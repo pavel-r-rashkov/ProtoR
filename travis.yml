@@ -1,0 +1,22 @@
+language: csharp
+os: linux
+mono: none
+sudo: required
+dist: trusty
+
+branches:
+  only:
+  - master
+
+services:
+  - docker
+
+jobs:
+  include:
+    # All stages are stuffed in a single script in order to reuse docker cache
+    - stage: "Build / Test / Create image"
+      script:
+        # Build
+        - ./tools/build.sh
+        # Test
+        - ./tools/test.sh
