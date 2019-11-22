@@ -1,4 +1,4 @@
-FROM microsoft/dotnet:2.1-sdk AS build
+FROM mcr.microsoft.com/dotnet/core/sdk:2.1 AS build
 LABEL protor-build=true
 WORKDIR /app
 
@@ -11,22 +11,22 @@ RUN dotnet restore
 # copy rest of files
 COPY src/Web/. ./Web/
 COPY src/UnitTests/. ./UnitTests/
-RUN dotnet build
+RUN dotnet build --no-restore -c Release
 
-# test
-FROM build AS test
+# unit tests
+FROM build AS unit-tests
 LABEL protor-test=true
 WORKDIR /app/UnitTests
-RUN dotnet test --logger "xunit;LogFilePath=../../TestResults/UnitTests.xml"
+ENTRYPOINT ["dotnet", "test", "-c", "Release", "--no-build", "--logger", "\"xunit;LogFilePath=../../TestResults/unit-tests.xml\""]
 
 # publish
 FROM build AS publish
 LABEL protor-publish=true
 WORKDIR /app/Web
-RUN dotnet publish -c Release -o out
+RUN dotnet publish --no-build -c Release -o out
 
 # run
-FROM microsoft/dotnet:2.1-runtime AS runtime
+FROM mcr.microsoft.com/dotnet/core/aspnet:2.1 AS runtime
 WORKDIR /app
 COPY --from=publish /app/Web/out ./
 EXPOSE 80
