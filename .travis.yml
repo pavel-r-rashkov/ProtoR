@@ -17,6 +17,8 @@ jobs:
     - stage: "Build / Test / Create image"
       script:
         # Build
+        - chmod u+x ./tools/build.sh
         - ./tools/build.sh
         # Test
+        - chmod u+x ./tools/test.sh
         - ./tools/test.sh
