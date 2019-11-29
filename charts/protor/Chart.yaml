@@ -1,0 +1,4 @@
+apiVersion: v1
+description: Registry for Protocol Buffers schemas
+name: protor
+version: v1.0.0

@@ -1,0 +1,9 @@
+[environments]
+  [environments.development]
+    name = "dev-registry"
+    namespace = "default"
+    wait = true
+    auto-connect = false
+    dockerfile = "Dockerfile"
+    chart = "protor"
+    set = ["service.type=NodePort"]

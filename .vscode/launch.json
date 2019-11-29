@@ -1,0 +1,58 @@
+{
+   // Use IntelliSense to find out which attributes exist for C# debugging
+   // Use hover for the description of the existing attributes
+   // For further information visit https://github.com/OmniSharp/omnisharp-vscode/blob/master/debugger-launchjson.md
+   "version": "0.2.0",
+   "configurations": [
+        {
+            "name": "Attach to Kubernetes Pod",
+            "type": "coreclr",
+            "request": "attach", // we are going to attach to the existing pod
+            "processName": "dotnet",
+            "sourceFileMap": {
+                // mapping of source code inside a container to the source code on a host machine
+                "/app": "${workspaceRoot}/src"
+            },
+            "pipeTransport": {
+                "pipeProgram": "/bin/bash",
+                "pipeCwd": "${workspaceRoot}",
+                "pipeArgs": [
+                    "./tools/kube-debug.sh",
+                    "--selector app=prototest",
+                    "--namespace default"
+                ],
+                "quoteArgs": false,
+                // path to installed debugger inside a container relative to WORKDIR
+                "debuggerPath": "../vsdbg/vsdbg"
+            }
+        },
+        {
+            "name": ".NET Core Launch (web)",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build",
+            // If you have changed target frameworks, make sure to update the program path.
+            "program": "${workspaceFolder}/src/Web/bin/Debug/netcoreapp2.1/Web.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}/src/Web",
+            "stopAtEntry": false,
+            // Enable launching a web browser when ASP.NET Core starts. For more information: https://aka.ms/VSCode-CS-LaunchJson-WebBrowser
+            "serverReadyAction": {
+                "action": "openExternally",
+                "pattern": "^\\s*Now listening on:\\s+(https?://\\S+)"                
+            },
+            "env": {
+                "ASPNETCORE_ENVIRONMENT": "Development"
+            },
+            "sourceFileMap": {
+                "/Views": "${workspaceFolder}/Views"
+            }
+        },
+        {
+            "name": ".NET Core Attach",
+            "type": "coreclr",
+            "request": "attach",
+            "processId": "${command:pickProcess}"
+        }
+    ]
+}

@@ -1,0 +1,11 @@
+{        
+    "emeraldwalk.runonsave": {
+        "commands": [
+            {
+                "match": "\\.cs$",
+                "isAsync": true,
+                "cmd": "echo 'I am a .txt file ${file}.'"
+            }
+        ]
+    }
+}

@@ -337,5 +337,5 @@ ASALocalRun/
 !.vscode/extensions.json
 *.code-workspace
 
-
+# Test results
 /TestResults
