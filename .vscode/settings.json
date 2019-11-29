@@ -4,7 +4,7 @@
             {
                 "match": "\\.cs$",
                 "isAsync": true,
-                "cmd": "echo 'I am a .txt file ${file}.'"
+                "cmd": "eval $(minikube docker-env) && draft up"
             }
         ]
     }
