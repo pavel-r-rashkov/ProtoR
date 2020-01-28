@@ -1,8 +1,9 @@
-﻿using System.Collections.Generic;
-using Microsoft.AspNetCore.Mvc;
-
-namespace Web.Controllers
+﻿namespace Web.Controllers
 {
+    using System;
+    using System.Collections.Generic;
+    using Microsoft.AspNetCore.Mvc;
+
     [Route("api/[controller]")]
     [ApiController]
     public class ValuesController : ControllerBase
@@ -11,7 +12,7 @@ namespace Web.Controllers
         [HttpGet]
         public ActionResult<IEnumerable<string>> Get()
         {
-            return new string[] { "value1", "value2", "value3" };
+            return this.Ok(new string[] { "value1", "value2", "value3" });
         }
     }
 }

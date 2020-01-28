@@ -1,7 +1,7 @@
-using Xunit;
-
 namespace UnitTests
 {
+    using Xunit;
+
     public class UnitTest1
     {
         [Fact]

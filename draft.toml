@@ -7,3 +7,4 @@
     dockerfile = "Dockerfile"
     chart = "protor"
     set = ["service.type=NodePort"]
+    image-build-args = { build_config = "Debug" }
