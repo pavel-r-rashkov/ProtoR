@@ -1,17 +1,48 @@
 ﻿namespace Web
 {
-    using Microsoft.AspNetCore;
+    using System;
+    using Autofac.Extensions.DependencyInjection;
     using Microsoft.AspNetCore.Hosting;
+    using Microsoft.Extensions.Hosting;
+    using Serilog;
+    using Serilog.Events;
 
     public static class Program
     {
         public static void Main(string[] args)
         {
-            CreateWebHostBuilder(args).Build().Run();
+            Log.Logger = new LoggerConfiguration()
+                .MinimumLevel.Debug()
+                .MinimumLevel.Override("Microsoft", LogEventLevel.Information)
+                .Enrich.FromLogContext()
+                .WriteTo.Console()
+                .CreateLogger();
+
+            try
+            {
+                CreateWebHostBuilder(args).Build().Run();
+            }
+            catch (Exception ex)
+            {
+                Log.Fatal(ex, "Host terminated unexpectedly");
+                throw;
+            }
+            finally
+            {
+                Log.CloseAndFlush();
+            }
         }
 
-        public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
-            WebHost.CreateDefaultBuilder(args)
-                .UseStartup<Startup>();
+        public static IHostBuilder CreateWebHostBuilder(string[] args)
+        {
+            return Host
+                .CreateDefaultBuilder(args)
+                .UseServiceProviderFactory(new AutofacServiceProviderFactory())
+                .ConfigureWebHostDefaults(webHostBuilder =>
+                {
+                    webHostBuilder.UseStartup<Startup>();
+                })
+                .UseSerilog();
+        }
     }
 }
