@@ -6,12 +6,14 @@ WORKDIR /app
 # copy csproj files
 COPY *.sln .
 COPY src/ProtoR.Web/*.csproj ./src/ProtoR.Web/
+COPY src/ProtoR.Domain/*.csproj ./src/ProtoR.Domain/
 COPY tests/ProtoR.Domain.UnitTests/*.csproj ./tests/ProtoR.Domain.UnitTests/
 COPY Directory.Build.props .
 RUN dotnet restore
 
 # copy rest of files
 COPY src/ProtoR.Web/. ./src/ProtoR.Web/
+COPY src/ProtoR.Domain/. ./src/ProtoR.Domain/
 COPY tests/ProtoR.Domain.UnitTests/. ./tests/ProtoR.Domain.UnitTests/
 COPY default.ruleset .
 RUN dotnet build --no-restore -c ${build_config}
