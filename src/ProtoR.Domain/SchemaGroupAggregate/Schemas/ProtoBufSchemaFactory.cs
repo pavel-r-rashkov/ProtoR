@@ -1,5 +1,6 @@
 namespace ProtoR.Domain.SchemaGroupAggregate.Schemas
 {
+    using System;
     using System.IO;
     using Google.Protobuf.Reflection;
     using ProtoBuf.Reflection;
@@ -11,7 +12,7 @@ namespace ProtoR.Domain.SchemaGroupAggregate.Schemas
             this.Validate(contents);
 
             return new ProtoBufSchema(
-                default,
+                Guid.NewGuid(),
                 version,
                 contents);
         }

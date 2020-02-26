@@ -1,10 +1,9 @@
 namespace ProtoR.Domain.SeedWork
 {
-    using System;
     using System.Collections.Generic;
     using System.Linq;
 
-    public abstract class ValueObject<T> : IEquatable<T>
+    public abstract class ValueObject<T>
         where T : ValueObject<T>
     {
         public static bool operator ==(ValueObject<T> a, ValueObject<T> b)
@@ -25,11 +24,6 @@ namespace ProtoR.Domain.SeedWork
         public static bool operator !=(ValueObject<T> a, ValueObject<T> b)
         {
             return !(a == b);
-        }
-
-        public bool Equals(T other)
-        {
-            return this.Equals(other);
         }
 
         public override bool Equals(object obj)

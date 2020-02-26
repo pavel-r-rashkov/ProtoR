@@ -52,7 +52,7 @@ namespace ProtoR.Domain.SchemaGroupAggregate.Schemas
 
         public int CompareTo(Version other)
         {
-            return this.VersionNumber.CompareTo(other);
+            return this.VersionNumber.CompareTo(other.VersionNumber);
         }
 
         public Version Next()

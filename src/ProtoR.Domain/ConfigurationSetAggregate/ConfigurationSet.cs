@@ -21,14 +21,14 @@ namespace ProtoR.Domain.GlobalConfigurationAggregate
             bool transitive)
             : base(id)
         {
-            this.shouldInherit = shouldInherit;
-            this.SetRulesConfiguration(rulesConfig);
             this.SchemaGroupId = schemaGroupId;
+            this.ShouldInherit = shouldInherit;
+            this.SetRulesConfiguration(rulesConfig);
             this.SetCompatibility(backwardCompatible, forwardCompatible);
             this.Transitive = transitive;
         }
 
-        public Guid? SchemaGroupId { get; }
+        public Guid SchemaGroupId { get; }
 
         public bool ShouldInherit
         {

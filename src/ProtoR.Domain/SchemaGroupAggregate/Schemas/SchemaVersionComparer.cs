@@ -1,24 +1,20 @@
 namespace ProtoR.Domain.SchemaGroupAggregate.Schemas
 {
+    using System;
     using System.Collections.Generic;
 
     public class SchemaVersionComparer<TSchemaContents> : IComparer<Schema<TSchemaContents>>
     {
         public int Compare(Schema<TSchemaContents> a, Schema<TSchemaContents> b)
         {
-            if (a is null && b is null)
+            if (a == null)
             {
-                return 0;
+                throw new ArgumentNullException($"{nameof(a)} cannot be null");
             }
 
-            if (a is null)
+            if (b == null)
             {
-                return -1;
-            }
-
-            if (b is null)
-            {
-                return 1;
+                throw new ArgumentNullException($"{nameof(b)} cannot be null");
             }
 
             return a.Version.CompareTo(b.Version);

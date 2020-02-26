@@ -37,6 +37,11 @@ namespace ProtoR.Domain.SchemaGroupAggregate
 
         public string Name { get; }
 
+        public IReadOnlyList<Schema<TSchemaContents>> Schemas
+        {
+            get { return this.schemas.ToList().AsReadOnly(); }
+        }
+
         public IEnumerable<RuleViolation> AddSchema(
             string schemaContents,
             ConfigurationSet config,
@@ -67,6 +72,7 @@ namespace ProtoR.Domain.SchemaGroupAggregate
             if (lastSchema != null)
             {
                 var schemaEnumerator = this.schemas.Reverse().GetEnumerator();
+                schemaEnumerator.MoveNext();
 
                 do
                 {

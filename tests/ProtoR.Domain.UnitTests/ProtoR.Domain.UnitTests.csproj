@@ -19,6 +19,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Content Include="SchemaFixtures\**\*.*">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>  
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\..\src\ProtoR.Domain\ProtoR.Domain.csproj" />
   </ItemGroup>
 

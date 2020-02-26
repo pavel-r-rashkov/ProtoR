@@ -5,7 +5,7 @@ namespace ProtoR.Domain.SeedWork
     using System.Linq;
     using System.Reflection;
 
-    public class Enumeration : IComparable
+    public abstract class Enumeration : IComparable
     {
         protected Enumeration(int id, string name)
         {
@@ -55,7 +55,7 @@ namespace ProtoR.Domain.SeedWork
         public static IEnumerable<T> GetAll<T>()
             where T : Enumeration
         {
-            var fields = typeof(T).GetFields(
+            var fields = typeof(T).GetProperties(
                 BindingFlags.Public
                 | BindingFlags.Static
                 | BindingFlags.DeclaredOnly);
