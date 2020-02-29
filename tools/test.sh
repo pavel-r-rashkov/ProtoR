@@ -18,7 +18,7 @@ if [[ "$OSTYPE" == "msys" ]]; then
   solution_dir_path=$(echo "$solution_dir_path" | sed 's/^\///' | sed 's/\//\\/g' | sed 's/^./\0:/')      
 fi
 
-docker cp protor-unit-tests:/TestResults $solution_dir_path/
+docker cp protor-unit-tests:/app/TestResults $solution_dir_path/
 
 # Clean container
 echo -e '\e[1mRemoving unit tests container...\e[0m'

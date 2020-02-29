@@ -13,7 +13,6 @@
   </ItemGroup>
 
   <PropertyGroup>
-  <!-- Condition=" $(MSBuildProjectName.EndsWith('Tests')) == 'false' " -->
     <CodeAnalysisRuleSet Condition=" $(MSBuildProjectName.EndsWith('Tests')) == 'false' ">../../default.ruleset</CodeAnalysisRuleSet>
     <CodeAnalysisRuleSet Condition=" $(MSBuildProjectName.EndsWith('Tests')) == 'true' ">../../tests.ruleset</CodeAnalysisRuleSet>
     <TreatWarningsAsErrors Condition=" '$(Configuration)' == 'Release' ">true</TreatWarningsAsErrors>

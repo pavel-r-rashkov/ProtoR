@@ -23,7 +23,7 @@ RUN dotnet build --no-restore -c ${build_config}
 FROM build AS unit-tests
 LABEL protor-test=true
 WORKDIR /app/tests/ProtoR.Domain.UnitTests
-ENTRYPOINT ["dotnet", "test", "--no-restore", "--logger", "\"xunit;LogFilePath=../../../TestResults/unit-tests.xml\"", "/p:CollectCoverage=true", "/p:CoverletOutput=\"../../../TestResults/coverage.xml\"", "/p:CoverletOutputFormat=cobertura"]
+ENTRYPOINT ["dotnet", "test", "--no-restore", "--logger", "\"xunit;LogFilePath=../../TestResults/unit-tests.xml\"", "/p:CollectCoverage=true", "/p:CoverletOutput=\"../../TestResults/coverage.xml\"", "/p:CoverletOutputFormat=cobertura"]
 
 # publish
 FROM build AS publish
