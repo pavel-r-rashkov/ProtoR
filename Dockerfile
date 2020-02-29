@@ -16,6 +16,7 @@ COPY src/ProtoR.Web/. ./src/ProtoR.Web/
 COPY src/ProtoR.Domain/. ./src/ProtoR.Domain/
 COPY tests/ProtoR.Domain.UnitTests/. ./tests/ProtoR.Domain.UnitTests/
 COPY default.ruleset .
+COPY tests.ruleset .
 RUN dotnet build --no-restore -c ${build_config}
 
 # unit tests
