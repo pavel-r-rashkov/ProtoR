@@ -1,0 +1,25 @@
+name: CI workflow
+
+on: [push]
+
+jobs:
+  Build and Test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+      - name: Build
+        run: bash ./tools/build.sh
+      - name: Test
+        run: bash tools/test.sh
+      - name: Upload unit test results
+        uses: actions/upload-artifact@v1
+        with:
+          name: unit-tests
+          path: TestResults/unit-tests.xml
+      - name: Upload test coverage
+        uses: actions/upload-artifact@v1
+        with:
+          name: TestResults/coverage.xml
+
+      
