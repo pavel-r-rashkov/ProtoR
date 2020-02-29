@@ -20,6 +20,8 @@ jobs:
       - name: Upload test coverage
         uses: actions/upload-artifact@v1
         with:
-          name: TestResults/coverage.xml
+          name: coverage
+          path: TestResults/coverage.xml
+
 
       
