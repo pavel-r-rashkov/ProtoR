@@ -1,13 +1,15 @@
 namespace ProtoR.Domain.SchemaGroupAggregate
 {
+    using ProtoR.Domain.SchemaGroupAggregate.Schemas;
     using ProtoR.Domain.SeedWork;
 
-    public interface ISchemaGroupRepository<TSchemaContents> : IRepository<SchemaGroup<TSchemaContents>>
+    public interface ISchemaGroupRepository<TSchema, TSchemaContents> : IRepository<SchemaGroup<TSchema, TSchemaContents>>
+        where TSchema : Schema<TSchemaContents>
     {
-        SchemaGroup<TSchemaContents> GetByName(string name);
+        SchemaGroup<TSchema, TSchemaContents> GetByName(string name);
 
-        void Update(SchemaGroup<TSchemaContents> schemaGroup);
+        void Update(SchemaGroup<TSchema, TSchemaContents> schemaGroup);
 
-        void Add(SchemaGroup<TSchemaContents> schemaGroup);
+        void Add(SchemaGroup<TSchema, TSchemaContents> schemaGroup);
     }
 }

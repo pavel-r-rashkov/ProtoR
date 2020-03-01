@@ -5,6 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="FluentAssertions" Version="5.10.2" />
     <PackageReference Include="protobuf-net" Version="2.4.6" />
     <PackageReference Include="protobuf-net.Reflection" Version="2.3.17" />
   </ItemGroup>

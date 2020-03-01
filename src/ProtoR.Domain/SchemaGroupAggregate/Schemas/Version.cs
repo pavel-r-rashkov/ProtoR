@@ -2,6 +2,7 @@ namespace ProtoR.Domain.SchemaGroupAggregate.Schemas
 {
     using System;
     using System.Collections.Generic;
+    using System.Globalization;
     using ProtoR.Domain.SeedWork;
 
     public class Version : ValueObject<Version>, IComparable<Version>
@@ -58,6 +59,11 @@ namespace ProtoR.Domain.SchemaGroupAggregate.Schemas
         public Version Next()
         {
             return new Version(this.VersionNumber + 1);
+        }
+
+        public override string ToString()
+        {
+            return this.VersionNumber.ToString(CultureInfo.InvariantCulture);
         }
 
         public override bool Equals(object obj)

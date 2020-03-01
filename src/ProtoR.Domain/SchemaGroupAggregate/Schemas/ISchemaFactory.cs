@@ -1,7 +1,8 @@
 namespace ProtoR.Domain.SchemaGroupAggregate.Schemas
 {
-    public interface ISchemaFactory<TSchemaContents>
+    public interface ISchemaFactory<TSchema, TSchemaContents>
+        where TSchema : Schema<TSchemaContents>
     {
-        Schema<TSchemaContents> CreateNew(Version version, string contents);
+        TSchema CreateNew(Version version, string contents);
     }
 }

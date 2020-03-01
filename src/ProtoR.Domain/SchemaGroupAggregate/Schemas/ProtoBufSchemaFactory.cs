@@ -5,9 +5,9 @@ namespace ProtoR.Domain.SchemaGroupAggregate.Schemas
     using Google.Protobuf.Reflection;
     using ProtoBuf.Reflection;
 
-    public class ProtoBufSchemaFactory : ISchemaFactory<FileDescriptorSet>
+    public class ProtoBufSchemaFactory : ISchemaFactory<ProtoBufSchema, FileDescriptorSet>
     {
-        public Schema<FileDescriptorSet> CreateNew(Version version, string contents)
+        public ProtoBufSchema CreateNew(Version version, string contents)
         {
             this.Validate(contents);
 

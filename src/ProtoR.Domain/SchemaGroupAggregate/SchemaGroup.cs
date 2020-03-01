@@ -9,29 +9,30 @@ namespace ProtoR.Domain.SchemaGroupAggregate
     using ProtoR.Domain.SeedWork;
     using Version = ProtoR.Domain.SchemaGroupAggregate.Schemas.Version;
 
-    public class SchemaGroup<TSchemaContents> : Entity, IAggregateRoot
+    public class SchemaGroup<TSchema, TSchemaContents> : Entity, IAggregateRoot
+        where TSchema : Schema<TSchemaContents>
     {
-        private SortedSet<Schema<TSchemaContents>> schemas;
-        private IEnumerable<Rule<TSchemaContents>> rules;
+        private SortedSet<TSchema> schemas;
+        private IEnumerable<Rule<TSchema, TSchemaContents>> rules;
 
         public SchemaGroup(string name)
             : this(
                 Guid.NewGuid(),
                 name,
-                new List<Schema<TSchemaContents>>(),
-                new List<Rule<TSchemaContents>>())
+                new List<TSchema>(),
+                new List<Rule<TSchema, TSchemaContents>>())
         {
         }
 
         public SchemaGroup(
             Guid id,
             string name,
-            IEnumerable<Schema<TSchemaContents>> schemas,
-            IEnumerable<Rule<TSchemaContents>> rules)
+            IEnumerable<TSchema> schemas,
+            IEnumerable<Rule<TSchema, TSchemaContents>> rules)
             : base(id)
         {
             this.Name = name;
-            this.schemas = new SortedSet<Schema<TSchemaContents>>(schemas, new SchemaVersionComparer<TSchemaContents>());
+            this.schemas = new SortedSet<TSchema>(schemas, new SchemaVersionComparer<TSchemaContents>());
             this.rules = rules;
         }
 
@@ -45,7 +46,7 @@ namespace ProtoR.Domain.SchemaGroupAggregate
         public IEnumerable<RuleViolation> AddSchema(
             string schemaContents,
             ConfigurationSet config,
-            ISchemaFactory<TSchemaContents> schemaFactory)
+            ISchemaFactory<TSchema, TSchemaContents> schemaFactory)
         {
             if (config == null)
             {
@@ -62,9 +63,9 @@ namespace ProtoR.Domain.SchemaGroupAggregate
                 throw new ArgumentException($"Config with schema group id {config.SchemaGroupId} cannot be used for schema group with id {this.Id}");
             }
 
-            Schema<TSchemaContents> lastSchema = this.schemas.LastOrDefault();
+            TSchema lastSchema = this.schemas.LastOrDefault();
             Version newVersion = lastSchema?.Version.Next() ?? Version.Initial;
-            Schema<TSchemaContents> newSchema = schemaFactory.CreateNew(newVersion, schemaContents);
+            TSchema newSchema = schemaFactory.CreateNew(newVersion, schemaContents);
 
             var ruleViolations = new List<RuleViolation>();
             IReadOnlyDictionary<RuleCode, RuleConfig> rulesConfig = config.GetRulesConfiguration();
@@ -76,7 +77,7 @@ namespace ProtoR.Domain.SchemaGroupAggregate
 
                 do
                 {
-                    Schema<TSchemaContents> oldSchema = schemaEnumerator.Current;
+                    TSchema oldSchema = schemaEnumerator.Current;
 
                     if (config.BackwardCompatible)
                     {
@@ -102,8 +103,8 @@ namespace ProtoR.Domain.SchemaGroupAggregate
         }
 
         private List<RuleViolation> ValidateSchemas(
-            Schema<TSchemaContents> newSchema,
-            Schema<TSchemaContents> oldSchema,
+            TSchema newSchema,
+            TSchema oldSchema,
             IReadOnlyDictionary<RuleCode, RuleConfig> rulesConfig,
             bool backwardCompatible)
         {

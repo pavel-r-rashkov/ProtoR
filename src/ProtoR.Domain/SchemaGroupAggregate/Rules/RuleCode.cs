@@ -9,5 +9,15 @@ namespace ProtoR.Domain.SchemaGroupAggregate.Rules
         /// Code for test rule.
         /// </summary>
         R0001,
+
+        /// <summary>
+        /// Message type is removed.
+        /// </summary>
+        PB0001,
+
+        /// <summary>
+        /// Message type is added.
+        /// </summary>
+        PB0002,
     }
 }

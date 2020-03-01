@@ -8,19 +8,20 @@ namespace ProtoR.Domain.UnitTests.SchemaGroupAggregateTests
     using ProtoR.Domain.GlobalConfigurationAggregate;
     using ProtoR.Domain.SchemaGroupAggregate;
     using ProtoR.Domain.SchemaGroupAggregate.Rules;
+    using ProtoR.Domain.SchemaGroupAggregate.Rules.ProtoBufRules;
     using ProtoR.Domain.SchemaGroupAggregate.Schemas;
     using Xunit;
     using Version = ProtoR.Domain.SchemaGroupAggregate.Schemas.Version;
 
     public class SchemaGroupTests
     {
-        private Mock<ISchemaFactory<FileDescriptorSet>> schemaFactoryMock;
+        private Mock<ISchemaFactory<ProtoBufSchema, FileDescriptorSet>> schemaFactoryMock;
         private Mock<ProtoBufRule> ruleMock;
         private Fixture fixture;
 
         public SchemaGroupTests()
         {
-            this.schemaFactoryMock = new Mock<ISchemaFactory<FileDescriptorSet>>();
+            this.schemaFactoryMock = new Mock<ISchemaFactory<ProtoBufSchema, FileDescriptorSet>>();
             this.ruleMock = new Mock<ProtoBufRule>(RuleCode.R0001);
             this.fixture = new Fixture();
         }
@@ -29,7 +30,7 @@ namespace ProtoR.Domain.UnitTests.SchemaGroupAggregateTests
         public void Name_ShouldReturnSchemaGroupName()
         {
             var name = this.fixture.Create<string>();
-            var schemaGroup = new SchemaGroup<FileDescriptorSet>(name);
+            var schemaGroup = new SchemaGroup<ProtoBufSchema, FileDescriptorSet>(name);
 
             Assert.Equal(name, schemaGroup.Name);
         }
@@ -37,7 +38,7 @@ namespace ProtoR.Domain.UnitTests.SchemaGroupAggregateTests
         [Fact]
         public void AddSchema_WithNullConfigurationSet_ShouldThrow()
         {
-            var schemaGroup = this.fixture.Create<SchemaGroup<FileDescriptorSet>>();
+            var schemaGroup = this.fixture.Create<SchemaGroup<ProtoBufSchema, FileDescriptorSet>>();
 
             Assert.Throws<ArgumentNullException>(() =>
             {
@@ -48,7 +49,7 @@ namespace ProtoR.Domain.UnitTests.SchemaGroupAggregateTests
         [Fact]
         public void AddSchema_WithNullSchemaFactory_ShouldThrow()
         {
-            var schemaGroup = this.fixture.Create<SchemaGroup<FileDescriptorSet>>();
+            var schemaGroup = this.fixture.Create<SchemaGroup<ProtoBufSchema, FileDescriptorSet>>();
 
             Assert.Throws<ArgumentNullException>(() =>
             {
@@ -62,7 +63,7 @@ namespace ProtoR.Domain.UnitTests.SchemaGroupAggregateTests
         [Fact]
         public void AddSchema_WithConfigurationSetNotAssociatedWithTheSchemaGroup_ShouldThrow()
         {
-            var schemaGroup = this.fixture.Create<SchemaGroup<FileDescriptorSet>>();
+            var schemaGroup = this.fixture.Create<SchemaGroup<ProtoBufSchema, FileDescriptorSet>>();
             var config = new ConfigurationSet(
                 Guid.NewGuid(),
                 new Dictionary<RuleCode, RuleConfig>(),
@@ -87,7 +88,7 @@ namespace ProtoR.Domain.UnitTests.SchemaGroupAggregateTests
             this.schemaFactoryMock
                 .Setup(factory => factory.CreateNew(It.IsAny<Version>(), It.IsAny<string>()))
                 .Throws<InvalidProtoBufSchemaException>();
-            var schemaGroup = this.fixture.Create<SchemaGroup<FileDescriptorSet>>();
+            var schemaGroup = this.fixture.Create<SchemaGroup<ProtoBufSchema, FileDescriptorSet>>();
             var config = new ConfigurationSet(
                 Guid.NewGuid(),
                 new Dictionary<RuleCode, RuleConfig>(),
@@ -109,7 +110,7 @@ namespace ProtoR.Domain.UnitTests.SchemaGroupAggregateTests
         [Fact]
         public void AddSchema_ToGroupWithoutSchemas_ShouldAddSchemaWithInitialVersion()
         {
-            var schemaGroup = new SchemaGroup<FileDescriptorSet>(this.fixture.Create<string>());
+            var schemaGroup = new SchemaGroup<ProtoBufSchema, FileDescriptorSet>(this.fixture.Create<string>());
             var contents = this.fixture.Create<string>();
             var config = new ConfigurationSet(
                 Guid.NewGuid(),
@@ -148,11 +149,11 @@ namespace ProtoR.Domain.UnitTests.SchemaGroupAggregateTests
             var groupId = this.fixture.Create<Guid>();
             var firstSchema = new ProtoBufSchema(Guid.NewGuid(), Version.Initial, string.Empty);
             var previousSchema = new ProtoBufSchema(Guid.NewGuid(), Version.Initial.Next(), string.Empty);
-            var schemaGroup = new SchemaGroup<FileDescriptorSet>(
+            var schemaGroup = new SchemaGroup<ProtoBufSchema, FileDescriptorSet>(
                 groupId,
                 this.fixture.Create<string>(),
-                new List<Schema<FileDescriptorSet>> { firstSchema, previousSchema },
-                new List<Rule<FileDescriptorSet>> { this.ruleMock.Object });
+                new List<ProtoBufSchema> { firstSchema, previousSchema },
+                new List<ProtoBufRule> { this.ruleMock.Object });
 
             var config = new ConfigurationSet(
                 this.fixture.Create<Guid>(),
@@ -192,11 +193,11 @@ namespace ProtoR.Domain.UnitTests.SchemaGroupAggregateTests
             var groupId = this.fixture.Create<Guid>();
             var firstSchema = new ProtoBufSchema(Guid.NewGuid(), Version.Initial, string.Empty);
             var previousSchema = new ProtoBufSchema(Guid.NewGuid(), Version.Initial.Next(), string.Empty);
-            var schemaGroup = new SchemaGroup<FileDescriptorSet>(
+            var schemaGroup = new SchemaGroup<ProtoBufSchema, FileDescriptorSet>(
                 groupId,
                 this.fixture.Create<string>(),
-                new List<Schema<FileDescriptorSet>> { firstSchema, previousSchema },
-                new List<Rule<FileDescriptorSet>> { this.ruleMock.Object });
+                new List<ProtoBufSchema> { firstSchema, previousSchema },
+                new List<ProtoBufRule> { this.ruleMock.Object });
 
             var config = new ConfigurationSet(
                 this.fixture.Create<Guid>(),
@@ -236,11 +237,11 @@ namespace ProtoR.Domain.UnitTests.SchemaGroupAggregateTests
             var groupId = this.fixture.Create<Guid>();
             var firstSchema = new ProtoBufSchema(Guid.NewGuid(), Version.Initial, string.Empty);
             var previousSchema = new ProtoBufSchema(Guid.NewGuid(), Version.Initial.Next(), string.Empty);
-            var schemaGroup = new SchemaGroup<FileDescriptorSet>(
+            var schemaGroup = new SchemaGroup<ProtoBufSchema, FileDescriptorSet>(
                 groupId,
                 this.fixture.Create<string>(),
-                new List<Schema<FileDescriptorSet>> { firstSchema, previousSchema },
-                new List<Rule<FileDescriptorSet>> { this.ruleMock.Object });
+                new List<ProtoBufSchema> { firstSchema, previousSchema },
+                new List<ProtoBufRule> { this.ruleMock.Object });
 
             var config = new ConfigurationSet(
                 this.fixture.Create<Guid>(),
@@ -280,11 +281,11 @@ namespace ProtoR.Domain.UnitTests.SchemaGroupAggregateTests
             var groupId = this.fixture.Create<Guid>();
             var firstSchema = new ProtoBufSchema(Guid.NewGuid(), Version.Initial, string.Empty);
             var previousSchema = new ProtoBufSchema(Guid.NewGuid(), Version.Initial.Next(), string.Empty);
-            var schemaGroup = new SchemaGroup<FileDescriptorSet>(
+            var schemaGroup = new SchemaGroup<ProtoBufSchema, FileDescriptorSet>(
                 groupId,
                 this.fixture.Create<string>(),
-                new List<Schema<FileDescriptorSet>> { firstSchema, previousSchema },
-                new List<Rule<FileDescriptorSet>> { this.ruleMock.Object });
+                new List<ProtoBufSchema> { firstSchema, previousSchema },
+                new List<ProtoBufRule> { this.ruleMock.Object });
 
             var config = new ConfigurationSet(
                 this.fixture.Create<Guid>(),
@@ -324,11 +325,11 @@ namespace ProtoR.Domain.UnitTests.SchemaGroupAggregateTests
             var groupId = this.fixture.Create<Guid>();
             var firstSchema = new ProtoBufSchema(Guid.NewGuid(), Version.Initial, string.Empty);
             var previousSchema = new ProtoBufSchema(Guid.NewGuid(), Version.Initial.Next(), string.Empty);
-            var schemaGroup = new SchemaGroup<FileDescriptorSet>(
+            var schemaGroup = new SchemaGroup<ProtoBufSchema, FileDescriptorSet>(
                 groupId,
                 this.fixture.Create<string>(),
-                new List<Schema<FileDescriptorSet>> { firstSchema, previousSchema },
-                new List<Rule<FileDescriptorSet>> { this.ruleMock.Object });
+                new List<ProtoBufSchema> { firstSchema, previousSchema },
+                new List<ProtoBufRule> { this.ruleMock.Object });
 
             var config = new ConfigurationSet(
                 this.fixture.Create<Guid>(),
@@ -368,11 +369,11 @@ namespace ProtoR.Domain.UnitTests.SchemaGroupAggregateTests
             var groupId = this.fixture.Create<Guid>();
             var firstSchema = new ProtoBufSchema(Guid.NewGuid(), Version.Initial, string.Empty);
             var previousSchema = new ProtoBufSchema(Guid.NewGuid(), Version.Initial.Next(), string.Empty);
-            var schemaGroup = new SchemaGroup<FileDescriptorSet>(
+            var schemaGroup = new SchemaGroup<ProtoBufSchema, FileDescriptorSet>(
                 groupId,
                 this.fixture.Create<string>(),
-                new List<Schema<FileDescriptorSet>> { firstSchema, previousSchema },
-                new List<Rule<FileDescriptorSet>> { this.ruleMock.Object });
+                new List<ProtoBufSchema> { firstSchema, previousSchema },
+                new List<ProtoBufRule> { this.ruleMock.Object });
 
             var config = new ConfigurationSet(
                 this.fixture.Create<Guid>(),
@@ -407,11 +408,11 @@ namespace ProtoR.Domain.UnitTests.SchemaGroupAggregateTests
 
             var groupId = this.fixture.Create<Guid>();
             var firstSchema = new ProtoBufSchema(Guid.NewGuid(), Version.Initial, string.Empty);
-            var schemaGroup = new SchemaGroup<FileDescriptorSet>(
+            var schemaGroup = new SchemaGroup<ProtoBufSchema, FileDescriptorSet>(
                 groupId,
                 this.fixture.Create<string>(),
-                new List<Schema<FileDescriptorSet>> { firstSchema },
-                new List<Rule<FileDescriptorSet>> { this.ruleMock.Object });
+                new List<ProtoBufSchema> { firstSchema },
+                new List<ProtoBufRule> { this.ruleMock.Object });
 
             var config = new ConfigurationSet(
                 this.fixture.Create<Guid>(),
@@ -446,11 +447,11 @@ namespace ProtoR.Domain.UnitTests.SchemaGroupAggregateTests
 
             var groupId = this.fixture.Create<Guid>();
             var firstSchema = new ProtoBufSchema(Guid.NewGuid(), Version.Initial, string.Empty);
-            var schemaGroup = new SchemaGroup<FileDescriptorSet>(
+            var schemaGroup = new SchemaGroup<ProtoBufSchema, FileDescriptorSet>(
                 groupId,
                 this.fixture.Create<string>(),
-                new List<Schema<FileDescriptorSet>> { firstSchema },
-                new List<Rule<FileDescriptorSet>> { this.ruleMock.Object });
+                new List<ProtoBufSchema> { firstSchema },
+                new List<ProtoBufRule> { this.ruleMock.Object });
 
             var config = new ConfigurationSet(
                 this.fixture.Create<Guid>(),
@@ -485,11 +486,11 @@ namespace ProtoR.Domain.UnitTests.SchemaGroupAggregateTests
 
             var groupId = this.fixture.Create<Guid>();
             var firstSchema = new ProtoBufSchema(Guid.NewGuid(), Version.Initial, string.Empty);
-            var schemaGroup = new SchemaGroup<FileDescriptorSet>(
+            var schemaGroup = new SchemaGroup<ProtoBufSchema, FileDescriptorSet>(
                 groupId,
                 this.fixture.Create<string>(),
-                new List<Schema<FileDescriptorSet>> { firstSchema },
-                new List<Rule<FileDescriptorSet>> { this.ruleMock.Object });
+                new List<ProtoBufSchema> { firstSchema },
+                new List<ProtoBufRule> { this.ruleMock.Object });
 
             var config = new ConfigurationSet(
                 this.fixture.Create<Guid>(),
@@ -528,11 +529,11 @@ namespace ProtoR.Domain.UnitTests.SchemaGroupAggregateTests
 
             var groupId = this.fixture.Create<Guid>();
             var firstSchema = new ProtoBufSchema(Guid.NewGuid(), Version.Initial, string.Empty);
-            var schemaGroup = new SchemaGroup<FileDescriptorSet>(
+            var schemaGroup = new SchemaGroup<ProtoBufSchema, FileDescriptorSet>(
                 groupId,
                 this.fixture.Create<string>(),
-                new List<Schema<FileDescriptorSet>> { firstSchema },
-                new List<Rule<FileDescriptorSet>> { this.ruleMock.Object });
+                new List<ProtoBufSchema> { firstSchema },
+                new List<ProtoBufRule> { this.ruleMock.Object });
 
             var config = new ConfigurationSet(
                 this.fixture.Create<Guid>(),
@@ -571,11 +572,11 @@ namespace ProtoR.Domain.UnitTests.SchemaGroupAggregateTests
 
             var groupId = this.fixture.Create<Guid>();
             var firstSchema = new ProtoBufSchema(Guid.NewGuid(), Version.Initial, string.Empty);
-            var schemaGroup = new SchemaGroup<FileDescriptorSet>(
+            var schemaGroup = new SchemaGroup<ProtoBufSchema, FileDescriptorSet>(
                 groupId,
                 this.fixture.Create<string>(),
-                new List<Schema<FileDescriptorSet>> { firstSchema },
-                new List<Rule<FileDescriptorSet>> { this.ruleMock.Object });
+                new List<ProtoBufSchema> { firstSchema },
+                new List<ProtoBufRule> { this.ruleMock.Object });
 
             var config = new ConfigurationSet(
                 this.fixture.Create<Guid>(),

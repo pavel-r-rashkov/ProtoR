@@ -4,7 +4,8 @@ namespace ProtoR.Domain.SchemaGroupAggregate.Rules
     using ProtoR.Domain.SchemaGroupAggregate.Schemas;
     using ProtoR.Domain.SeedWork;
 
-    public abstract class Rule<TSchemaContents> : ValueObject<Rule<TSchemaContents>>
+    public abstract class Rule<TSchema, TSchemaContents> : ValueObject<Rule<TSchema, TSchemaContents>>
+        where TSchema : Schema<TSchemaContents>
     {
         public Rule(RuleCode code)
         {
@@ -13,7 +14,7 @@ namespace ProtoR.Domain.SchemaGroupAggregate.Rules
 
         public RuleCode Code { get; }
 
-        public abstract ValidationResult Validate(Schema<TSchemaContents> a, Schema<TSchemaContents> b);
+        public abstract ValidationResult Validate(TSchema a, TSchema b);
 
         protected override IEnumerable<object> GetEqualityComponents()
         {
