@@ -21,16 +21,16 @@ namespace ProtoR.Domain.SchemaGroupAggregate.Rules.ProtoBufRules
             IEnumerable<string> aTypes = a.GetMessageTypeNames();
             IEnumerable<string> bTypes = b.GetMessageTypeNames();
 
-            IEnumerable<string> removedMessageTypes = bTypes.Except(aTypes);
+            IEnumerable<string> addedMessageTypes = bTypes.Except(aTypes);
 
-            return removedMessageTypes.Any()
-                ? new ValidationResult(false, this.FormatRemovedMessageTypes(removedMessageTypes))
+            return addedMessageTypes.Any()
+                ? new ValidationResult(false, this.FormatRemovedMessageTypes(addedMessageTypes))
                 : new ValidationResult(true, "No message types were added");
         }
 
-        private string FormatRemovedMessageTypes(IEnumerable<string> removedMessageTypes)
+        private string FormatRemovedMessageTypes(IEnumerable<string> addedMessageTypes)
         {
-            return $"Added message types:{Environment.NewLine}{string.Join(Environment.NewLine, removedMessageTypes)}";
+            return $"Added message types:{Environment.NewLine}{string.Join(Environment.NewLine, addedMessageTypes)}";
         }
     }
 }

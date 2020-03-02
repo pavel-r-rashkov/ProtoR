@@ -2,6 +2,7 @@ namespace ProtoR.Domain.SchemaGroupAggregate.Schemas
 {
     using System;
     using System.Collections.Generic;
+    using System.Globalization;
     using System.IO;
     using System.Linq;
     using Google.Protobuf.Reflection;
@@ -15,20 +16,42 @@ namespace ProtoR.Domain.SchemaGroupAggregate.Schemas
 
         public IEnumerable<string> GetMessageTypeNames()
         {
-            return this.Parsed.Files.SelectMany(f =>
-                f.MessageTypes.SelectMany(messageType => this.GetMessageTypeNames(messageType)));
+            Func<FileDescriptorProto, IEnumerable<string>> fromFileDescriptor =
+                (FileDescriptorProto fileDescriptor) => fileDescriptor.MessageTypes.Select(e => e.Name);
+            Func<DescriptorProto, IEnumerable<string>> fromDescriptorProto =
+                (DescriptorProto descriptorProto) => new string[] { descriptorProto.Name };
+
+            return this.GetTypeNames(fromFileDescriptor, fromDescriptorProto);
         }
 
         public IEnumerable<string> GetEnumTypeNames()
         {
-            IEnumerable<string> outerScopeEnums = this.Parsed.Files
-                .SelectMany(f => f.EnumTypes)
-                .Select(e => FormatName(e.Name));
+            Func<FileDescriptorProto, IEnumerable<string>> fromFileDescriptor =
+                (FileDescriptorProto fileDescriptor) => fileDescriptor.EnumTypes.Select(e => e.Name);
+            Func<DescriptorProto, IEnumerable<string>> fromDescriptorProto =
+                (DescriptorProto descriptorProto) => descriptorProto.EnumTypes.Select(e => e.Name);
 
-            IEnumerable<string> innerScopeEnums = this.Parsed.Files.SelectMany(f =>
-                f.MessageTypes.SelectMany(messageType => this.GetEnumTypeNames(messageType)));
+            return this.GetTypeNames(fromFileDescriptor, fromDescriptorProto);
+        }
 
-            return outerScopeEnums.Union(innerScopeEnums);
+        public IEnumerable<string> GetOneOfTypeNames()
+        {
+            Func<FileDescriptorProto, IEnumerable<string>> fromFileDescriptor =
+                (FileDescriptorProto fileDescriptor) => Array.Empty<string>();
+            Func<DescriptorProto, IEnumerable<string>> fromDescriptorProto =
+                (DescriptorProto descriptorProto) => descriptorProto.OneofDecls.Select(e => e.Name);
+
+            return this.GetTypeNames(fromFileDescriptor, fromDescriptorProto);
+        }
+
+        public IEnumerable<string> GetFieldTypeNumbers()
+        {
+            Func<FileDescriptorProto, IEnumerable<string>> fromFileDescriptor =
+                (FileDescriptorProto fileDescriptor) => Array.Empty<string>();
+            Func<DescriptorProto, IEnumerable<string>> fromDescriptorProto =
+                (DescriptorProto descriptorProto) => descriptorProto.Fields.Select(e => e.Number.ToString(CultureInfo.InvariantCulture));
+
+            return this.GetTypeNames(fromFileDescriptor, fromDescriptorProto);
         }
 
         protected override FileDescriptorSet ParseContents()
@@ -48,29 +71,32 @@ namespace ProtoR.Domain.SchemaGroupAggregate.Schemas
             return $".{name}";
         }
 
-        private IEnumerable<string> GetMessageTypeNames(DescriptorProto message, string parentName = "")
+        private IEnumerable<string> GetTypeNames(
+            Func<FileDescriptorProto, IEnumerable<string>> fromFileDescriptor,
+            Func<DescriptorProto, IEnumerable<string>> fromDescriptorProto)
         {
-            var messageName = $"{parentName}{FormatName(message.Name)}";
-            var messages = new List<string>
-            {
-                messageName,
-            };
+            IEnumerable<string> outerScopeEnums = this.Parsed.Files
+                .SelectMany(f => fromFileDescriptor(f))
+                .Select(name => FormatName(name));
 
-            IEnumerable<string> nestedMessageNames = message.NestedTypes
-                .SelectMany(messageType => this.GetMessageTypeNames(messageType, messageName));
+            IEnumerable<string> innerScopeEnums = this.Parsed.Files.SelectMany(f =>
+                f.MessageTypes.SelectMany(messageType => this.GetTypeNames(fromDescriptorProto, messageType)));
 
-            return messages.Union(nestedMessageNames);
+            return outerScopeEnums.Union(innerScopeEnums);
         }
 
-        private IEnumerable<string> GetEnumTypeNames(DescriptorProto message, string parentName = "")
+        private IEnumerable<string> GetTypeNames(
+            Func<DescriptorProto, IEnumerable<string>> fromDescriptorProto,
+            DescriptorProto message,
+            string parentName = "")
         {
             var messageName = $"{parentName}{FormatName(message.Name)}";
-            List<string> enums = message.EnumTypes
-                .Select(e => $"{messageName}{FormatName(e.Name)}")
+            List<string> enums = fromDescriptorProto(message)
+                .Select(name => $"{messageName}{FormatName(name)}")
                 .ToList();
 
             IEnumerable<string> nestedEnumNames = message.NestedTypes
-                .SelectMany(messageType => this.GetEnumTypeNames(messageType, messageName));
+                .SelectMany(messageType => this.GetTypeNames(fromDescriptorProto, messageType, messageName));
 
             return enums.Union(nestedEnumNames);
         }

@@ -21,16 +21,16 @@ namespace ProtoR.Domain.SchemaGroupAggregate.Rules.ProtoBufRules
             IEnumerable<string> aTypes = a.GetEnumTypeNames();
             IEnumerable<string> bTypes = b.GetEnumTypeNames();
 
-            IEnumerable<string> removedEnumTypes = bTypes.Except(aTypes);
+            IEnumerable<string> addedEnumTypes = bTypes.Except(aTypes);
 
-            return removedEnumTypes.Any()
-                ? new ValidationResult(false, this.FormatRemovedEnumTypes(removedEnumTypes))
+            return addedEnumTypes.Any()
+                ? new ValidationResult(false, this.FormatRemovedEnumTypes(addedEnumTypes))
                 : new ValidationResult(true, "No enum types were added");
         }
 
-        private string FormatRemovedEnumTypes(IEnumerable<string> removedEnumTypes)
+        private string FormatRemovedEnumTypes(IEnumerable<string> addedEnumTypes)
         {
-            return $"Added enum types:{Environment.NewLine}{string.Join(Environment.NewLine, removedEnumTypes)}";
+            return $"Added enum types:{Environment.NewLine}{string.Join(Environment.NewLine, addedEnumTypes)}";
         }
     }
 }

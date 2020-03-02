@@ -29,5 +29,10 @@ namespace ProtoR.Domain.SchemaGroupAggregate.Rules
         /// Enum type is added.
         /// </summary>
         PB0004,
+
+        /// <summary>
+        /// OneOf type is added.
+        /// </summary>
+        PB0006,
     }
 }
