@@ -19,6 +19,18 @@ namespace ProtoR.Domain.SchemaGroupAggregate.Schemas
                 f.MessageTypes.SelectMany(messageType => this.GetMessageTypeNames(messageType)));
         }
 
+        public IEnumerable<string> GetEnumTypeNames()
+        {
+            IEnumerable<string> outerScopeEnums = this.Parsed.Files
+                .SelectMany(f => f.EnumTypes)
+                .Select(e => FormatName(e.Name));
+
+            IEnumerable<string> innerScopeEnums = this.Parsed.Files.SelectMany(f =>
+                f.MessageTypes.SelectMany(messageType => this.GetEnumTypeNames(messageType)));
+
+            return outerScopeEnums.Union(innerScopeEnums);
+        }
+
         protected override FileDescriptorSet ParseContents()
         {
             var descriptorSet = new FileDescriptorSet();
@@ -48,6 +60,19 @@ namespace ProtoR.Domain.SchemaGroupAggregate.Schemas
                 .SelectMany(messageType => this.GetMessageTypeNames(messageType, messageName));
 
             return messages.Union(nestedMessageNames);
+        }
+
+        private IEnumerable<string> GetEnumTypeNames(DescriptorProto message, string parentName = "")
+        {
+            var messageName = $"{parentName}{FormatName(message.Name)}";
+            List<string> enums = message.EnumTypes
+                .Select(e => $"{messageName}{FormatName(e.Name)}")
+                .ToList();
+
+            IEnumerable<string> nestedEnumNames = message.NestedTypes
+                .SelectMany(messageType => this.GetEnumTypeNames(messageType, messageName));
+
+            return enums.Union(nestedEnumNames);
         }
     }
 }

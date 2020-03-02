@@ -19,5 +19,15 @@ namespace ProtoR.Domain.SchemaGroupAggregate.Rules
         /// Message type is added.
         /// </summary>
         PB0002,
+
+        /// <summary>
+        /// Enum type is removed.
+        /// </summary>
+        PB0003,
+
+        /// <summary>
+        /// Enum type is added.
+        /// </summary>
+        PB0004,
     }
 }
