@@ -31,6 +31,11 @@ namespace ProtoR.Domain.SchemaGroupAggregate.Rules
         PB0004,
 
         /// <summary>
+        /// OneOf type is removed.
+        /// </summary>
+        PB0005,
+
+        /// <summary>
         /// OneOf type is added.
         /// </summary>
         PB0006,

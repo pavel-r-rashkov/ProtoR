@@ -16,42 +16,30 @@ namespace ProtoR.Domain.SchemaGroupAggregate.Schemas
 
         public IEnumerable<string> GetMessageTypeNames()
         {
-            Func<FileDescriptorProto, IEnumerable<string>> fromFileDescriptor =
-                (FileDescriptorProto fileDescriptor) => fileDescriptor.MessageTypes.Select(e => e.Name);
-            Func<DescriptorProto, IEnumerable<string>> fromDescriptorProto =
-                (DescriptorProto descriptorProto) => new string[] { descriptorProto.Name };
-
-            return this.GetTypeNames(fromFileDescriptor, fromDescriptorProto);
+            return this.GetTypeNames(
+                (FileDescriptorProto fileDescriptor) => fileDescriptor.MessageTypes.Select(e => e.Name),
+                (DescriptorProto descriptorProto) => new string[] { descriptorProto.Name });
         }
 
         public IEnumerable<string> GetEnumTypeNames()
         {
-            Func<FileDescriptorProto, IEnumerable<string>> fromFileDescriptor =
-                (FileDescriptorProto fileDescriptor) => fileDescriptor.EnumTypes.Select(e => e.Name);
-            Func<DescriptorProto, IEnumerable<string>> fromDescriptorProto =
-                (DescriptorProto descriptorProto) => descriptorProto.EnumTypes.Select(e => e.Name);
-
-            return this.GetTypeNames(fromFileDescriptor, fromDescriptorProto);
+            return this.GetTypeNames(
+                (FileDescriptorProto fileDescriptor) => fileDescriptor.EnumTypes.Select(e => e.Name),
+                (DescriptorProto descriptorProto) => descriptorProto.EnumTypes.Select(e => e.Name));
         }
 
         public IEnumerable<string> GetOneOfTypeNames()
         {
-            Func<FileDescriptorProto, IEnumerable<string>> fromFileDescriptor =
-                (FileDescriptorProto fileDescriptor) => Array.Empty<string>();
-            Func<DescriptorProto, IEnumerable<string>> fromDescriptorProto =
-                (DescriptorProto descriptorProto) => descriptorProto.OneofDecls.Select(e => e.Name);
-
-            return this.GetTypeNames(fromFileDescriptor, fromDescriptorProto);
+            return this.GetTypeNames(
+                (FileDescriptorProto fileDescriptor) => Array.Empty<string>(),
+                (DescriptorProto descriptorProto) => descriptorProto.OneofDecls.Select(e => e.Name));
         }
 
         public IEnumerable<string> GetFieldTypeNumbers()
         {
-            Func<FileDescriptorProto, IEnumerable<string>> fromFileDescriptor =
-                (FileDescriptorProto fileDescriptor) => Array.Empty<string>();
-            Func<DescriptorProto, IEnumerable<string>> fromDescriptorProto =
-                (DescriptorProto descriptorProto) => descriptorProto.Fields.Select(e => e.Number.ToString(CultureInfo.InvariantCulture));
-
-            return this.GetTypeNames(fromFileDescriptor, fromDescriptorProto);
+            return this.GetTypeNames(
+                (FileDescriptorProto fileDescriptor) => Array.Empty<string>(),
+                (DescriptorProto descriptorProto) => descriptorProto.Fields.Select(e => e.Number.ToString(CultureInfo.InvariantCulture)));
         }
 
         protected override FileDescriptorSet ParseContents()
