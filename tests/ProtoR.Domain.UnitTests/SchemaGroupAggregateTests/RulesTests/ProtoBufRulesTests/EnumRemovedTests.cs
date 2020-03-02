@@ -6,27 +6,18 @@ namespace ProtoR.Domain.UnitTests.SchemaGroupAggregateTests.RulesTests.ProtoBufR
     using ProtoR.Domain.UnitTests.SchemaFixtures;
     using Xunit;
 
-    public class EnumAddedRuleTests
+    public class EnumRemovedTests
     {
-        private EnumAddedRule rule;
+        private EnumRemovedRule rule;
 
-        public EnumAddedRuleTests()
+        public EnumRemovedTests()
         {
-            this.rule = new EnumAddedRule();
+            this.rule = new EnumRemovedRule();
         }
 
         [Theory]
-        [RuleTestData("EnumAdded", "AddedEnum")]
-        public void Validate_WithAddedEnum_ShouldNotPass(ProtoBufSchema a, ProtoBufSchema b)
-        {
-            ValidationResult result = this.rule.Validate(a, b);
-
-            Assert.False(result.Passed);
-        }
-
-        [Theory]
-        [RuleTestData("EnumAdded", "InnerEnum")]
-        public void Validate_WithAddedNestedEnum_ShouldNotPass(ProtoBufSchema a, ProtoBufSchema b)
+        [RuleTestData("EnumRemoved", "RemovedEnum")]
+        public void Validate_WithRemovedEnum_ShouldNotPass(ProtoBufSchema a, ProtoBufSchema b)
         {
             ValidationResult result = this.rule.Validate(a, b);
 
@@ -34,8 +25,17 @@ namespace ProtoR.Domain.UnitTests.SchemaGroupAggregateTests.RulesTests.ProtoBufR
         }
 
         [Theory]
-        [RuleTestData("EnumAdded", "NoAddedEnum")]
-        public void Validate_WithNoAddedEnum_ShouldPass(ProtoBufSchema a, ProtoBufSchema b)
+        [RuleTestData("EnumRemoved", "NestedEnum")]
+        public void Validate_WithRemovedNestedEnum_ShouldNotPass(ProtoBufSchema a, ProtoBufSchema b)
+        {
+            ValidationResult result = this.rule.Validate(a, b);
+
+            Assert.False(result.Passed);
+        }
+
+        [Theory]
+        [RuleTestData("EnumRemoved", "NoRemovedEnums")]
+        public void Validate_WithNoRemovedEnum_ShouldPass(ProtoBufSchema a, ProtoBufSchema b)
         {
             ValidationResult result = this.rule.Validate(a, b);
 
