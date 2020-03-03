@@ -35,7 +35,7 @@ namespace ProtoR.Domain.SchemaGroupAggregate.Schemas
                 (DescriptorProto descriptorProto) => descriptorProto.OneofDecls.Select(e => e.Name));
         }
 
-        public IEnumerable<string> GetFieldTypeNumbers()
+        public IEnumerable<string> GetFieldNumbers()
         {
             return this.GetTypeNames(
                 (FileDescriptorProto fileDescriptor) => Array.Empty<string>(),
