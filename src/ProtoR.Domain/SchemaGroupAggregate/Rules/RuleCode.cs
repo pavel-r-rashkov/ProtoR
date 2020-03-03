@@ -51,6 +51,11 @@ namespace ProtoR.Domain.SchemaGroupAggregate.Rules
         PB0008,
 
         /// <summary>
+        /// Enum const is removed.
+        /// </summary>
+        PB0009,
+
+        /// <summary>
         /// Enum const is added.
         /// </summary>
         PB0010,

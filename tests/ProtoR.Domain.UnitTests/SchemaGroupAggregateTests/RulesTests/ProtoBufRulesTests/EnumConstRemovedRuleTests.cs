@@ -6,27 +6,18 @@ namespace ProtoR.Domain.UnitTests.SchemaGroupAggregateTests.RulesTests.ProtoBufR
     using ProtoR.Domain.UnitTests.SchemaFixtures;
     using Xunit;
 
-    public class EnumConstAddedRuleTests
+    public class EnumConstRemovedRuleTests
     {
-        private EnumConstAddedRule rule;
+        private EnumConstRemovedRule rule;
 
-        public EnumConstAddedRuleTests()
+        public EnumConstRemovedRuleTests()
         {
-            this.rule = new EnumConstAddedRule();
+            this.rule = new EnumConstRemovedRule();
         }
 
         [Theory]
-        [RuleTestData("EnumConstAdded", "AddedEnumConst")]
-        public void Validate_WithAddedEnumConst_ShouldNotPass(ProtoBufSchema a, ProtoBufSchema b)
-        {
-            ValidationResult result = this.rule.Validate(a, b);
-
-            Assert.False(result.Passed);
-        }
-
-        [Theory]
-        [RuleTestData("EnumConstAdded", "NestedEnumConstAdded")]
-        public void Validate_WithAddedNestedEnumConst_ShouldNotPass(ProtoBufSchema a, ProtoBufSchema b)
+        [RuleTestData("EnumConstRemoved", "RemovedEnumConst")]
+        public void Validate_WithRemovedEnumConst_ShouldNotPass(ProtoBufSchema a, ProtoBufSchema b)
         {
             ValidationResult result = this.rule.Validate(a, b);
 
@@ -34,8 +25,17 @@ namespace ProtoR.Domain.UnitTests.SchemaGroupAggregateTests.RulesTests.ProtoBufR
         }
 
         [Theory]
-        [RuleTestData("EnumConstAdded", "NoAddedEnumConst")]
-        public void Validate_WithNoAddedEnumConst_ShouldPass(ProtoBufSchema a, ProtoBufSchema b)
+        [RuleTestData("EnumConstRemoved", "NestedEnumConstRemoved")]
+        public void Validate_WithRemovedNestedEnumConst_ShouldNotPass(ProtoBufSchema a, ProtoBufSchema b)
+        {
+            ValidationResult result = this.rule.Validate(a, b);
+
+            Assert.False(result.Passed);
+        }
+
+        [Theory]
+        [RuleTestData("EnumConstRemoved", "NoRemovedEnumConst")]
+        public void Validate_WithNoRemovedEnumConst_ShouldPass(ProtoBufSchema a, ProtoBufSchema b)
         {
             ValidationResult result = this.rule.Validate(a, b);
 

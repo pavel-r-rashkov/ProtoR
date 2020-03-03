@@ -38,7 +38,7 @@ namespace ProtoR.Domain.SchemaGroupAggregate.Schemas
                 (DescriptorProto descriptorProto) =>
                     descriptorProto.EnumTypes.SelectMany(e =>
                         e.Values.Select(ev =>
-                            $"{FormatName(e.Name)}{FormatName(ev.Name)}")));
+                            $"{e.Name}{FormatName(ev.Number.ToString(CultureInfo.InvariantCulture))}")));
         }
 
         public IEnumerable<string> GetOneOfTypeNames()

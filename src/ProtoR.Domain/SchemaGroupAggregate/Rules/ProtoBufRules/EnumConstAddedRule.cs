@@ -24,11 +24,11 @@ namespace ProtoR.Domain.SchemaGroupAggregate.Rules.ProtoBufRules
             IEnumerable<string> addedEnumConstants = bEnumConstants.Except(aEnumConstants);
 
             return addedEnumConstants.Any()
-                ? new ValidationResult(false, this.FormatRemovedEnumTypes(addedEnumConstants))
+                ? new ValidationResult(false, this.FormatAddedEnumConstants(addedEnumConstants))
                 : new ValidationResult(true, "No enum constants were added");
         }
 
-        private string FormatRemovedEnumTypes(IEnumerable<string> addedEnumConstants)
+        private string FormatAddedEnumConstants(IEnumerable<string> addedEnumConstants)
         {
             return $"Added enum constants:{Environment.NewLine}{string.Join(Environment.NewLine, addedEnumConstants)}";
         }
