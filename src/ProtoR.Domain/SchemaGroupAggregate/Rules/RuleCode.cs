@@ -44,5 +44,10 @@ namespace ProtoR.Domain.SchemaGroupAggregate.Rules
         /// Field is removed.
         /// </summary>
         PB0007,
+
+        /// <summary>
+        /// Field is added.
+        /// </summary>
+        PB0008,
     }
 }

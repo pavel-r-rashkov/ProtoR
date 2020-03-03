@@ -6,27 +6,18 @@ namespace ProtoR.Domain.UnitTests.SchemaGroupAggregateTests.RulesTests.ProtoBufR
     using ProtoR.Domain.UnitTests.SchemaFixtures;
     using Xunit;
 
-    public class FieldRemovedRuleTests
+    public class FieldAddedRuleTests
     {
-        private FieldRemovedRule rule;
+        private FieldAddedRule rule;
 
-        public FieldRemovedRuleTests()
+        public FieldAddedRuleTests()
         {
-            this.rule = new FieldRemovedRule();
+            this.rule = new FieldAddedRule();
         }
 
         [Theory]
-        [RuleTestData("FieldRemoved", "RemovedField")]
-        public void Validate_WithRemovedField_ShouldNotPass(ProtoBufSchema a, ProtoBufSchema b)
-        {
-            ValidationResult result = this.rule.Validate(a, b);
-
-            Assert.False(result.Passed);
-        }
-
-        [Theory]
-        [RuleTestData("FieldRemoved", "NestedMessageField")]
-        public void Validate_WithRemovedNestedMessageField_ShouldNotPass(ProtoBufSchema a, ProtoBufSchema b)
+        [RuleTestData("FieldAdded", "AddedField")]
+        public void Validate_WithAddedField_ShouldNotPass(ProtoBufSchema a, ProtoBufSchema b)
         {
             ValidationResult result = this.rule.Validate(a, b);
 
@@ -34,8 +25,17 @@ namespace ProtoR.Domain.UnitTests.SchemaGroupAggregateTests.RulesTests.ProtoBufR
         }
 
         [Theory]
-        [RuleTestData("FieldRemoved", "NoRemovedFields")]
-        public void Validate_WithNoRemovedFields_ShouldPass(ProtoBufSchema a, ProtoBufSchema b)
+        [RuleTestData("FieldAdded", "NestedMessageField")]
+        public void Validate_WithAddedNestedMessageField_ShouldNotPass(ProtoBufSchema a, ProtoBufSchema b)
+        {
+            ValidationResult result = this.rule.Validate(a, b);
+
+            Assert.False(result.Passed);
+        }
+
+        [Theory]
+        [RuleTestData("FieldAdded", "NoAddedFields")]
+        public void Validate_WithNoAddedFields_ShouldPass(ProtoBufSchema a, ProtoBufSchema b)
         {
             ValidationResult result = this.rule.Validate(a, b);
 
