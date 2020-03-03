@@ -28,6 +28,19 @@ namespace ProtoR.Domain.SchemaGroupAggregate.Schemas
                 (DescriptorProto descriptorProto) => descriptorProto.EnumTypes.Select(e => e.Name));
         }
 
+        public IEnumerable<string> GetEnumConstantNumbers()
+        {
+            return this.GetTypeNames(
+                (FileDescriptorProto fileDescriptor) =>
+                    fileDescriptor.EnumTypes.SelectMany(e =>
+                        e.Values.Select(ev =>
+                            $"{e.Name}{FormatName(ev.Number.ToString(CultureInfo.InvariantCulture))}")),
+                (DescriptorProto descriptorProto) =>
+                    descriptorProto.EnumTypes.SelectMany(e =>
+                        e.Values.Select(ev =>
+                            $"{FormatName(e.Name)}{FormatName(ev.Name)}")));
+        }
+
         public IEnumerable<string> GetOneOfTypeNames()
         {
             return this.GetTypeNames(
@@ -39,7 +52,9 @@ namespace ProtoR.Domain.SchemaGroupAggregate.Schemas
         {
             return this.GetTypeNames(
                 (FileDescriptorProto fileDescriptor) => Array.Empty<string>(),
-                (DescriptorProto descriptorProto) => descriptorProto.Fields.Select(e => e.Number.ToString(CultureInfo.InvariantCulture)));
+                (DescriptorProto descriptorProto) =>
+                    descriptorProto.Fields.Select(e =>
+                        e.Number.ToString(CultureInfo.InvariantCulture)));
         }
 
         protected override FileDescriptorSet ParseContents()
