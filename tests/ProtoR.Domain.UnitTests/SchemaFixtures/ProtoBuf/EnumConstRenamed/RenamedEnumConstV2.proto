@@ -1,0 +1,6 @@
+syntax = "proto3";
+
+enum Status {
+  ACTIVE = 1;
+  PENDING_RENAMED = 2;
+}

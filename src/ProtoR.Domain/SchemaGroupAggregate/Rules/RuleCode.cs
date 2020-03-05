@@ -64,5 +64,10 @@ namespace ProtoR.Domain.SchemaGroupAggregate.Rules
         /// Field is renamed.
         /// </summary>
         PB0013,
+
+        /// <summary>
+        /// Enum const is renamed.
+        /// </summary>
+        PB0014,
     }
 }

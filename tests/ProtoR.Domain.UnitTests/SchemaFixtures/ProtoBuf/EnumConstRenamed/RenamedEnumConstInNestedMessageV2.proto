@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+message User {
+  string email = 1;
+  int32 age = 2;
+
+  message Account {
+    string name = 1;
+
+    enum Color {
+      RED = 1;
+      YELLOW = 2;
+    }
+  }
+}
+
+enum Status {
+  ACTIVE = 1;
+  PENDING = 2;
+}
