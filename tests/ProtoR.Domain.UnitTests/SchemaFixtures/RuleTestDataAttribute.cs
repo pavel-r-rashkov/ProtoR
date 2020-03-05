@@ -23,8 +23,8 @@ namespace ProtoR.Domain.UnitTests.SchemaFixtures
 
         public override IEnumerable<object[]> GetData(MethodInfo testMethod)
         {
-            string firstContents = SchemaFixtureUtils.GetProtoBuf(Path.Combine(this.ruleName, $"{this.schemaName}V1"));
-            string secondContents = SchemaFixtureUtils.GetProtoBuf(Path.Combine(this.ruleName, $"{this.schemaName}V2"));
+            string firstContents = SchemaFixtureUtils.GetProtoBuf(Path.Combine(this.ruleName, $"{this.schemaName}V2"));
+            string secondContents = SchemaFixtureUtils.GetProtoBuf(Path.Combine(this.ruleName, $"{this.schemaName}V1"));
 
             var schemaFactory = new ProtoBufSchemaFactory();
             ProtoBufSchema firstSchema = schemaFactory.CreateNew(Version.Initial, firstContents);

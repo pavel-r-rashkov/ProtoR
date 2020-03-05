@@ -21,7 +21,7 @@ namespace ProtoR.Domain.SchemaGroupAggregate.Rules.ProtoBufRules
             IEnumerable<string> aTypes = a.GetEnumTypeNames();
             IEnumerable<string> bTypes = b.GetEnumTypeNames();
 
-            IEnumerable<string> removedEnumTypes = aTypes.Except(bTypes);
+            IEnumerable<string> removedEnumTypes = bTypes.Except(aTypes);
 
             return removedEnumTypes.Any()
                 ? new ValidationResult(false, this.FormatRemovedEnumTypes(removedEnumTypes))

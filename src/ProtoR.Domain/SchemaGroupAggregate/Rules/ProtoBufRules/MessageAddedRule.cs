@@ -21,7 +21,7 @@ namespace ProtoR.Domain.SchemaGroupAggregate.Rules.ProtoBufRules
             IEnumerable<string> aTypes = a.GetMessageTypeNames();
             IEnumerable<string> bTypes = b.GetMessageTypeNames();
 
-            IEnumerable<string> addedMessageTypes = bTypes.Except(aTypes);
+            IEnumerable<string> addedMessageTypes = aTypes.Except(bTypes);
 
             return addedMessageTypes.Any()
                 ? new ValidationResult(false, this.FormatRemovedMessageTypes(addedMessageTypes))

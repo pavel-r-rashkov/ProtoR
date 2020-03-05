@@ -21,7 +21,7 @@ namespace ProtoR.Domain.SchemaGroupAggregate.Rules.ProtoBufRules
             IEnumerable<string> aFields = a.GetFieldNumbers();
             IEnumerable<string> bFields = b.GetFieldNumbers();
 
-            IEnumerable<string> removedFields = aFields.Except(bFields);
+            IEnumerable<string> removedFields = bFields.Except(aFields);
 
             return removedFields.Any()
                 ? new ValidationResult(false, this.FormatRemovedFields(removedFields))

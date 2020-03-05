@@ -21,7 +21,7 @@ namespace ProtoR.Domain.SchemaGroupAggregate.Rules.ProtoBufRules
             IEnumerable<string> aEnumConstants = a.GetEnumConstantNumbers();
             IEnumerable<string> bEnumConstants = b.GetEnumConstantNumbers();
 
-            IEnumerable<string> addedEnumConstants = bEnumConstants.Except(aEnumConstants);
+            IEnumerable<string> addedEnumConstants = aEnumConstants.Except(bEnumConstants);
 
             return addedEnumConstants.Any()
                 ? new ValidationResult(false, this.FormatAddedEnumConstants(addedEnumConstants))

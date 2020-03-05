@@ -24,9 +24,9 @@ namespace ProtoR.Domain.SchemaGroupAggregate.Rules.ProtoBufRules
 
             var renamedFields = new List<Field>();
 
-            foreach (var field in bFields)
+            foreach (var field in aFields)
             {
-                Field matchingField = aFields.FirstOrDefault(f => f.FullyQualifiedName == field.FullyQualifiedName);
+                Field matchingField = bFields.FirstOrDefault(f => f.FullyQualifiedName == field.FullyQualifiedName);
 
                 if (matchingField != null && matchingField.Name != field.Name)
                 {
