@@ -1,0 +1,7 @@
+syntax = "proto3";
+
+message User {
+  int32 age = 2;
+
+  reserved 1;
+}

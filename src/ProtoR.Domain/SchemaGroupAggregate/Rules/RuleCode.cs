@@ -69,5 +69,10 @@ namespace ProtoR.Domain.SchemaGroupAggregate.Rules
         /// Enum const is renamed.
         /// </summary>
         PB0014,
+
+        /// <summary>
+        /// Removed field is missing a reservation.
+        /// </summary>
+        PB0015,
     }
 }
