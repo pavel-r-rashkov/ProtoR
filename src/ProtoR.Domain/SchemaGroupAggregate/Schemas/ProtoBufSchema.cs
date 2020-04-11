@@ -5,6 +5,7 @@ namespace ProtoR.Domain.SchemaGroupAggregate.Schemas
     using System.Globalization;
     using System.IO;
     using System.Linq;
+    using System.Reflection;
     using Google.Protobuf.Reflection;
 
     public class ProtoBufSchema : Schema<FileDescriptorSet>
@@ -42,6 +43,8 @@ namespace ProtoR.Domain.SchemaGroupAggregate.Schemas
 
         internal class ProtoBufSchemaScope
         {
+            public static readonly FieldInfo OneOfIndexField = typeof(FieldDescriptorProto).GetField("__pbn__OneofIndex", BindingFlags.NonPublic | BindingFlags.Instance);
+
             public ProtoBufSchemaScope(
                 string path,
                 string name,

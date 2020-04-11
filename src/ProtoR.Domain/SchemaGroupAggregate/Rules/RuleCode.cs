@@ -74,5 +74,10 @@ namespace ProtoR.Domain.SchemaGroupAggregate.Rules
         /// Removed field is missing a reservation.
         /// </summary>
         PB0015,
+
+        /// <summary>
+        /// OneOf field is removed.
+        /// </summary>
+        PB0016,
     }
 }
