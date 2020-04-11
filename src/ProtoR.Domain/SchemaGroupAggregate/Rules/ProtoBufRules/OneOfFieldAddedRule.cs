@@ -36,9 +36,19 @@ namespace ProtoR.Domain.SchemaGroupAggregate.Rules.ProtoBufRules
 
             foreach (var oneOfField in a.MessageFields.Where(f => (int?)ProtoBufSchemaScope.OneOfIndexField.GetValue(f) != null))
             {
+                string destinationOneOfName = a.OneOfDefinitions.ElementAt((int)ProtoBufSchemaScope.OneOfIndexField.GetValue(oneOfField)).Name;
+                OneofDescriptorProto sourceOneOf = b.OneOfDefinitions.FirstOrDefault(o => o.Name == destinationOneOfName);
+
+                if (sourceOneOf == null)
+                {
+                    continue;
+                }
+
+                int sourceOneOfIndex = b.OneOfDefinitions.ToList().IndexOf(sourceOneOf);
+
                 FieldDescriptorProto matchingOneOfField = b.MessageFields.FirstOrDefault(f =>
                     f.Number == oneOfField.Number
-                    && (int?)ProtoBufSchemaScope.OneOfIndexField.GetValue(oneOfField) == (int?)ProtoBufSchemaScope.OneOfIndexField.GetValue(f));
+                    && (int?)ProtoBufSchemaScope.OneOfIndexField.GetValue(f) == sourceOneOfIndex);
 
                 if (matchingOneOfField == null)
                 {

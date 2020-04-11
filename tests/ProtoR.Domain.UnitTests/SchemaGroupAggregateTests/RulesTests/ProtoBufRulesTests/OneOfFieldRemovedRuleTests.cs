@@ -59,5 +59,23 @@ namespace ProtoR.Domain.UnitTests.SchemaGroupAggregateTests.RulesTests.ProtoBufR
 
             Assert.True(result.Passed);
         }
+
+        [Theory]
+        [RuleTestData("OneOfFieldRemoved", "RemovedParentOneOf")]
+        public void Validate_WithRemovedParentOneOf_ShouldPass(ProtoBufSchema a, ProtoBufSchema b)
+        {
+            ValidationResult result = this.rule.Validate(a, b);
+
+            Assert.True(result.Passed);
+        }
+
+        [Theory]
+        [RuleTestData("OneOfFieldRemoved", "NoRemovedFieldsAndAnotherOneOfRemoved")]
+        public void Validate_WithNoRemovedFieldsAndAnotherOneOfRemoved_ShouldPass(ProtoBufSchema a, ProtoBufSchema b)
+        {
+            ValidationResult result = this.rule.Validate(a, b);
+
+            Assert.True(result.Passed);
+        }
     }
 }
