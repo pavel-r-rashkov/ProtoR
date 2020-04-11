@@ -84,5 +84,10 @@ namespace ProtoR.Domain.SchemaGroupAggregate.Rules
         /// OneOf field is added.
         /// </summary>
         PB0017,
+
+        /// <summary>
+        /// OneOf field is added in unsafe manner.
+        /// </summary>
+        PB0018,
     }
 }
