@@ -14,47 +14,18 @@ namespace ProtoR.Domain.SchemaGroupAggregate.Schemas
         {
         }
 
-        public IEnumerable<string> GetMessageTypeNames()
+        internal ProtoBufSchemaScope RootScope()
         {
-            return this.GetTypeNames(
-                (FileDescriptorProto fileDescriptor) => fileDescriptor.MessageTypes.Select(e => e.Name),
-                (DescriptorProto descriptorProto) => new string[] { descriptorProto.Name });
-        }
+            FileDescriptorProto fileDescriptor = this.Parsed.Files.First();
 
-        public IEnumerable<string> GetEnumTypeNames()
-        {
-            return this.GetTypeNames(
-                (FileDescriptorProto fileDescriptor) => fileDescriptor.EnumTypes.Select(e => e.Name),
-                (DescriptorProto descriptorProto) => descriptorProto.EnumTypes.Select(e => e.Name));
-        }
-
-        public IEnumerable<string> GetEnumConstantNumbers()
-        {
-            return this.GetTypeNames(
-                (FileDescriptorProto fileDescriptor) =>
-                    fileDescriptor.EnumTypes.SelectMany(e =>
-                        e.Values.Select(ev =>
-                            $"{e.Name}{FormatName(ev.Number.ToString(CultureInfo.InvariantCulture))}")),
-                (DescriptorProto descriptorProto) =>
-                    descriptorProto.EnumTypes.SelectMany(e =>
-                        e.Values.Select(ev =>
-                            $"{e.Name}{FormatName(ev.Number.ToString(CultureInfo.InvariantCulture))}")));
-        }
-
-        public IEnumerable<string> GetOneOfTypeNames()
-        {
-            return this.GetTypeNames(
-                (FileDescriptorProto fileDescriptor) => Array.Empty<string>(),
-                (DescriptorProto descriptorProto) => descriptorProto.OneofDecls.Select(e => e.Name));
-        }
-
-        public IEnumerable<string> GetFieldNumbers()
-        {
-            return this.GetTypeNames(
-                (FileDescriptorProto fileDescriptor) => Array.Empty<string>(),
-                (DescriptorProto descriptorProto) =>
-                    descriptorProto.Fields.Select(e =>
-                        e.Number.ToString(CultureInfo.InvariantCulture)));
+            return new ProtoBufSchemaScope(
+                string.Empty,
+                string.Empty,
+                null,
+                fileDescriptor.MessageTypes,
+                Array.Empty<FieldDescriptorProto>(),
+                fileDescriptor.EnumTypes,
+                Array.Empty<OneofDescriptorProto>());
         }
 
         protected override FileDescriptorSet ParseContents()
@@ -69,39 +40,79 @@ namespace ProtoR.Domain.SchemaGroupAggregate.Schemas
             }
         }
 
-        private static string FormatName(string name)
+        internal class ProtoBufSchemaScope
         {
-            return $".{name}";
-        }
+            public ProtoBufSchemaScope(
+                string path,
+                string name,
+                DescriptorProto containingMessage,
+                IEnumerable<DescriptorProto> messages,
+                IEnumerable<FieldDescriptorProto> messageFields,
+                IEnumerable<EnumDescriptorProto> enums,
+                IEnumerable<OneofDescriptorProto> oneOfDefinitions)
+            {
+                this.Path = path;
+                this.Name = name;
+                this.ContainingMessage = containingMessage;
+                this.Messages = messages;
+                this.MessageFields = messageFields;
+                this.Enums = enums;
+                this.OneOfDefinitions = oneOfDefinitions;
+            }
 
-        private IEnumerable<string> GetTypeNames(
-            Func<FileDescriptorProto, IEnumerable<string>> fromFileDescriptor,
-            Func<DescriptorProto, IEnumerable<string>> fromDescriptorProto)
-        {
-            IEnumerable<string> outerScopeEnums = this.Parsed.Files
-                .SelectMany(f => fromFileDescriptor(f))
-                .Select(name => FormatName(name));
+            public string Path { get; private set; }
 
-            IEnumerable<string> innerScopeEnums = this.Parsed.Files.SelectMany(f =>
-                f.MessageTypes.SelectMany(messageType => this.GetTypeNames(fromDescriptorProto, messageType)));
+            public string Name { get; private set; }
 
-            return outerScopeEnums.Union(innerScopeEnums);
-        }
+            public DescriptorProto ContainingMessage { get; private set; }
 
-        private IEnumerable<string> GetTypeNames(
-            Func<DescriptorProto, IEnumerable<string>> fromDescriptorProto,
-            DescriptorProto message,
-            string parentName = "")
-        {
-            var messageName = $"{parentName}{FormatName(message.Name)}";
-            List<string> enums = fromDescriptorProto(message)
-                .Select(name => $"{messageName}{FormatName(name)}")
-                .ToList();
+            public IEnumerable<DescriptorProto> Messages { get; private set; }
 
-            IEnumerable<string> nestedEnumNames = message.NestedTypes
-                .SelectMany(messageType => this.GetTypeNames(fromDescriptorProto, messageType, messageName));
+            public IEnumerable<FieldDescriptorProto> MessageFields { get; private set; }
 
-            return enums.Union(nestedEnumNames);
+            public IEnumerable<EnumDescriptorProto> Enums { get; private set; }
+
+            public IEnumerable<OneofDescriptorProto> OneOfDefinitions { get; private set; }
+
+            public static IEnumerable<T> ParallelTraverse<T>(
+                ProtoBufSchemaScope a,
+                ProtoBufSchemaScope b,
+                Func<ProtoBufSchemaScope, ProtoBufSchemaScope, IList<T>> scopeVisitor)
+            {
+                List<ProtoBufSchemaScope> aChildScopes = a.GetChildScopes().ToList();
+                List<ProtoBufSchemaScope> bChildScopes = b.GetChildScopes().ToList();
+                var differences = new List<T>();
+
+                differences.AddRange(scopeVisitor(a, b));
+
+                var matchingScopes = aChildScopes.Join(
+                    bChildScopes,
+                    s => s.Name,
+                    s => s.Name,
+                    (ProtoBufSchemaScope aScope, ProtoBufSchemaScope bScope) => new { aScope, bScope });
+
+                foreach (var matchingScope in matchingScopes)
+                {
+                    differences.AddRange(ParallelTraverse(matchingScope.aScope, matchingScope.bScope, scopeVisitor));
+                }
+
+                return differences;
+            }
+
+            public IEnumerable<ProtoBufSchemaScope> GetChildScopes()
+            {
+                foreach (var message in this.Messages)
+                {
+                    yield return new ProtoBufSchemaScope(
+                        $"{this.Path}.{message.Name}",
+                        message.Name,
+                        message,
+                        message.NestedTypes,
+                        message.Fields,
+                        message.EnumTypes,
+                        message.OneofDecls);
+                }
+            }
         }
     }
 }

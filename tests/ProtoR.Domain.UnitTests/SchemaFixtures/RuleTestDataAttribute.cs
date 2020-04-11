@@ -11,8 +11,8 @@ namespace ProtoR.Domain.UnitTests.SchemaFixtures
     [AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
     public class RuleTestDataAttribute : ClassDataAttribute
     {
-        private string ruleName;
-        private string schemaName;
+        private readonly string ruleName;
+        private readonly string schemaName;
 
         public RuleTestDataAttribute(string ruleName, string schemaName)
             : base(null)

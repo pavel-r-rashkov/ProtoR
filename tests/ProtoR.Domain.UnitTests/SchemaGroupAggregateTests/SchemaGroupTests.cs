@@ -15,9 +15,9 @@ namespace ProtoR.Domain.UnitTests.SchemaGroupAggregateTests
 
     public class SchemaGroupTests
     {
-        private Mock<ISchemaFactory<ProtoBufSchema, FileDescriptorSet>> schemaFactoryMock;
-        private Mock<ProtoBufRule> ruleMock;
-        private Fixture fixture;
+        private readonly Mock<ISchemaFactory<ProtoBufSchema, FileDescriptorSet>> schemaFactoryMock;
+        private readonly Mock<ProtoBufRule> ruleMock;
+        private readonly Fixture fixture;
 
         public SchemaGroupTests()
         {

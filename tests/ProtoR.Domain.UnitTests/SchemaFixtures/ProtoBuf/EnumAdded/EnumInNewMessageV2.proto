@@ -1,0 +1,9 @@
+syntax = "proto3";
+
+message NewMessage {
+	enum Foo {
+    FOO_A = 1;
+    FOO_B = 2;
+    FOO_C = 3;
+	}
+}

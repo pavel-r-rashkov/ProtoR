@@ -12,8 +12,8 @@ namespace ProtoR.Domain.SchemaGroupAggregate
     public class SchemaGroup<TSchema, TSchemaContents> : Entity, IAggregateRoot
         where TSchema : Schema<TSchemaContents>
     {
-        private SortedSet<TSchema> schemas;
-        private IEnumerable<Rule<TSchema, TSchemaContents>> rules;
+        private readonly SortedSet<TSchema> schemas;
+        private readonly IEnumerable<Rule<TSchema, TSchemaContents>> rules;
 
         public SchemaGroup(string name)
             : this(

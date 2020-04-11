@@ -8,7 +8,7 @@ namespace ProtoR.Domain.UnitTests.SchemaGroupAggregateTests.RulesTests.ProtoBufR
 
     public class OneOfAddedRuleTests
     {
-        private OneOfAddedRule rule;
+        private readonly OneOfAddedRule rule;
 
         public OneOfAddedRuleTests()
         {
@@ -36,6 +36,15 @@ namespace ProtoR.Domain.UnitTests.SchemaGroupAggregateTests.RulesTests.ProtoBufR
         [Theory]
         [RuleTestData("OneOfAdded", "NoAddedOneOf")]
         public void Validate_WithNoAddedOneOf_ShouldPass(ProtoBufSchema a, ProtoBufSchema b)
+        {
+            ValidationResult result = this.rule.Validate(a, b);
+
+            Assert.True(result.Passed);
+        }
+
+        [Theory]
+        [RuleTestData("OneOfAdded", "OneOfInNewMessage")]
+        public void Validate_WithOneOfInNewMessage_ShouldPass(ProtoBufSchema a, ProtoBufSchema b)
         {
             ValidationResult result = this.rule.Validate(a, b);
 

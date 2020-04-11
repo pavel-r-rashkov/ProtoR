@@ -9,7 +9,7 @@ namespace ProtoR.Domain.UnitTests.SchemaGroupAggregateTests.RulesTests.ProtoBufR
 
     public class EnumConstRenamedRuleTests
     {
-        private EnumConstRenamedRule rule;
+        private readonly EnumConstRenamedRule rule;
 
         public EnumConstRenamedRuleTests()
         {

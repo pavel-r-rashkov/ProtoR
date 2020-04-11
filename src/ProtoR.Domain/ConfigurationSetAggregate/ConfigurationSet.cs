@@ -8,7 +8,7 @@ namespace ProtoR.Domain.GlobalConfigurationAggregate
 
     public class ConfigurationSet : Entity, IAggregateRoot
     {
-        private Dictionary<RuleCode, RuleConfig> rulesConfig = new Dictionary<RuleCode, RuleConfig>();
+        private readonly Dictionary<RuleCode, RuleConfig> rulesConfig = new Dictionary<RuleCode, RuleConfig>();
         private bool shouldInherit;
 
         public ConfigurationSet(

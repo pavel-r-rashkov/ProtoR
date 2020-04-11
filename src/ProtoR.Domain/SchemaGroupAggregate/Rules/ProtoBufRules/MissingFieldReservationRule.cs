@@ -1,13 +1,12 @@
 namespace ProtoR.Domain.SchemaGroupAggregate.Rules.ProtoBufRules
 {
-    using System;
     using System.Collections.Generic;
-    using System.Globalization;
     using System.Linq;
     using System.Text;
     using FluentAssertions;
     using Google.Protobuf.Reflection;
     using ProtoR.Domain.SchemaGroupAggregate.Schemas;
+    using static ProtoR.Domain.SchemaGroupAggregate.Schemas.ProtoBufSchema;
 
     public class MissingFieldReservationRule : ProtoBufRule
     {
@@ -21,80 +20,46 @@ namespace ProtoR.Domain.SchemaGroupAggregate.Rules.ProtoBufRules
             a.Should().NotBeNull();
             b.Should().NotBeNull();
 
-            IEnumerable<string> aFields = a.GetFieldNumbers();
-            IEnumerable<string> bFields = b.GetFieldNumbers();
-            IEnumerable<string> removedFieldNames = bFields.Except(aFields);
-            var reservations = new List<FieldReservation>();
-
-            foreach (var removedFieldName in removedFieldNames)
-            {
-                DescriptorProto originalMessage = this.FindMessage(b, removedFieldName);
-                int fieldNumber = Convert.ToInt32(removedFieldName.Substring(removedFieldName.LastIndexOf('.') + 1), CultureInfo.InvariantCulture);
-                FieldDescriptorProto removedField = originalMessage.Fields.First(f => f.Number == fieldNumber);
-                DescriptorProto message = this.FindMessage(a, removedFieldName);
-
-                if (message == null)
-                {
-                    continue;
-                }
-
-                reservations.Add(this.CheckReservationForField(
-                    removedFieldName,
-                    removedField.Name,
-                    fieldNumber,
-                    message));
-            }
-
-            IEnumerable<FieldReservation> missingReservations = reservations
-                .Where(r => !r.NameReserved || !r.NumberReserved);
+            IEnumerable<FieldReservation> missingReservations = ProtoBufSchemaScope.ParallelTraverse(
+                a.RootScope(),
+                b.RootScope(),
+                this.VisitScope);
 
             return missingReservations.Any()
                 ? new ValidationResult(false, this.FormatMissingReservations(missingReservations))
                 : new ValidationResult(true, "No field reservations are missing.");
         }
 
-        private FieldReservation CheckReservationForField(
-            string fullyQualifiedName,
-            string removedFieldName,
-            int removedFieldNumber,
-            DescriptorProto message)
+        private IList<FieldReservation> VisitScope(ProtoBufSchemaScope a, ProtoBufSchemaScope b)
         {
-            bool nameReserved = message.ReservedNames.Contains(removedFieldName);
-            bool numberReserved = message.ReservedRanges.Any(range => range.Start <= removedFieldNumber && removedFieldNumber < range.End);
+            var missingReservations = new List<FieldReservation>();
 
-            return new FieldReservation
+            foreach (var messageField in b.MessageFields)
             {
-                NameReserved = nameReserved,
-                NumberReserved = numberReserved,
-                FullyQualifiedName = fullyQualifiedName,
-                FieldName = removedFieldName,
-                FieldNumber = removedFieldNumber,
-            };
-        }
+                FieldDescriptorProto matchingMessageField = a.MessageFields.FirstOrDefault(e => e.Number == messageField.Number);
 
-        private DescriptorProto FindMessage(ProtoBufSchema schema, string fullyQualifiedName)
-        {
-            string[] names = fullyQualifiedName.Split(new char[] { '.' }, StringSplitOptions.RemoveEmptyEntries);
-            int fieldNumber = Convert.ToInt32(names.Last(), CultureInfo.InvariantCulture);
-            IEnumerable<string> messageNames = names.Take(names.Length - 1);
-            List<DescriptorProto> messageDescriptors = schema.Parsed.Files.First().MessageTypes;
-            DescriptorProto parentMessage = null;
-
-            while (names.Length > 1)
-            {
-                string messageName = names[0];
-                names = names.Skip(1).ToArray();
-                parentMessage = messageDescriptors.FirstOrDefault(m => m.Name == messageName);
-
-                if (parentMessage == null)
+                if (matchingMessageField == null && a.ContainingMessage != null)
                 {
-                    return null;
-                }
+                    bool nameReserved = a.ContainingMessage.ReservedNames.Contains(messageField.Name);
+                    bool numberReserved = a.ContainingMessage.ReservedRanges.Any(range =>
+                        range.Start <= messageField.Number
+                        && messageField.Number < range.End);
 
-                messageDescriptors = parentMessage.NestedTypes;
+                    if (!nameReserved || !numberReserved)
+                    {
+                        missingReservations.Add(new FieldReservation
+                        {
+                            NameReserved = nameReserved,
+                            NumberReserved = numberReserved,
+                            FullyQualifiedName = $"{b.Path}.{messageField.Number}",
+                            FieldName = messageField.Name,
+                            FieldNumber = messageField.Number,
+                        });
+                    }
+                }
             }
 
-            return parentMessage;
+            return missingReservations;
         }
 
         private string FormatMissingReservations(IEnumerable<FieldReservation> reseravations)

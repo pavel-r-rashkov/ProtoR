@@ -1,5 +1,6 @@
 namespace ProtoR.Domain.UnitTests.SchemaGroupAggregateTests.RulesTests.ProtoBufRulesTests
 {
+    using System;
     using ProtoR.Domain.SchemaGroupAggregate;
     using ProtoR.Domain.SchemaGroupAggregate.Rules.ProtoBufRules;
     using ProtoR.Domain.SchemaGroupAggregate.Schemas;
@@ -8,7 +9,7 @@ namespace ProtoR.Domain.UnitTests.SchemaGroupAggregateTests.RulesTests.ProtoBufR
 
     public class MessageAddedRuleTests
     {
-        private MessageAddedRule rule;
+        private readonly MessageAddedRule rule;
 
         public MessageAddedRuleTests()
         {
@@ -40,6 +41,15 @@ namespace ProtoR.Domain.UnitTests.SchemaGroupAggregateTests.RulesTests.ProtoBufR
             ValidationResult result = this.rule.Validate(a, b);
 
             Assert.True(result.Passed);
+        }
+
+        [Theory]
+        [RuleTestData("MessageAdded", "NestedMessagesAdded")]
+        public void Validate_WithNestedMessagesAdded_ShouldDetectOnlyOutermostMessage(ProtoBufSchema a, ProtoBufSchema b)
+        {
+            ValidationResult result = this.rule.Validate(a, b);
+
+            Assert.DoesNotContain(".Inner", result.Description, StringComparison.InvariantCultureIgnoreCase);
         }
     }
 }

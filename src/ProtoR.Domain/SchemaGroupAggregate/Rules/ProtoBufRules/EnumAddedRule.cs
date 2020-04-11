@@ -4,7 +4,9 @@ namespace ProtoR.Domain.SchemaGroupAggregate.Rules.ProtoBufRules
     using System.Collections.Generic;
     using System.Linq;
     using FluentAssertions;
+    using Google.Protobuf.Reflection;
     using ProtoR.Domain.SchemaGroupAggregate.Schemas;
+    using static ProtoR.Domain.SchemaGroupAggregate.Schemas.ProtoBufSchema;
 
     public class EnumAddedRule : ProtoBufRule
     {
@@ -18,14 +20,28 @@ namespace ProtoR.Domain.SchemaGroupAggregate.Rules.ProtoBufRules
             a.Should().NotBeNull();
             b.Should().NotBeNull();
 
-            IEnumerable<string> aTypes = a.GetEnumTypeNames();
-            IEnumerable<string> bTypes = b.GetEnumTypeNames();
-
-            IEnumerable<string> addedEnumTypes = aTypes.Except(bTypes);
+            IEnumerable<string> addedEnumTypes = ProtoBufSchemaScope.ParallelTraverse(a.RootScope(), b.RootScope(), this.VisitScope);
 
             return addedEnumTypes.Any()
                 ? new ValidationResult(false, this.FormatRemovedEnumTypes(addedEnumTypes))
                 : new ValidationResult(true, "No enum types were added");
+        }
+
+        private IList<string> VisitScope(ProtoBufSchemaScope a, ProtoBufSchemaScope b)
+        {
+            var addedEnums = new List<string>();
+
+            foreach (var enumDefinition in a.Enums)
+            {
+                EnumDescriptorProto matchingEnum = b.Enums.FirstOrDefault(e => e.Name == enumDefinition.Name);
+
+                if (matchingEnum == null)
+                {
+                    addedEnums.Add($"{b.Path}.{enumDefinition.Name}");
+                }
+            }
+
+            return addedEnums;
         }
 
         private string FormatRemovedEnumTypes(IEnumerable<string> addedEnumTypes)

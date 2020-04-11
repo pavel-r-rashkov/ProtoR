@@ -6,6 +6,7 @@ namespace ProtoR.Domain.SchemaGroupAggregate.Rules.ProtoBufRules
     using FluentAssertions;
     using Google.Protobuf.Reflection;
     using ProtoR.Domain.SchemaGroupAggregate.Schemas;
+    using static ProtoR.Domain.SchemaGroupAggregate.Schemas.ProtoBufSchema;
 
     public class FieldRenamedRule : ProtoBufRule
     {
@@ -19,52 +20,42 @@ namespace ProtoR.Domain.SchemaGroupAggregate.Rules.ProtoBufRules
             a.Should().NotBeNull();
             b.Should().NotBeNull();
 
-            IEnumerable<Field> aFields = this.GetFields(a);
-            IEnumerable<Field> bFields = this.GetFields(b);
-
-            var renamedFields = new List<Field>();
-
-            foreach (var field in aFields)
-            {
-                Field matchingField = bFields.FirstOrDefault(f => f.FullyQualifiedName == field.FullyQualifiedName);
-
-                if (matchingField != null && matchingField.Name != field.Name)
-                {
-                    field.RenamedFrom = matchingField.Name;
-                    renamedFields.Add(field);
-                }
-            }
+            IEnumerable<Field> renamedFields = ProtoBufSchemaScope.ParallelTraverse(
+                a.RootScope(),
+                b.RootScope(),
+                this.VisitScope);
 
             return renamedFields.Any()
                 ? new ValidationResult(false, $"Fields were renamed:{Environment.NewLine}{this.FormatRenamedFields(renamedFields)}")
                 : new ValidationResult(true, "No fields were renamed.");
         }
 
-        private string FormatRenamedFields(List<Field> renamedFields)
+        private IList<Field> VisitScope(ProtoBufSchemaScope a, ProtoBufSchemaScope b)
+        {
+            var addedFields = new List<Field>();
+
+            foreach (var messageField in a.MessageFields)
+            {
+                FieldDescriptorProto matchingMessageField = b.MessageFields.FirstOrDefault(e => e.Number == messageField.Number);
+
+                if (matchingMessageField != null && messageField.Name != matchingMessageField.Name)
+                {
+                    addedFields.Add(new Field
+                    {
+                        FullyQualifiedName = $"{a.Path}.{messageField.Number}",
+                        Name = messageField.Name,
+                        RenamedFrom = matchingMessageField.Name,
+                    });
+                }
+            }
+
+            return addedFields;
+        }
+
+        private string FormatRenamedFields(IEnumerable<Field> renamedFields)
         {
             var messages = renamedFields.Select(field => $"{field.FullyQualifiedName} was renamed from {field.RenamedFrom} to {field.Name}");
             return string.Join(Environment.NewLine, messages);
-        }
-
-        private IEnumerable<Field> GetFields(ProtoBufSchema schema)
-        {
-            return schema.Parsed.Files
-                .SelectMany(f => f.MessageTypes.SelectMany(message => this.GetFields(message)));
-        }
-
-        private IEnumerable<Field> GetFields(DescriptorProto message, string parentName = "")
-        {
-            var messageName = $"{parentName}.{message.Name}";
-
-            IEnumerable<Field> fields = message.Fields.Select(field => new Field
-            {
-                FullyQualifiedName = $"{messageName}.{field.Number}",
-                Name = field.Name,
-            });
-
-            IEnumerable<Field> nestedFields = message.NestedTypes.SelectMany(nestedMessage => this.GetFields(nestedMessage, messageName));
-
-            return fields.Union(nestedFields);
         }
 
         private class Field

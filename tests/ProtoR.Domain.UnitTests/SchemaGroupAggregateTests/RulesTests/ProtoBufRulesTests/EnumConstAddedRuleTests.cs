@@ -8,7 +8,7 @@ namespace ProtoR.Domain.UnitTests.SchemaGroupAggregateTests.RulesTests.ProtoBufR
 
     public class EnumConstAddedRuleTests
     {
-        private EnumConstAddedRule rule;
+        private readonly EnumConstAddedRule rule;
 
         public EnumConstAddedRuleTests()
         {
@@ -36,6 +36,15 @@ namespace ProtoR.Domain.UnitTests.SchemaGroupAggregateTests.RulesTests.ProtoBufR
         [Theory]
         [RuleTestData("EnumConstAdded", "NoAddedEnumConst")]
         public void Validate_WithNoAddedEnumConst_ShouldPass(ProtoBufSchema a, ProtoBufSchema b)
+        {
+            ValidationResult result = this.rule.Validate(a, b);
+
+            Assert.True(result.Passed);
+        }
+
+        [Theory]
+        [RuleTestData("EnumConstAdded", "EnumConstInNewEnum")]
+        public void Validate_WithEnumConstInNewEnum_ShouldPass(ProtoBufSchema a, ProtoBufSchema b)
         {
             ValidationResult result = this.rule.Validate(a, b);
 

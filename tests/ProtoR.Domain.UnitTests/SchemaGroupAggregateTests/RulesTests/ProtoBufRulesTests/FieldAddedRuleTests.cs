@@ -8,7 +8,7 @@ namespace ProtoR.Domain.UnitTests.SchemaGroupAggregateTests.RulesTests.ProtoBufR
 
     public class FieldAddedRuleTests
     {
-        private FieldAddedRule rule;
+        private readonly FieldAddedRule rule;
 
         public FieldAddedRuleTests()
         {
@@ -36,6 +36,15 @@ namespace ProtoR.Domain.UnitTests.SchemaGroupAggregateTests.RulesTests.ProtoBufR
         [Theory]
         [RuleTestData("FieldAdded", "NoAddedFields")]
         public void Validate_WithNoAddedFields_ShouldPass(ProtoBufSchema a, ProtoBufSchema b)
+        {
+            ValidationResult result = this.rule.Validate(a, b);
+
+            Assert.True(result.Passed);
+        }
+
+        [Theory]
+        [RuleTestData("FieldAdded", "FieldInNewMessage")]
+        public void Validate_WithFieldInNewMessage_ShouldPass(ProtoBufSchema a, ProtoBufSchema b)
         {
             ValidationResult result = this.rule.Validate(a, b);
 

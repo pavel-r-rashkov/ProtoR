@@ -1,0 +1,9 @@
+syntax = "proto3";
+
+message Outer {
+  string name = 1;
+
+  message Inner {
+      string foo = 1;
+  }
+}

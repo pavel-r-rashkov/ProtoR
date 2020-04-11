@@ -11,7 +11,7 @@ namespace ProtoR.Domain.UnitTests.SchemaGroupAggregateTests.SchemasTests
     public class SchemaVersionComparerTests
     {
         private readonly string validSchema = SchemaFixtureUtils.GetProtoBuf("ValidSchema");
-        private ProtoBufSchemaFactory factory = new ProtoBufSchemaFactory();
+        private readonly ProtoBufSchemaFactory factory = new ProtoBufSchemaFactory();
 
         [Fact]
         public void Compare_WithSchemasWithEqualVersions_ShouldReturnZero()

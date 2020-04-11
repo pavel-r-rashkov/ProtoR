@@ -5,7 +5,7 @@ namespace ProtoR.Domain.SchemaGroupAggregate.Schemas
 
     public abstract class Schema<TSchemaContents> : Entity
     {
-        private Lazy<TSchemaContents> parsedSchema;
+        private readonly Lazy<TSchemaContents> parsedSchema;
 
         public Schema(Guid id, Version version, string contents)
             : base(id)

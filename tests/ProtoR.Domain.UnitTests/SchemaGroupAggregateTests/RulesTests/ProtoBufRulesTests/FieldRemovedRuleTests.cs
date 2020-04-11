@@ -8,7 +8,7 @@ namespace ProtoR.Domain.UnitTests.SchemaGroupAggregateTests.RulesTests.ProtoBufR
 
     public class FieldRemovedRuleTests
     {
-        private FieldRemovedRule rule;
+        private readonly FieldRemovedRule rule;
 
         public FieldRemovedRuleTests()
         {
@@ -36,6 +36,15 @@ namespace ProtoR.Domain.UnitTests.SchemaGroupAggregateTests.RulesTests.ProtoBufR
         [Theory]
         [RuleTestData("FieldRemoved", "NoRemovedFields")]
         public void Validate_WithNoRemovedFields_ShouldPass(ProtoBufSchema a, ProtoBufSchema b)
+        {
+            ValidationResult result = this.rule.Validate(a, b);
+
+            Assert.True(result.Passed);
+        }
+
+        [Theory]
+        [RuleTestData("FieldRemoved", "FieldInRemovedMessage")]
+        public void Validate_WithFieldInRemovedMessage_ShouldPass(ProtoBufSchema a, ProtoBufSchema b)
         {
             ValidationResult result = this.rule.Validate(a, b);
 

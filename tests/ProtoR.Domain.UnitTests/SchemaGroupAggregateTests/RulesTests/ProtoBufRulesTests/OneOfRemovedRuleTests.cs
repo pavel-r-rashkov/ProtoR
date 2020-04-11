@@ -8,7 +8,7 @@ namespace ProtoR.Domain.UnitTests.SchemaGroupAggregateTests.RulesTests.ProtoBufR
 
     public class OneOfRemovedRuleTests
     {
-        private OneOfRemovedRule rule;
+        private readonly OneOfRemovedRule rule;
 
         public OneOfRemovedRuleTests()
         {
@@ -36,6 +36,15 @@ namespace ProtoR.Domain.UnitTests.SchemaGroupAggregateTests.RulesTests.ProtoBufR
         [Theory]
         [RuleTestData("OneOfRemoved", "NoRemovedOneOf")]
         public void Validate_WithNoRemovedOneOf_ShouldPass(ProtoBufSchema a, ProtoBufSchema b)
+        {
+            ValidationResult result = this.rule.Validate(a, b);
+
+            Assert.True(result.Passed);
+        }
+
+        [Theory]
+        [RuleTestData("OneOfRemoved", "OneOfInRemovedMessage")]
+        public void Validate_WithOneOfInRemovedMessage_ShouldPass(ProtoBufSchema a, ProtoBufSchema b)
         {
             ValidationResult result = this.rule.Validate(a, b);
 

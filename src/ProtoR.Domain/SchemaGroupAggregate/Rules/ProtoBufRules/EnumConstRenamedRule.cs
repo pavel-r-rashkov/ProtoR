@@ -6,6 +6,7 @@ namespace ProtoR.Domain.SchemaGroupAggregate.Rules.ProtoBufRules
     using FluentAssertions;
     using Google.Protobuf.Reflection;
     using ProtoR.Domain.SchemaGroupAggregate.Schemas;
+    using static ProtoR.Domain.SchemaGroupAggregate.Schemas.ProtoBufSchema;
 
     public class EnumConstRenamedRule : ProtoBufRule
     {
@@ -19,67 +20,53 @@ namespace ProtoR.Domain.SchemaGroupAggregate.Rules.ProtoBufRules
             a.Should().NotBeNull();
             b.Should().NotBeNull();
 
-            IEnumerable<EnumConstant> aEnumConstants = this.GetEnumConstants(a);
-            IEnumerable<EnumConstant> bEnumConstants = this.GetEnumConstants(b);
-
-            var renamedEnumConstants = new List<EnumConstant>();
-
-            foreach (var enumConstant in aEnumConstants)
-            {
-                EnumConstant matchingEnumConstant = bEnumConstants.FirstOrDefault(e => e.FullyQualifiedName == enumConstant.FullyQualifiedName);
-
-                if (matchingEnumConstant != null && matchingEnumConstant.Name != enumConstant.Name)
-                {
-                    enumConstant.RenamedFrom = matchingEnumConstant.Name;
-                    renamedEnumConstants.Add(enumConstant);
-                }
-            }
+            IEnumerable<EnumConstant> renamedEnumConstants = ProtoBufSchemaScope.ParallelTraverse(
+                a.RootScope(),
+                b.RootScope(),
+                this.VisitScope);
 
             return renamedEnumConstants.Any()
                 ? new ValidationResult(false, $"Enum consts were renamed:{Environment.NewLine}{this.FormatRenamedEnumConstants(renamedEnumConstants)}")
                 : new ValidationResult(true, "No Enum consts were renamed.");
         }
 
-        private string FormatRenamedEnumConstants(List<EnumConstant> renamedEnumConstants)
+        private IList<EnumConstant> VisitScope(ProtoBufSchemaScope a, ProtoBufSchemaScope b)
+        {
+            var renamedEnumConstants = new List<EnumConstant>();
+
+            foreach (var enumDefinition in a.Enums)
+            {
+                EnumDescriptorProto matchingEnum = b.Enums.FirstOrDefault(e => e.Name == enumDefinition.Name);
+
+                if (matchingEnum == null)
+                {
+                    continue;
+                }
+
+                foreach (var enumConstant in enumDefinition.Values)
+                {
+                    EnumValueDescriptorProto matchingEnumConstant = matchingEnum.Values
+                        .FirstOrDefault(e => e.Number == enumConstant.Number);
+
+                    if (matchingEnumConstant != null && enumConstant.Name != matchingEnumConstant.Name)
+                    {
+                        renamedEnumConstants.Add(new EnumConstant
+                        {
+                            FullyQualifiedName = $"{a.Path}.{enumDefinition.Name}.{enumConstant.Number}",
+                            Name = enumConstant.Name,
+                            RenamedFrom = matchingEnumConstant.Name,
+                        });
+                    }
+                }
+            }
+
+            return renamedEnumConstants;
+        }
+
+        private string FormatRenamedEnumConstants(IEnumerable<EnumConstant> renamedEnumConstants)
         {
             var messages = renamedEnumConstants.Select(enumConstant => $"{enumConstant.FullyQualifiedName} was renamed from {enumConstant.RenamedFrom} to {enumConstant.Name}");
             return string.Join(Environment.NewLine, messages);
-        }
-
-        private IEnumerable<EnumConstant> GetEnumConstants(ProtoBufSchema schema)
-        {
-            IEnumerable<EnumConstant> outerEnumConstants = schema.Parsed.Files
-                .SelectMany(f => f.EnumTypes
-                    .SelectMany(e => e.Values
-                        .Select(ev => new EnumConstant
-                        {
-                            FullyQualifiedName = $".{e.Name}.{ev.Number}",
-                            Name = ev.Name,
-                        })));
-
-            IEnumerable<EnumConstant> innerEnumConstants = schema.Parsed.Files
-                .SelectMany(f => f.MessageTypes
-                    .SelectMany(message => this.GetEnumConstants(message)));
-
-            return outerEnumConstants.Union(innerEnumConstants);
-        }
-
-        private IEnumerable<EnumConstant> GetEnumConstants(DescriptorProto message, string parentName = "")
-        {
-            var messageName = $"{parentName}.{message.Name}";
-
-            IEnumerable<EnumConstant> enumConstants = message.EnumTypes
-                .SelectMany(e => e.Values
-                    .Select(ev => new EnumConstant
-                    {
-                        FullyQualifiedName = $"{messageName}.{e.Name}.{ev.Number}",
-                        Name = ev.Name,
-                    }));
-
-            IEnumerable<EnumConstant> nestedEnumConstants = message.NestedTypes
-                .SelectMany(nestedMessage => this.GetEnumConstants(nestedMessage, messageName));
-
-            return enumConstants.Union(nestedEnumConstants);
         }
 
         private class EnumConstant

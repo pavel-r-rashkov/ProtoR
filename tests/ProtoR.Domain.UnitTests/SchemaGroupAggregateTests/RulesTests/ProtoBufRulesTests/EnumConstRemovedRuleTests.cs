@@ -8,7 +8,7 @@ namespace ProtoR.Domain.UnitTests.SchemaGroupAggregateTests.RulesTests.ProtoBufR
 
     public class EnumConstRemovedRuleTests
     {
-        private EnumConstRemovedRule rule;
+        private readonly EnumConstRemovedRule rule;
 
         public EnumConstRemovedRuleTests()
         {
@@ -36,6 +36,15 @@ namespace ProtoR.Domain.UnitTests.SchemaGroupAggregateTests.RulesTests.ProtoBufR
         [Theory]
         [RuleTestData("EnumConstRemoved", "NoRemovedEnumConst")]
         public void Validate_WithNoRemovedEnumConst_ShouldPass(ProtoBufSchema a, ProtoBufSchema b)
+        {
+            ValidationResult result = this.rule.Validate(a, b);
+
+            Assert.True(result.Passed);
+        }
+
+        [Theory]
+        [RuleTestData("EnumConstRemoved", "EnumConstInRemovedEnum")]
+        public void Validate_WithEnumConstInRemovedMessage_ShouldPass(ProtoBufSchema a, ProtoBufSchema b)
         {
             ValidationResult result = this.rule.Validate(a, b);
 

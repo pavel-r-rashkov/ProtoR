@@ -8,7 +8,7 @@ namespace ProtoR.Domain.UnitTests.SchemaGroupAggregateTests.RulesTests.ProtoBufR
 
     public class FieldRenamedRuleTests
     {
-        private FieldRenamedRule rule;
+        private readonly FieldRenamedRule rule;
 
         public FieldRenamedRuleTests()
         {

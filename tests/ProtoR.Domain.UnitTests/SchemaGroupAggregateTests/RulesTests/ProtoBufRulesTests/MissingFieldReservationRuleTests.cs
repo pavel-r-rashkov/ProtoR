@@ -8,7 +8,7 @@ namespace ProtoR.Domain.UnitTests.SchemaGroupAggregateTests.RulesTests.ProtoBufR
 
     public class MissingFieldReservationRuleTests
     {
-        private MissingFieldReservationRule rule;
+        private readonly MissingFieldReservationRule rule;
 
         public MissingFieldReservationRuleTests()
         {
