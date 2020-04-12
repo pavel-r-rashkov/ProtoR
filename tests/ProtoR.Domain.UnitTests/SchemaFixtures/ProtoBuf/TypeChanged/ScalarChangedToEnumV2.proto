@@ -1,0 +1,10 @@
+syntax = "proto3";
+
+message User {
+  Status status = 1;
+
+  enum Status {
+    ACTIVE = 1;
+    INACTIVE = 2;
+  }
+}

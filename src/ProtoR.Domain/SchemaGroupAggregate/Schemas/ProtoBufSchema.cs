@@ -151,7 +151,7 @@ namespace ProtoR.Domain.SchemaGroupAggregate.Schemas
 
                 mapEntryName.Append("Entry");
 
-                return this.Messages.FirstOrDefault(m =>
+                return this.ContainingMessage.NestedTypes.FirstOrDefault(m =>
                     m.Name == mapEntryName.ToString()
                     && m.Options != null
                     && m.Options.MapEntry);

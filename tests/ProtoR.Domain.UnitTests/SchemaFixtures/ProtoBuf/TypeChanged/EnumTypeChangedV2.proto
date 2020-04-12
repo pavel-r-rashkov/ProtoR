@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+message User {
+  StatusV2 current_status = 1;
+
+  enum Status {
+    ACTIVE = 1;
+    INACTIVE = 2;
+  }
+
+  enum StatusV2 {
+    ACTIVEV2 = 1;
+    INACTIVEV2 = 2;
+  }
+}
