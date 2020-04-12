@@ -6,7 +6,10 @@ namespace ProtoR.Domain.SchemaGroupAggregate.Schemas
     using System.IO;
     using System.Linq;
     using System.Reflection;
+    using System.Text;
     using Google.Protobuf.Reflection;
+    using static Google.Protobuf.Reflection.FieldDescriptorProto;
+    using Type = Google.Protobuf.Reflection.FieldDescriptorProto.Type;
 
     public class ProtoBufSchema : Schema<FileDescriptorSet>
     {
@@ -104,17 +107,54 @@ namespace ProtoR.Domain.SchemaGroupAggregate.Schemas
 
             public IEnumerable<ProtoBufSchemaScope> GetChildScopes()
             {
-                foreach (var message in this.Messages)
+                foreach (var message in this.Messages.Where(m => m.Options == null || !m.Options.MapEntry))
                 {
                     yield return new ProtoBufSchemaScope(
                         $"{this.Path}.{message.Name}",
                         message.Name,
                         message,
-                        message.NestedTypes,
+                        message.NestedTypes.Where(m => m.Options == null || !m.Options.MapEntry),
                         message.Fields,
                         message.EnumTypes,
                         message.OneofDecls);
                 }
+            }
+
+            public DescriptorProto GetMapEntryMessage(FieldDescriptorProto field)
+            {
+                if (field.type != Type.TypeMessage || field.label != Label.LabelRepeated)
+                {
+                    return null;
+                }
+
+                var mapEntryName = new StringBuilder();
+                var shouldChangeToUpperCase = true;
+
+                foreach (var nameChar in field.Name.ToCharArray())
+                {
+                    if (nameChar == '_')
+                    {
+                        shouldChangeToUpperCase = true;
+                        continue;
+                    }
+
+                    if (shouldChangeToUpperCase)
+                    {
+                        mapEntryName.Append(nameChar.ToString(CultureInfo.InvariantCulture).ToUpperInvariant());
+                        shouldChangeToUpperCase = false;
+                    }
+                    else
+                    {
+                        mapEntryName.Append(nameChar);
+                    }
+                }
+
+                mapEntryName.Append("Entry");
+
+                return this.Messages.FirstOrDefault(m =>
+                    m.Name == mapEntryName.ToString()
+                    && m.Options != null
+                    && m.Options.MapEntry);
             }
         }
     }

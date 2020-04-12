@@ -3,6 +3,7 @@ syntax = "proto3";
 message User {
   string name = 1;
   int32 age = 2;
+  map<string, int32> foo = 3;
 
   message InnerMessage {
     string foo = 1;
