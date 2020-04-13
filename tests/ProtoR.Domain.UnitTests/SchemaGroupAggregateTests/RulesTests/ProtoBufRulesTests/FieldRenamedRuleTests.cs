@@ -17,16 +17,8 @@ namespace ProtoR.Domain.UnitTests.SchemaGroupAggregateTests.RulesTests.ProtoBufR
 
         [Theory]
         [RuleTestData("FieldRenamed", "RenamedField")]
-        public void Validate_WithRenamedField_ShouldNotPass(ProtoBufSchema a, ProtoBufSchema b)
-        {
-            ValidationResult result = this.rule.Validate(a, b);
-
-            Assert.False(result.Passed);
-        }
-
-        [Theory]
         [RuleTestData("FieldRenamed", "RenamedFieldInNestedMessage")]
-        public void Validate_WithRenamedFieldInNestedMessage_ShouldNotPass(ProtoBufSchema a, ProtoBufSchema b)
+        public void Validate_WithRuleViolation_ShouldNotPass(ProtoBufSchema a, ProtoBufSchema b)
         {
             ValidationResult result = this.rule.Validate(a, b);
 
@@ -35,7 +27,7 @@ namespace ProtoR.Domain.UnitTests.SchemaGroupAggregateTests.RulesTests.ProtoBufR
 
         [Theory]
         [RuleTestData("FieldRenamed", "NoRenamedFields")]
-        public void Validate_WithNoRenamedFields_ShouldPass(ProtoBufSchema a, ProtoBufSchema b)
+        public void Validate_WithNoRuleViolation_ShouldPass(ProtoBufSchema a, ProtoBufSchema b)
         {
             ValidationResult result = this.rule.Validate(a, b);
 

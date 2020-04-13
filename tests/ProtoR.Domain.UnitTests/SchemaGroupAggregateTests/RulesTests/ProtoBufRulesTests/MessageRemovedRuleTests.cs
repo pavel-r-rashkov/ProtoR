@@ -18,16 +18,8 @@ namespace ProtoR.Domain.UnitTests.SchemaGroupAggregateTests.RulesTests.ProtoBufR
 
         [Theory]
         [RuleTestData("MessageRemoved", "RemovedMessage")]
-        public void Validate_WithRemovedMessage_ShouldNotPass(ProtoBufSchema a, ProtoBufSchema b)
-        {
-            ValidationResult result = this.rule.Validate(a, b);
-
-            Assert.False(result.Passed);
-        }
-
-        [Theory]
         [RuleTestData("MessageRemoved", "NestedMessage")]
-        public void Validate_WithRemovedNestedMessage_ShouldNotPass(ProtoBufSchema a, ProtoBufSchema b)
+        public void Validate_WithRuleViolation_ShouldNotPass(ProtoBufSchema a, ProtoBufSchema b)
         {
             ValidationResult result = this.rule.Validate(a, b);
 

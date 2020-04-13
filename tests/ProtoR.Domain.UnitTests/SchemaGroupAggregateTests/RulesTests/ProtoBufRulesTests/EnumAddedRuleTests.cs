@@ -17,16 +17,8 @@ namespace ProtoR.Domain.UnitTests.SchemaGroupAggregateTests.RulesTests.ProtoBufR
 
         [Theory]
         [RuleTestData("EnumAdded", "AddedEnum")]
-        public void Validate_WithAddedEnum_ShouldNotPass(ProtoBufSchema a, ProtoBufSchema b)
-        {
-            ValidationResult result = this.rule.Validate(a, b);
-
-            Assert.False(result.Passed);
-        }
-
-        [Theory]
         [RuleTestData("EnumAdded", "InnerEnum")]
-        public void Validate_WithAddedNestedEnum_ShouldNotPass(ProtoBufSchema a, ProtoBufSchema b)
+        public void Validate_WithARuleViolation_ShouldNotPass(ProtoBufSchema a, ProtoBufSchema b)
         {
             ValidationResult result = this.rule.Validate(a, b);
 
@@ -35,16 +27,8 @@ namespace ProtoR.Domain.UnitTests.SchemaGroupAggregateTests.RulesTests.ProtoBufR
 
         [Theory]
         [RuleTestData("EnumAdded", "NoAddedEnum")]
-        public void Validate_WithNoAddedEnum_ShouldPass(ProtoBufSchema a, ProtoBufSchema b)
-        {
-            ValidationResult result = this.rule.Validate(a, b);
-
-            Assert.True(result.Passed);
-        }
-
-        [Theory]
         [RuleTestData("EnumAdded", "EnumInNewMessage")]
-        public void Validate_WithEnumInNewMessage_ShouldPass(ProtoBufSchema a, ProtoBufSchema b)
+        public void Validate_WithNoRuleViolation_ShouldPass(ProtoBufSchema a, ProtoBufSchema b)
         {
             ValidationResult result = this.rule.Validate(a, b);
 

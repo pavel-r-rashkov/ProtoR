@@ -18,28 +18,20 @@ namespace ProtoR.Domain.UnitTests.SchemaGroupAggregateTests.RulesTests.ProtoBufR
 
         [Theory]
         [RuleTestData("EnumConstRenamed", "RenamedEnumConst")]
-        public void Validate_WithRenamedEnumConst_ShouldNotPass(ProtoBufSchema a, ProtoBufSchema b)
-        {
-            ValidationResult result = this.rule.Validate(a, b);
-            Debug.WriteLine(result.Description);
-            Assert.False(result.Passed);
-        }
-
-        [Theory]
         [RuleTestData("EnumConstRenamed", "RenamedEnumConstInNestedMessage")]
-        public void Validate_WithRenamedEnumConstInNestedMessage_ShouldNotPass(ProtoBufSchema a, ProtoBufSchema b)
+        public void Validate_WithRuleViolation_ShouldNotPass(ProtoBufSchema a, ProtoBufSchema b)
         {
             ValidationResult result = this.rule.Validate(a, b);
-            Debug.WriteLine(result.Description);
+
             Assert.False(result.Passed);
         }
 
         [Theory]
         [RuleTestData("EnumConstRenamed", "NoRenamedEnumConstants")]
-        public void Validate_WithNoRenamedEnumConstants_ShouldPass(ProtoBufSchema a, ProtoBufSchema b)
+        public void Validate_WithNoRuleViolation_ShouldPass(ProtoBufSchema a, ProtoBufSchema b)
         {
             ValidationResult result = this.rule.Validate(a, b);
-            Debug.WriteLine(result.Description);
+
             Assert.True(result.Passed);
         }
     }

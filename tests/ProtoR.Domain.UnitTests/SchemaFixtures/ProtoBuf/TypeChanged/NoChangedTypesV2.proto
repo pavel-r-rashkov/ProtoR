@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+message User {
+  Details details = 1;
+  int32 age = 2;
+  string name = 3;
+  Status status = 4;
+  map<int32, string> results = 5;
+
+  message Details {
+    string address = 1;
+    string phone = 2;
+  }
+
+  enum Status {
+    ACTIVE = 1;
+    INACTIVE = 2;
+  }
+}

@@ -2,7 +2,6 @@ namespace ProtoR.Domain.UnitTests.ConfigurationSetAggregateTests
 {
     using System;
     using System.Collections.Generic;
-    using System.Collections.ObjectModel;
     using System.Linq;
     using ProtoR.Domain.GlobalConfigurationAggregate;
     using ProtoR.Domain.SchemaGroupAggregate;
