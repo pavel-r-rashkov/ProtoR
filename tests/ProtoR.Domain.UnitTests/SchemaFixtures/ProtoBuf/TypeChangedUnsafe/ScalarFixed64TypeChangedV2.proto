@@ -1,0 +1,5 @@
+syntax = "proto3";
+
+message User {
+  sfixed64 status = 1;
+}

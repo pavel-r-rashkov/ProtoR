@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+message User {
+  Details details = 1;
+
+  message Details {
+    int32 age = 1;
+    string name = 2;
+  }
+
+  message DetailsV2 {
+    int32 age = 1;
+    string name = 2;
+  }
+}

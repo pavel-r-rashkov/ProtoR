@@ -1,0 +1,5 @@
+syntax = "proto3";
+
+message User {
+  fixed32 status = 1;
+}

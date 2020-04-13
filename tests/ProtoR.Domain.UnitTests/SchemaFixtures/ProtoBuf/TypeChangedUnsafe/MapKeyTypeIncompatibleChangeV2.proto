@@ -1,0 +1,5 @@
+syntax = "proto3";
+
+message User {
+  map<sint32, string> status = 1;
+}

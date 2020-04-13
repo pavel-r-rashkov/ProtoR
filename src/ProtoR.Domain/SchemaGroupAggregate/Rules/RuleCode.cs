@@ -94,5 +94,10 @@ namespace ProtoR.Domain.SchemaGroupAggregate.Rules
         /// Type changed.
         /// </summary>
         PB0019,
+
+        /// <summary>
+        /// Unsafe type change.
+        /// </summary>
+        PB0020,
     }
 }
