@@ -22,7 +22,7 @@ namespace ProtoR.Domain.UnitTests.SchemaGroupAggregateTests
         public SchemaGroupTests()
         {
             this.schemaFactoryMock = new Mock<ISchemaFactory<ProtoBufSchema, FileDescriptorSet>>();
-            this.ruleMock = new Mock<ProtoBufRule>(RuleCode.R0001);
+            this.ruleMock = new Mock<ProtoBufRule>(RuleCode.PB0001);
             this.fixture = new Fixture();
         }
 
@@ -159,7 +159,7 @@ namespace ProtoR.Domain.UnitTests.SchemaGroupAggregateTests
                 this.fixture.Create<Guid>(),
                 new Dictionary<RuleCode, RuleConfig>
                 {
-                    { RuleCode.R0001, new RuleConfig(false, Severity.Error) },
+                    { RuleCode.PB0001, new RuleConfig(false, Severity.Error) },
                 },
                 groupId,
                 false,
@@ -203,7 +203,7 @@ namespace ProtoR.Domain.UnitTests.SchemaGroupAggregateTests
                 this.fixture.Create<Guid>(),
                 new Dictionary<RuleCode, RuleConfig>
                 {
-                    { RuleCode.R0001, new RuleConfig(false, Severity.Error) },
+                    { RuleCode.PB0001, new RuleConfig(false, Severity.Error) },
                 },
                 groupId,
                 false,
@@ -247,7 +247,7 @@ namespace ProtoR.Domain.UnitTests.SchemaGroupAggregateTests
                 this.fixture.Create<Guid>(),
                 new Dictionary<RuleCode, RuleConfig>
                 {
-                    { RuleCode.R0001, new RuleConfig(false, Severity.Error) },
+                    { RuleCode.PB0001, new RuleConfig(false, Severity.Error) },
                 },
                 groupId,
                 false,
@@ -291,7 +291,7 @@ namespace ProtoR.Domain.UnitTests.SchemaGroupAggregateTests
                 this.fixture.Create<Guid>(),
                 new Dictionary<RuleCode, RuleConfig>
                 {
-                    { RuleCode.R0001, new RuleConfig(false, Severity.Error) },
+                    { RuleCode.PB0001, new RuleConfig(false, Severity.Error) },
                 },
                 groupId,
                 false,
@@ -335,7 +335,7 @@ namespace ProtoR.Domain.UnitTests.SchemaGroupAggregateTests
                 this.fixture.Create<Guid>(),
                 new Dictionary<RuleCode, RuleConfig>
                 {
-                    { RuleCode.R0001, new RuleConfig(false, Severity.Error) },
+                    { RuleCode.PB0001, new RuleConfig(false, Severity.Error) },
                 },
                 groupId,
                 false,
@@ -379,7 +379,7 @@ namespace ProtoR.Domain.UnitTests.SchemaGroupAggregateTests
                 this.fixture.Create<Guid>(),
                 new Dictionary<RuleCode, RuleConfig>
                 {
-                    { RuleCode.R0001, new RuleConfig(false, Severity.Error) },
+                    { RuleCode.PB0001, new RuleConfig(false, Severity.Error) },
                 },
                 groupId,
                 false,
@@ -418,7 +418,7 @@ namespace ProtoR.Domain.UnitTests.SchemaGroupAggregateTests
                 this.fixture.Create<Guid>(),
                 new Dictionary<RuleCode, RuleConfig>
                 {
-                    { RuleCode.R0001, new RuleConfig(false, Severity.Error) },
+                    { RuleCode.PB0001, new RuleConfig(false, Severity.Error) },
                 },
                 groupId,
                 false,
@@ -457,7 +457,7 @@ namespace ProtoR.Domain.UnitTests.SchemaGroupAggregateTests
                 this.fixture.Create<Guid>(),
                 new Dictionary<RuleCode, RuleConfig>
                 {
-                    { RuleCode.R0001, new RuleConfig(false, Severity.Warning) },
+                    { RuleCode.PB0001, new RuleConfig(false, Severity.Warning) },
                 },
                 groupId,
                 false,
@@ -496,7 +496,7 @@ namespace ProtoR.Domain.UnitTests.SchemaGroupAggregateTests
                 this.fixture.Create<Guid>(),
                 new Dictionary<RuleCode, RuleConfig>
                 {
-                    { RuleCode.R0001, new RuleConfig(false, Severity.Hidden) },
+                    { RuleCode.PB0001, new RuleConfig(false, Severity.Hidden) },
                 },
                 groupId,
                 false,
@@ -539,7 +539,7 @@ namespace ProtoR.Domain.UnitTests.SchemaGroupAggregateTests
                 this.fixture.Create<Guid>(),
                 new Dictionary<RuleCode, RuleConfig>
                 {
-                    { RuleCode.R0001, new RuleConfig(false, Severity.Error) },
+                    { RuleCode.PB0001, new RuleConfig(false, Severity.Error) },
                 },
                 groupId,
                 false,
@@ -582,7 +582,7 @@ namespace ProtoR.Domain.UnitTests.SchemaGroupAggregateTests
                 this.fixture.Create<Guid>(),
                 new Dictionary<RuleCode, RuleConfig>
                 {
-                    { RuleCode.R0001, new RuleConfig(false, Severity.Error) },
+                    { RuleCode.PB0001, new RuleConfig(false, Severity.Error) },
                 },
                 groupId,
                 false,

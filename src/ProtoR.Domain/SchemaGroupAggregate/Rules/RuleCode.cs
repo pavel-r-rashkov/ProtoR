@@ -6,11 +6,6 @@ namespace ProtoR.Domain.SchemaGroupAggregate.Rules
     public enum RuleCode
     {
         /// <summary>
-        /// Code for test rule.
-        /// </summary>
-        R0001,
-
-        /// <summary>
         /// Message type is removed.
         /// </summary>
         PB0001,

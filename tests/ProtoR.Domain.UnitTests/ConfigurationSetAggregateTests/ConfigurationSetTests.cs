@@ -52,7 +52,7 @@ namespace ProtoR.Domain.UnitTests.ConfigurationSetAggregateTests
         {
             var ruleConfig = new Dictionary<RuleCode, RuleConfig>()
             {
-                { RuleCode.R0001, new RuleConfig(false, Severity.Error) },
+                { RuleCode.PB0001, new RuleConfig(false, Severity.Error) },
             };
             var configuration = new ConfigurationSet(
                 Guid.NewGuid(),
@@ -100,7 +100,7 @@ namespace ProtoR.Domain.UnitTests.ConfigurationSetAggregateTests
 
             configuration.SetRulesConfiguration(new Dictionary<RuleCode, RuleConfig>()
             {
-                { RuleCode.R0001, new RuleConfig(true, Severity.Error) },
+                { RuleCode.PB0001, new RuleConfig(true, Severity.Error) },
             });
 
             IReadOnlyDictionary<RuleCode, RuleConfig> rulesConfig = configuration.GetRulesConfiguration();
@@ -121,7 +121,7 @@ namespace ProtoR.Domain.UnitTests.ConfigurationSetAggregateTests
 
             configuration.SetRulesConfiguration(new Dictionary<RuleCode, RuleConfig>
             {
-                { RuleCode.R0001, new RuleConfig(true, Severity.Error) },
+                { RuleCode.PB0001, new RuleConfig(true, Severity.Error) },
             });
 
             IReadOnlyDictionary<RuleCode, RuleConfig> rulesConfig = configuration.GetRulesConfiguration();
