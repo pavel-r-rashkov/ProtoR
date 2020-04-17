@@ -9,6 +9,7 @@
     <PackageReference Include="Autofac.Extensions.DependencyInjection" Version="6.0.0" />
     <PackageReference Include="AutoMapper" Version="9.0.0" />
     <PackageReference Include="FluentValidation.AspNetCore" Version="8.6.1" />
+    <PackageReference Include="HybridModelBinding" Version="0.17.0" />
     <PackageReference Include="MediatR" Version="8.0.0" />
     <PackageReference Include="MicroElements.Swashbuckle.FluentValidation" Version="3.0.0-rc.5" />
     <PackageReference Include="Serilog.AspNetCore" Version="3.2.0" />
@@ -17,6 +18,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\ProtoR.Domain\ProtoR.Domain.csproj" />
+    <ProjectReference Include="..\ProtoR.Application\ProtoR.Application.csproj" />
   </ItemGroup>
 
 </Project>

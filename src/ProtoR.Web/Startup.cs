@@ -12,6 +12,7 @@
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Hosting;
     using Microsoft.OpenApi.Models;
+    using ProtoR.Web.Swagger;
     using Swashbuckle.AspNetCore.Swagger;
     using Web.Modules;
 
@@ -31,6 +32,7 @@
         {
             services
                 .AddControllers()
+                .AddHybridModelBinder()
                 .AddFluentValidation(config => config.RegisterValidatorsFromAssemblyContaining<Startup>());
 
             services.AddSwaggerGen(config =>
@@ -40,6 +42,9 @@
                     Title = "ProtoR API",
                     Version = "v1",
                 });
+
+                config.SchemaFilter<SwaggerExcludeFilter>();
+
                 var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
                 var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
                 config.IncludeXmlComments(xmlPath);

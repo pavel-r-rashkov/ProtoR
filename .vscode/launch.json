@@ -32,7 +32,7 @@
             "request": "launch",
             "preLaunchTask": "build",
             // If you have changed target frameworks, make sure to update the program path.
-            "program": "${workspaceFolder}/src/ProtoR.Web/bin/Debug/netcoreapp2.1/Web.dll",
+            "program": "${workspaceFolder}/src/ProtoR.Web/bin/Debug/netcoreapp3.0/ProtoR.Web.dll",
             "args": [],
             "cwd": "${workspaceFolder}/src/ProtoR.Web",
             "stopAtEntry": false,

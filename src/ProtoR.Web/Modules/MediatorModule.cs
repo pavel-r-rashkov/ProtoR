@@ -3,7 +3,7 @@ namespace Web.Modules
     using System.Reflection;
     using Autofac;
     using MediatR;
-    using Web.Features.Test;
+    using ProtoR.Application.Group;
 
     public class MediatorModule : Autofac.Module
     {
@@ -21,7 +21,7 @@ namespace Web.Modules
             });
 
             builder
-                .RegisterAssemblyTypes(typeof(TestRequest).GetTypeInfo().Assembly)
+                .RegisterAssemblyTypes(typeof(GetGroupsQuery).GetTypeInfo().Assembly)
                 .AsImplementedInterfaces();
         }
     }
