@@ -42,7 +42,11 @@
                 "pattern": "^\\s*Now listening on:\\s+(https?://\\S+)"                
             },
             "env": {
-                "ASPNETCORE_ENVIRONMENT": "Development"
+				"ASPNETCORE_ENVIRONMENT": "Development",
+				"PROTOR_DISCOVERY_PORT": "10100",
+				"PROTOR_COMMUNICATION_PORT": "9100",
+				"PROTOR_NODE_ENPOINTS": "127.0.0.1:10100",
+				"PROTOR_STORAGE_PATH": "/home/tmp/node-1"
             },
             "sourceFileMap": {
                 "/Views": "${workspaceFolder}/Views"

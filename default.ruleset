@@ -77,6 +77,7 @@
     <Rule Id="CS1591" Action="Hidden" />
     <Rule Id="CA1724" Action="Info" />
     <Rule Id="CA1303" Action="Hidden" />
+	<Rule Id="CA1304" Action="Info" />
   </Rules>
   <Rules AnalyzerId="StyleCop.Analyzers" RuleNamespace="StyleCop.Analyzers">
     <Rule Id="SA1633" Action="Hidden" />

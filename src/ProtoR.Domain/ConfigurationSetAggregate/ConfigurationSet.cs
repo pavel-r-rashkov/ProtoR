@@ -12,9 +12,9 @@ namespace ProtoR.Domain.GlobalConfigurationAggregate
         private bool shouldInherit;
 
         public ConfigurationSet(
-            Guid id,
+            long id,
             Dictionary<RuleCode, RuleConfig> rulesConfig,
-            Guid schemaGroupId,
+            long? schemaGroupId,
             bool shouldInherit,
             bool forwardCompatible,
             bool backwardCompatible,
@@ -28,7 +28,7 @@ namespace ProtoR.Domain.GlobalConfigurationAggregate
             this.Transitive = transitive;
         }
 
-        public Guid SchemaGroupId { get; }
+        public long? SchemaGroupId { get; }
 
         public bool ShouldInherit
         {
@@ -50,7 +50,7 @@ namespace ProtoR.Domain.GlobalConfigurationAggregate
 
         public bool BackwardCompatible { get; private set; }
 
-        public bool Transitive { get; }
+        public bool Transitive { get; set; }
 
         public IReadOnlyDictionary<RuleCode, RuleConfig> GetRulesConfiguration()
         {

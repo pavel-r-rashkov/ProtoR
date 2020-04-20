@@ -52,7 +52,7 @@ namespace ProtoR.Web.Controllers
 
         [HttpGet]
         [Route("{GroupName}/Schemas")]
-        public async Task<ActionResult<IEnumerable<GroupReadModel>>> GetSchemas([FromRoute]GetGroupSchemasQuery query)
+        public async Task<ActionResult<IEnumerable<SchemaReadModel>>> GetSchemas([FromRoute]GetGroupSchemasQuery query)
         {
             IEnumerable<SchemaDto> schemasDto = await this.Mediator.Send(query);
             var schemaResources = this.Mapper.Map<IEnumerable<SchemaReadModel>>(schemasDto);
@@ -62,7 +62,7 @@ namespace ProtoR.Web.Controllers
 
         [HttpGet]
         [Route("{GroupName}/Schemas/{Version}")]
-        public async Task<ActionResult<IEnumerable<GroupReadModel>>> GetSchema([FromRoute]GetByVersionQuery query)
+        public async Task<ActionResult<SchemaReadModel>> GetSchema([FromRoute]GetByVersionQuery query)
         {
             SchemaDto schemaDto = await this.Mediator.Send(query);
             var schemaResource = this.Mapper.Map<SchemaReadModel>(schemaDto);
@@ -72,12 +72,12 @@ namespace ProtoR.Web.Controllers
 
         [HttpPost]
         [Route("{GroupName}/Schemas")]
-        public async Task<ActionResult<IEnumerable<GroupReadModel>>> PostSchema(SchemaWriteModel schema)
+        public async Task<ActionResult> PostSchema(SchemaWriteModel schema)
         {
             var command = this.Mapper.Map<CreateSchemaCommand>(schema);
             string version = await this.Mediator.Send(command);
 
-            return this.CreatedAtAction(nameof(this.GetSchema), new { schema.GroupName, Version = version }, null);
+            return this.CreatedAtAction(nameof(this.GetSchema), new { schema.GroupName, Version = version });
         }
 
         [HttpGet]

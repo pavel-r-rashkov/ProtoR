@@ -12,9 +12,11 @@
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Hosting;
     using Microsoft.OpenApi.Models;
-    using ProtoR.Web.Swagger;
+    using ProtoR.Infrastructure.DataAccess;
+    using ProtoR.Web.Infrastructure;
+    using ProtoR.Web.Infrastructure.Modules;
+    using ProtoR.Web.Infrastructure.Swagger;
     using Swashbuckle.AspNetCore.Swagger;
-    using Web.Modules;
 
     public class Startup
     {
@@ -52,10 +54,14 @@
             });
         }
 
-        public static void ConfigureContainer(ContainerBuilder builder)
+        public void ConfigureContainer(ContainerBuilder builder)
         {
             builder.RegisterModule(new MediatorModule());
+            builder.RegisterModule(new CommonModule());
             builder.RegisterModule(new AutoMapperModule(typeof(Startup).Assembly));
+
+            var igniteFactory = new IgniteFactory(this.GetIgniteConfiguration());
+            builder.RegisterModule(new IgniteModule(igniteFactory.InitalizeIgnite()));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -81,6 +87,21 @@
             {
                 endpoints.MapControllers();
             });
+        }
+
+        private IIgniteConfigurationProvider GetIgniteConfiguration()
+        {
+            return new IgniteConfigurationProvider()
+            {
+                SchemaCacheName = "PROTOR_SCHEMA_CACHE",
+                SchemaGroupCacheName = "PROTOR_SCHEMA_GROUP_CACHE",
+                ConfigurationCacheName = "PROTOR_CONFIGURATION_CACHE",
+                RuleConfigurationCacheName = "PROTOR_RULE_CONFIGURATION_CACHE",
+                DiscoveryPort = this.Configuration.GetValue<int>("PROTOR_DISCOVERY_PORT"),
+                CommunicationPort = this.Configuration.GetValue<int>("PROTOR_COMMUNICATION_PORT"),
+                NodeEndpoints = this.Configuration.GetValue<string>("PROTOR_NODE_ENPOINTS").Split(',', StringSplitOptions.RemoveEmptyEntries),
+                StoragePath = this.Configuration.GetValue<string>("PROTOR_STORAGE_PATH"),
+            };
         }
     }
 }

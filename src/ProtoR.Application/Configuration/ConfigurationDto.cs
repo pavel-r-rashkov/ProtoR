@@ -4,9 +4,9 @@ namespace ProtoR.Application.Configuration
 
     public class ConfigurationDto
     {
-        public int Id { get; set; }
+        public long Id { get; set; }
 
-        public int? GroupId { get; set; }
+        public long? GroupId { get; set; }
 
         public bool Transitive { get; set; }
 

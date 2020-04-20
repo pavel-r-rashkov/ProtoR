@@ -7,7 +7,7 @@ namespace ProtoR.Domain.SchemaGroupAggregate.Schemas
     {
         private readonly Lazy<TSchemaContents> parsedSchema;
 
-        public Schema(Guid id, Version version, string contents)
+        public Schema(long id, Version version, string contents)
             : base(id)
         {
             this.Version = version;

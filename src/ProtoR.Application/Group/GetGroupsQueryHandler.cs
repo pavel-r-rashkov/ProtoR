@@ -1,19 +1,22 @@
 namespace ProtoR.Application.Group
 {
     using System.Collections.Generic;
-    using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
     using MediatR;
 
     public class GetGroupsQueryHandler : IRequestHandler<GetGroupsQuery, IEnumerable<GroupDto>>
     {
-        public Task<IEnumerable<GroupDto>> Handle(GetGroupsQuery request, CancellationToken cancellationToken)
+        private readonly IGroupDataProvider dataProvider;
+
+        public GetGroupsQueryHandler(IGroupDataProvider dataProvider)
         {
-            return Task.FromResult(new List<GroupDto>
-            {
-                new GroupDto(),
-            }.AsEnumerable());
+            this.dataProvider = dataProvider;
+        }
+
+        public async Task<IEnumerable<GroupDto>> Handle(GetGroupsQuery request, CancellationToken cancellationToken)
+        {
+            return await this.dataProvider.GetGroups();
         }
     }
 }

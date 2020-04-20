@@ -13,7 +13,7 @@ namespace ProtoR.Domain.UnitTests.SchemaGroupAggregateTests.SchemasTests
         {
             string contents = SchemaFixtureUtils.GetProtoBuf("ValidSchema");
             var schema = new ProtoBufSchema(
-                Guid.NewGuid(),
+                1,
                 new SchemaGroupAggregate.Schemas.Version(1),
                 contents);
 

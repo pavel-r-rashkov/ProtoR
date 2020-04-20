@@ -339,3 +339,6 @@ ASALocalRun/
 
 # Test results
 /TestResults
+
+# Ignite working dir
+src/ProtoR.Web/ignite

@@ -1,7 +1,7 @@
 namespace ProtoR.Web.Resources.ConfigurationResource
 {
     using System.Collections.Generic;
-    using ProtoR.Web.Swagger;
+    using ProtoR.Web.Infrastructure.Swagger;
 
     public class ConfigurationWriteModel
     {
@@ -13,6 +13,8 @@ namespace ProtoR.Web.Resources.ConfigurationResource
         public bool BackwardCompatible { get; set; }
 
         public bool ForwardCompatible { get; set; }
+
+        public bool Inherit { get; set; }
 
         public IEnumerable<RuleConfigurationModel> RuleConfigurations { get; set; }
     }

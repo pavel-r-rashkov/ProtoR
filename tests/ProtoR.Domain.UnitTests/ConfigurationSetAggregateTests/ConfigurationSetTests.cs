@@ -3,6 +3,7 @@ namespace ProtoR.Domain.UnitTests.ConfigurationSetAggregateTests
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using AutoFixture;
     using ProtoR.Domain.GlobalConfigurationAggregate;
     using ProtoR.Domain.SchemaGroupAggregate;
     using ProtoR.Domain.SchemaGroupAggregate.Rules;
@@ -10,11 +11,18 @@ namespace ProtoR.Domain.UnitTests.ConfigurationSetAggregateTests
 
     public class ConfigurationSetTests
     {
+        private readonly Fixture fixture;
+
+        public ConfigurationSetTests()
+        {
+            this.fixture = new Fixture();
+        }
+
         [Fact]
         public void ShouldInherit_WithDefaultConfigurationSet_ShouldNotBeSet()
         {
             var configuration = new ConfigurationSet(
-                Guid.NewGuid(),
+                this.fixture.Create<long>(),
                 new Dictionary<RuleCode, RuleConfig>(),
                 default,
                 false,
@@ -32,9 +40,9 @@ namespace ProtoR.Domain.UnitTests.ConfigurationSetAggregateTests
         public void ShouldInherit_WithNonGlobalConfigurationSet_ShouldBeSet()
         {
             var configuration = new ConfigurationSet(
-                Guid.NewGuid(),
+                this.fixture.Create<long>(),
                 new Dictionary<RuleCode, RuleConfig>(),
-                Guid.NewGuid(),
+                this.fixture.Create<long>(),
                 false,
                 true,
                 true,
@@ -54,9 +62,9 @@ namespace ProtoR.Domain.UnitTests.ConfigurationSetAggregateTests
                 { RuleCode.PB0001, new RuleConfig(false, Severity.Error) },
             };
             var configuration = new ConfigurationSet(
-                Guid.NewGuid(),
+                this.fixture.Create<long>(),
                 ruleConfig,
-                Guid.NewGuid(),
+                this.fixture.Create<long>(),
                 false,
                 true,
                 true,
@@ -74,9 +82,9 @@ namespace ProtoR.Domain.UnitTests.ConfigurationSetAggregateTests
         public void SetRulesConfiguration_WithNullArgument_ShouldThrow()
         {
             var configuration = new ConfigurationSet(
-                Guid.NewGuid(),
+                this.fixture.Create<long>(),
                 new Dictionary<RuleCode, RuleConfig>(),
-                Guid.NewGuid(),
+                this.fixture.Create<long>(),
                 false,
                 true,
                 true,
@@ -89,9 +97,9 @@ namespace ProtoR.Domain.UnitTests.ConfigurationSetAggregateTests
         public void SetRulesConfiguration_WithNonGlobalConfigurationSet_ShouldSetInheritProperty()
         {
             var configuration = new ConfigurationSet(
-                Guid.NewGuid(),
+                this.fixture.Create<long>(),
                 new Dictionary<RuleCode, RuleConfig>(),
-                Guid.NewGuid(),
+                this.fixture.Create<long>(),
                 false,
                 true,
                 true,
@@ -110,7 +118,7 @@ namespace ProtoR.Domain.UnitTests.ConfigurationSetAggregateTests
         public void SetRulesConfiguration_WithGlobalConfigurationSet_ShouldSetInheritPropertyToFalse()
         {
             var configuration = new ConfigurationSet(
-                Guid.NewGuid(),
+                this.fixture.Create<long>(),
                 new Dictionary<RuleCode, RuleConfig>(),
                 default,
                 false,
@@ -131,7 +139,7 @@ namespace ProtoR.Domain.UnitTests.ConfigurationSetAggregateTests
         public void SetCompatibility_WithNeitherForwardNorBackward_ShouldThrow()
         {
             var configuration = new ConfigurationSet(
-                Guid.NewGuid(),
+                this.fixture.Create<long>(),
                 new Dictionary<RuleCode, RuleConfig>(),
                 default,
                 false,
@@ -150,7 +158,7 @@ namespace ProtoR.Domain.UnitTests.ConfigurationSetAggregateTests
             bool forwardCompatible)
         {
             var configuration = new ConfigurationSet(
-                Guid.NewGuid(),
+                this.fixture.Create<long>(),
                 new Dictionary<RuleCode, RuleConfig>(),
                 default,
                 false,

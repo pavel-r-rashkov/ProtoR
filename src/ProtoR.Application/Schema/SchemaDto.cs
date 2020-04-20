@@ -4,9 +4,9 @@ namespace ProtoR.Application.Schema
 
     public class SchemaDto
     {
-        public int Id { get; set; }
+        public long Id { get; set; }
 
-        public string Version { get; set; }
+        public int Version { get; set; }
 
         public string Contents { get; set; }
 

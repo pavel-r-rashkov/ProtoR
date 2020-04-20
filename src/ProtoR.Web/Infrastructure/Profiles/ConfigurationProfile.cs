@@ -1,4 +1,4 @@
-namespace ProtoR.Web.Profiles
+namespace ProtoR.Web.Infrastructure.Profiles
 {
     using AutoMapper;
     using ProtoR.Application.Configuration;

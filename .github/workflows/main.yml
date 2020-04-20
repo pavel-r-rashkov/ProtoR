@@ -12,6 +12,11 @@ jobs:
         run: bash ./tools/build.sh
       - name: Test
         run: bash tools/test.sh
+      - name: Upload integration test results
+        uses: actions/upload-artifact@v1
+        with:
+          name: integration-tests
+          path: TestResults/integration-tests.xml
       - name: Upload unit test results
         uses: actions/upload-artifact@v1
         with:

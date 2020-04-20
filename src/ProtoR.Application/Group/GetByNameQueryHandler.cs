@@ -6,9 +6,16 @@ namespace ProtoR.Application.Group
 
     public class GetByNameQueryHandler : IRequestHandler<GetByNameQuery, GroupDto>
     {
-        public Task<GroupDto> Handle(GetByNameQuery request, CancellationToken cancellationToken)
+        private readonly IGroupDataProvider dataProvider;
+
+        public GetByNameQueryHandler(IGroupDataProvider dataProvider)
         {
-            return Task.FromResult(new GroupDto());
+            this.dataProvider = dataProvider;
+        }
+
+        public async Task<GroupDto> Handle(GetByNameQuery request, CancellationToken cancellationToken)
+        {
+            return await this.dataProvider.GetByName(request.GroupName);
         }
     }
 }

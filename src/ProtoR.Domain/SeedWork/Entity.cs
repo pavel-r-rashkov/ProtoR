@@ -4,11 +4,11 @@ namespace ProtoR.Domain.SeedWork
 
     public abstract class Entity
     {
-        public Entity(Guid id)
+        public Entity(long id)
         {
             this.Id = id;
         }
 
-        public Guid Id { get; }
+        public long Id { get; }
     }
 }

@@ -7,13 +7,13 @@ namespace ProtoR.Application.Configuration
     {
         public string ConfigurationId { get; set; }
 
-        public int? GroupId { get; set; }
-
         public bool Transitive { get; set; }
 
         public bool ForwardCompatible { get; set; }
 
         public bool BackwardCompatible { get; set; }
+
+        public bool Inherit { get; set; }
 
         public IEnumerable<RuleConfigurationDto> RuleConfigurations { get; set; }
     }

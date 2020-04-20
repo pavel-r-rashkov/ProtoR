@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\ProtoR.Application\ProtoR.Application.csproj" />
+    <ProjectReference Include="..\ProtoR.Domain\ProtoR.Domain.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Apache.Ignite" Version="2.8.0" />
+    <PackageReference Include="Apache.Ignite.Linq" Version="2.8.0" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.1</TargetFramework>
+  </PropertyGroup>
+
+</Project>

@@ -17,7 +17,7 @@ namespace ProtoR.Domain.SchemaGroupAggregate
 
         public SchemaGroup(string name)
             : this(
-                Guid.NewGuid(),
+                default,
                 name,
                 new List<TSchema>(),
                 new List<Rule<TSchema, TSchemaContents>>())
@@ -25,7 +25,7 @@ namespace ProtoR.Domain.SchemaGroupAggregate
         }
 
         public SchemaGroup(
-            Guid id,
+            long id,
             string name,
             IEnumerable<TSchema> schemas,
             IEnumerable<Rule<TSchema, TSchemaContents>> rules)
@@ -58,7 +58,7 @@ namespace ProtoR.Domain.SchemaGroupAggregate
                 throw new ArgumentNullException($"{nameof(schemaFactory)} cannot be null");
             }
 
-            if (config.SchemaGroupId != this.Id)
+            if (config.SchemaGroupId.Value != this.Id)
             {
                 throw new ArgumentException($"Config with schema group id {config.SchemaGroupId} cannot be used for schema group with id {this.Id}");
             }

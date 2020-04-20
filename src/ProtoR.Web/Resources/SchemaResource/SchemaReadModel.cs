@@ -6,7 +6,7 @@ namespace ProtoR.Web.Resources.SchemaResource
     {
         public int Id { get; set; }
 
-        public string Version { get; set; }
+        public int Version { get; set; }
 
         public DateTime CreatedOn { get; set; }
 

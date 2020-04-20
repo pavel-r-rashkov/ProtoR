@@ -13,7 +13,7 @@ namespace ProtoR.Domain.SchemaGroupAggregate.Schemas
 
     public class ProtoBufSchema : Schema<FileDescriptorSet>
     {
-        public ProtoBufSchema(Guid id, Version version, string contents)
+        public ProtoBufSchema(long id, Version version, string contents)
             : base(id, version, contents)
         {
         }
@@ -38,7 +38,7 @@ namespace ProtoR.Domain.SchemaGroupAggregate.Schemas
 
             using (var contentsReader = new StringReader(this.Contents))
             {
-                descriptorSet.Add(this.Id.ToString(), true, contentsReader);
+                descriptorSet.Add(this.Id.ToString(CultureInfo.CurrentCulture), true, contentsReader);
                 descriptorSet.Process();
                 return descriptorSet;
             }

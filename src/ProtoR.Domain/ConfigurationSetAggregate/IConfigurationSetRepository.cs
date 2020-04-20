@@ -1,15 +1,18 @@
 namespace ProtoR.Domain.ConfigurationSetAggregate
 {
     using System;
+    using System.Threading.Tasks;
     using ProtoR.Domain.GlobalConfigurationAggregate;
     using ProtoR.Domain.SeedWork;
 
     public interface IConfigurationSetRepository : IRepository<ConfigurationSet>
     {
-        ConfigurationSet GetById(Guid id);
+        Task<ConfigurationSet> GetById(long id);
 
-        void Update(ConfigurationSet configurationSet);
+        Task<ConfigurationSet> GetBySchemaGroupId(long? groupId);
 
-        void Add(ConfigurationSet configurationSet);
+        Task Update(ConfigurationSet configurationSet);
+
+        Task<long> Add(ConfigurationSet configurationSet);
     }
 }

@@ -1,4 +1,4 @@
-namespace ProtoR.Web.Swagger
+namespace ProtoR.Web.Infrastructure.Swagger
 {
     using System.Globalization;
     using System.Linq;

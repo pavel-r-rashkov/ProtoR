@@ -1,6 +1,6 @@
 namespace ProtoR.Web.Resources.SchemaResource
 {
-    using ProtoR.Web.Swagger;
+    using ProtoR.Web.Infrastructure.Swagger;
 
     public class SchemaWriteModel
     {

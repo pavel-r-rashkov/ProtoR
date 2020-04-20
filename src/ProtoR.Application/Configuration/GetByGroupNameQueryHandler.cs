@@ -6,9 +6,16 @@ namespace ProtoR.Application.Configuration
 
     public class GetByGroupNameQueryHandler : IRequestHandler<GetByGroupNameQuery, ConfigurationDto>
     {
-        public Task<ConfigurationDto> Handle(GetByGroupNameQuery request, CancellationToken cancellationToken)
+        private readonly IConfigurationDataProvider dataProvider;
+
+        public GetByGroupNameQueryHandler(IConfigurationDataProvider dataProvider)
         {
-            return Task.FromResult(new ConfigurationDto());
+            this.dataProvider = dataProvider;
+        }
+
+        public async Task<ConfigurationDto> Handle(GetByGroupNameQuery request, CancellationToken cancellationToken)
+        {
+            return await this.dataProvider.GetConfigByGroupName(request.GroupName);
         }
     }
 }

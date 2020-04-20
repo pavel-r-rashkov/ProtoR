@@ -1,4 +1,4 @@
-namespace Web.Modules
+namespace ProtoR.Web.Infrastructure.Modules
 {
     using System;
     using System.Collections.Generic;
