@@ -1,7 +1,6 @@
 namespace ProtoR.Domain.UnitTests.SchemaGroupAggregateTests.RulesTests
 {
-    using ProtoR.Domain.SchemaGroupAggregate;
-    using ProtoR.Domain.SchemaGroupAggregate.Rules;
+    using ProtoR.Domain.ConfigurationAggregate;
     using Xunit;
 
     public class RuleConfigTests
@@ -9,7 +8,7 @@ namespace ProtoR.Domain.UnitTests.SchemaGroupAggregateTests.RulesTests
         [Fact]
         public void RuleConfig_ShoudBeCreated()
         {
-            var ruleConfig = new RuleConfig(false, Severity.Error);
+            var ruleConfig = new RuleConfiguration(false, Severity.Error);
 
             Assert.NotNull(ruleConfig);
         }
@@ -17,8 +16,8 @@ namespace ProtoR.Domain.UnitTests.SchemaGroupAggregateTests.RulesTests
         [Fact]
         public void Equality_WithEqualProperties_ShouldBeTrue()
         {
-            var firstConfig = new RuleConfig(false, Severity.Error);
-            var secondConfig = new RuleConfig(false, Severity.Error);
+            var firstConfig = new RuleConfiguration(false, Severity.Error);
+            var secondConfig = new RuleConfiguration(false, Severity.Error);
 
             Assert.Equal(firstConfig, secondConfig);
         }
@@ -26,13 +25,13 @@ namespace ProtoR.Domain.UnitTests.SchemaGroupAggregateTests.RulesTests
         [Theory]
         [InlineData(true)]
         [InlineData(false)]
-        public void WithInheritance_ShouldReturnValueWithInheritanceSet(bool shouldInherit)
+        public void WithInheritance_ShouldReturnValueWithInheritanceSet(bool inherit)
         {
-            var originalConfig = new RuleConfig(shouldInherit, Severity.Error);
+            var originalConfig = new RuleConfiguration(inherit, Severity.Error);
 
-            RuleConfig config = originalConfig.WithInheritance(!shouldInherit);
+            RuleConfiguration config = originalConfig.WithInheritance(!inherit);
 
-            Assert.Equal(!shouldInherit, config.ShouldInherit);
+            Assert.Equal(!inherit, config.Inherit);
         }
     }
 }

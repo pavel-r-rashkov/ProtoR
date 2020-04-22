@@ -6,8 +6,6 @@
 
   <ItemGroup>
     <PackageReference Include="MediatR" Version="8.0.0" />
-	<PackageReference Include="protobuf-net" Version="2.4.6" />
-    <PackageReference Include="protobuf-net.Reflection" Version="2.3.17" />
   </ItemGroup>
 
   <ItemGroup>

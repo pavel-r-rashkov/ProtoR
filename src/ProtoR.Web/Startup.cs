@@ -99,7 +99,7 @@
                 RuleConfigurationCacheName = "PROTOR_RULE_CONFIGURATION_CACHE",
                 DiscoveryPort = this.Configuration.GetValue<int>("PROTOR_DISCOVERY_PORT"),
                 CommunicationPort = this.Configuration.GetValue<int>("PROTOR_COMMUNICATION_PORT"),
-                NodeEndpoints = this.Configuration.GetValue<string>("PROTOR_NODE_ENPOINTS").Split(',', StringSplitOptions.RemoveEmptyEntries),
+                NodeEndpoints = this.Configuration.GetValue<string>("PROTOR_NODE_ENDPOINTS").Split(',', StringSplitOptions.RemoveEmptyEntries),
                 StoragePath = this.Configuration.GetValue<string>("PROTOR_STORAGE_PATH"),
             };
         }

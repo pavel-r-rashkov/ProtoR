@@ -6,7 +6,7 @@ namespace ProtoR.Infrastructure.DataAccess.CacheItems
 
         public string RuleCode { get; set; }
 
-        public bool ShouldInherit { get; set; }
+        public bool Inherit { get; set; }
 
         public int Severity { get; set; }
     }

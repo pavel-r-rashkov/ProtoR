@@ -4,22 +4,19 @@ namespace ProtoR.Application.Group
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
-    using Google.Protobuf.Reflection;
     using MediatR;
-    using ProtoR.Domain.ConfigurationSetAggregate;
-    using ProtoR.Domain.GlobalConfigurationAggregate;
+    using ProtoR.Domain.ConfigurationAggregate;
     using ProtoR.Domain.SchemaGroupAggregate;
     using ProtoR.Domain.SchemaGroupAggregate.Rules;
-    using ProtoR.Domain.SchemaGroupAggregate.Schemas;
 
     public class CreateGroupCommandHandler : AsyncRequestHandler<CreateGroupCommand>
     {
-        private readonly ISchemaGroupRepository<ProtoBufSchema, FileDescriptorSet> schemaGroupRepository;
-        private readonly IConfigurationSetRepository configurationRepository;
+        private readonly IProtoBufSchemaGroupRepository schemaGroupRepository;
+        private readonly IConfigurationRepository configurationRepository;
 
         public CreateGroupCommandHandler(
-            ISchemaGroupRepository<ProtoBufSchema, FileDescriptorSet> schemaGroupRepository,
-            IConfigurationSetRepository configurationRepository)
+            IProtoBufSchemaGroupRepository schemaGroupRepository,
+            IConfigurationRepository configurationRepository)
         {
             this.schemaGroupRepository = schemaGroupRepository;
             this.configurationRepository = configurationRepository;
@@ -27,30 +24,27 @@ namespace ProtoR.Application.Group
 
         protected override async Task Handle(CreateGroupCommand request, CancellationToken cancellationToken)
         {
-            var group = new SchemaGroup<ProtoBufSchema, FileDescriptorSet>(request.Name);
+            var group = new ProtoBufSchemaGroup(request.Name);
             long groupId = await this.schemaGroupRepository.Add(group);
 
-            ConfigurationSet defaultConfiguration = CreateDefaultConfiguration(groupId);
+            Configuration defaultConfiguration = CreateDefaultConfiguration(groupId);
             await this.configurationRepository.Add(defaultConfiguration);
         }
 
-        private static Dictionary<RuleCode, RuleConfig> CreateDefaultRulesConfiguration()
+        private static Dictionary<RuleCode, RuleConfiguration> CreateDefaultRulesConfiguration()
         {
             return RuleFactory.GetProtoBufRules().ToDictionary(
                 r => r.Code,
-                r => new RuleConfig(true, Severity.Hidden));
+                r => new RuleConfiguration(true, Severity.Hidden));
         }
 
-        private static ConfigurationSet CreateDefaultConfiguration(long groupId)
+        private static Configuration CreateDefaultConfiguration(long groupId)
         {
-            return new ConfigurationSet(
+            return new Configuration(
                 default,
                 CreateDefaultRulesConfiguration(),
                 groupId,
-                true,
-                false,
-                true,
-                false);
+                new GroupConfiguration(false, true, false, true));
         }
     }
 }

@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+message InitialMessage {
+  string foo = 1;
+  int32 bar = 2;
+}
+
+message BaseMessage {
+  string foo = 1;
+}
+
+message NewMessage {
+  string foo = 1;
+}

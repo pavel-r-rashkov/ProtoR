@@ -6,20 +6,19 @@ namespace ProtoR.Application.Schema
     using System.Threading.Tasks;
     using Google.Protobuf.Reflection;
     using MediatR;
-    using ProtoR.Domain.ConfigurationSetAggregate;
-    using ProtoR.Domain.GlobalConfigurationAggregate;
+    using ProtoR.Domain.ConfigurationAggregate;
     using ProtoR.Domain.SchemaGroupAggregate;
     using ProtoR.Domain.SchemaGroupAggregate.Rules;
     using ProtoR.Domain.SchemaGroupAggregate.Schemas;
 
     public class CreateSchemaCommandHandler : IRequestHandler<CreateSchemaCommand, string>
     {
-        private readonly ISchemaGroupRepository<ProtoBufSchema, FileDescriptorSet> schemaGroupRepository;
-        private readonly IConfigurationSetRepository configurationRepository;
+        private readonly IProtoBufSchemaGroupRepository schemaGroupRepository;
+        private readonly IConfigurationRepository configurationRepository;
 
         public CreateSchemaCommandHandler(
-            ISchemaGroupRepository<ProtoBufSchema, FileDescriptorSet> schemaGroupRepository,
-            IConfigurationSetRepository configurationRepository)
+            IProtoBufSchemaGroupRepository schemaGroupRepository,
+            IConfigurationRepository configurationRepository)
         {
             this.schemaGroupRepository = schemaGroupRepository;
             this.configurationRepository = configurationRepository;
@@ -27,9 +26,14 @@ namespace ProtoR.Application.Schema
 
         public async Task<string> Handle(CreateSchemaCommand request, CancellationToken cancellationToken)
         {
-            SchemaGroup<ProtoBufSchema, FileDescriptorSet> schemaGroup = await this.schemaGroupRepository.GetByName(request.GroupName);
-            ConfigurationSet configuration = await this.configurationRepository.GetBySchemaGroupId(schemaGroup.Id);
-            IEnumerable<RuleViolation> violations = schemaGroup.AddSchema(request.Contents, configuration, new ProtoBufSchemaFactory());
+            ProtoBufSchemaGroup schemaGroup = await this.schemaGroupRepository.GetByName(request.GroupName);
+            Configuration configuration = await this.configurationRepository.GetBySchemaGroupId(schemaGroup.Id);
+            Configuration globalConfiguration = await this.configurationRepository.GetBySchemaGroupId(null);
+
+            IEnumerable<RuleViolation> violations = schemaGroup.AddSchema(
+                request.Contents,
+                this.GetGroupConfiguration(configuration, globalConfiguration),
+                configuration.MergeRuleConfiguration(globalConfiguration));
 
             if (!violations.Any(v => v.Severity.IsFatal))
             {
@@ -38,6 +42,15 @@ namespace ProtoR.Application.Schema
 
             // TODO return violations
             return schemaGroup.Schemas.ToList().Last().Version.ToString();
+        }
+
+        private GroupConfiguration GetGroupConfiguration(
+            Configuration configuration,
+            Configuration globalConfiguration)
+        {
+            return configuration.GroupConfiguration.Inherit
+                ? globalConfiguration.GroupConfiguration
+                : configuration.GroupConfiguration;
         }
     }
 }

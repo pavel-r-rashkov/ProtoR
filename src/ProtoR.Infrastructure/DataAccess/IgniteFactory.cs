@@ -139,7 +139,7 @@ namespace ProtoR.Infrastructure.DataAccess
                             {
                                 new QueryField("ID", typeof(long)) { IsKeyField = true },
                                 new QueryField("SchemaGroupId", typeof(long?)),
-                                new QueryField("ShouldInherit", typeof(bool)) { NotNull = true },
+                                new QueryField("Inherit", typeof(bool)) { NotNull = true },
                                 new QueryField("ForwardCompatible", typeof(bool)) { NotNull = true },
                                 new QueryField("BackwardCompatible", typeof(bool)) { NotNull = true },
                                 new QueryField("Transitive", typeof(bool)) { NotNull = true },
@@ -161,7 +161,7 @@ namespace ProtoR.Infrastructure.DataAccess
                                 new QueryField("ID", typeof(long)) { IsKeyField = true },
                                 new QueryField("RuleCode", typeof(string)) { NotNull = true },
                                 new QueryField("ConfigurationId", typeof(long)) { NotNull = true },
-                                new QueryField("ShouldInherit", typeof(bool)) { NotNull = true },
+                                new QueryField("Inherit", typeof(bool)) { NotNull = true },
                                 new QueryField("Severity", typeof(int)) { NotNull = true },
                             },
                         })

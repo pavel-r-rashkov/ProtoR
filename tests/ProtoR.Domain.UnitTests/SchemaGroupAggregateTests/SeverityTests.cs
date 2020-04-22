@@ -2,7 +2,7 @@ namespace ProtoR.Domain.UnitTests.SchemaGroupAggregateTests
 {
     using System.Collections.Generic;
     using System.Linq;
-    using ProtoR.Domain.SchemaGroupAggregate;
+    using ProtoR.Domain.ConfigurationAggregate;
     using ProtoR.Domain.SeedWork;
     using Xunit;
 

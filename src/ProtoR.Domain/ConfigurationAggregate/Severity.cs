@@ -1,4 +1,4 @@
-namespace ProtoR.Domain.SchemaGroupAggregate
+namespace ProtoR.Domain.ConfigurationAggregate
 {
     using ProtoR.Domain.SeedWork;
 

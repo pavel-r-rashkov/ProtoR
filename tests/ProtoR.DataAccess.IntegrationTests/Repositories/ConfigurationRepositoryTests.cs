@@ -7,8 +7,7 @@ namespace ProtoR.DataAccess.IntegrationTests.Repositories
     using Apache.Ignite.Core.Cache;
     using Apache.Ignite.Linq;
     using ProtoR.DataAccess.IntegrationTests.Fixtures;
-    using ProtoR.Domain.GlobalConfigurationAggregate;
-    using ProtoR.Domain.SchemaGroupAggregate;
+    using ProtoR.Domain.ConfigurationAggregate;
     using ProtoR.Domain.SchemaGroupAggregate.Rules;
     using ProtoR.Infrastructure.DataAccess.CacheItems;
     using ProtoR.Infrastructure.DataAccess.Repositories;
@@ -38,22 +37,19 @@ namespace ProtoR.DataAccess.IntegrationTests.Repositories
         [Fact]
         public async Task Add_ShouldInsertConfiguration()
         {
-            var rulesConfigiguration = new Dictionary<RuleCode, RuleConfig>();
-            var configuration = new ConfigurationSet(
+            var rulesConfigiguration = new Dictionary<RuleCode, RuleConfiguration>();
+            var configuration = new Configuration(
                 default,
                 rulesConfigiguration,
                 1,
-                false,
-                true,
-                false,
-                false);
+                new GroupConfiguration(true, false, false, false));
 
             long id = await this.repository.Add(configuration);
 
             ConfigurationCacheItem cacheItem = this.configurationCache.Get(id);
             Assert.NotNull(cacheItem);
             Assert.Equal(1, cacheItem.SchemaGroupId);
-            Assert.False(cacheItem.ShouldInherit);
+            Assert.False(cacheItem.Inherit);
             Assert.True(cacheItem.ForwardCompatible);
             Assert.False(cacheItem.BackwardCompatible);
             Assert.False(cacheItem.Transitive);
@@ -62,19 +58,16 @@ namespace ProtoR.DataAccess.IntegrationTests.Repositories
         [Fact]
         public async Task Add_ShouldInsertRuleConfiguration()
         {
-            var rulesConfigiguration = new Dictionary<RuleCode, RuleConfig>()
+            var rulesConfigiguration = new Dictionary<RuleCode, RuleConfiguration>()
             {
-                { RuleCode.PB0001, new RuleConfig(false, Severity.Error) },
-                { RuleCode.PB0002, new RuleConfig(false, Severity.Warning) },
+                { RuleCode.PB0001, new RuleConfiguration(false, Severity.Error) },
+                { RuleCode.PB0002, new RuleConfiguration(false, Severity.Warning) },
             };
-            var configuration = new ConfigurationSet(
+            var configuration = new Configuration(
                 default,
                 rulesConfigiguration,
                 1,
-                false,
-                true,
-                false,
-                false);
+                new GroupConfiguration(true, false, false, false));
 
             long id = await this.repository.Add(configuration);
 
@@ -87,7 +80,7 @@ namespace ProtoR.DataAccess.IntegrationTests.Repositories
 
             Assert.Equal(2, ruleConfigurationCacheItems.Count);
             RuleConfigurationCacheItem ruleConfigCacheItem = ruleConfigurationCacheItems.First(r => r.RuleCode == RuleCode.PB0001.ToString());
-            Assert.False(ruleConfigCacheItem.ShouldInherit);
+            Assert.False(ruleConfigCacheItem.Inherit);
             Assert.Equal(Severity.Error.Id, ruleConfigCacheItem.Severity);
         }
 
@@ -96,27 +89,27 @@ namespace ProtoR.DataAccess.IntegrationTests.Repositories
         {
             var id = 100;
             var schemaGroupId = 10;
-            var shouldInherit = true;
+            var inherit = true;
             var forwardCompatible = true;
             var backwardCompatible = true;
             var transitive = true;
             await this.configurationCache.PutAsync(id, new ConfigurationCacheItem
             {
                 SchemaGroupId = schemaGroupId,
-                ShouldInherit = shouldInherit,
+                Inherit = inherit,
                 ForwardCompatible = forwardCompatible,
                 BackwardCompatible = backwardCompatible,
                 Transitive = transitive,
             });
 
-            ConfigurationSet configuration = await this.repository.GetById(id);
+            Configuration configuration = await this.repository.GetById(id);
 
             Assert.NotNull(configuration);
             Assert.Equal(schemaGroupId, configuration.SchemaGroupId);
-            Assert.Equal(shouldInherit, configuration.ShouldInherit);
-            Assert.Equal(forwardCompatible, configuration.ForwardCompatible);
-            Assert.Equal(backwardCompatible, configuration.BackwardCompatible);
-            Assert.Equal(transitive, configuration.Transitive);
+            Assert.Equal(inherit, configuration.GroupConfiguration.Inherit);
+            Assert.Equal(forwardCompatible, configuration.GroupConfiguration.ForwardCompatible);
+            Assert.Equal(backwardCompatible, configuration.GroupConfiguration.BackwardCompatible);
+            Assert.Equal(transitive, configuration.GroupConfiguration.Transitive);
         }
 
         [Fact]
@@ -126,7 +119,7 @@ namespace ProtoR.DataAccess.IntegrationTests.Repositories
             await this.configurationCache.PutAsync(id, new ConfigurationCacheItem
             {
                 SchemaGroupId = 10,
-                ShouldInherit = true,
+                Inherit = true,
                 ForwardCompatible = true,
                 BackwardCompatible = true,
                 Transitive = true,
@@ -135,16 +128,16 @@ namespace ProtoR.DataAccess.IntegrationTests.Repositories
             {
                 ConfigurationId = id,
                 RuleCode = RuleCode.PB0001.ToString(),
-                ShouldInherit = true,
+                Inherit = true,
                 Severity = Severity.Error.Id,
             });
 
-            ConfigurationSet configuration = await this.repository.GetById(id);
+            Configuration configuration = await this.repository.GetById(id);
 
-            IReadOnlyDictionary<RuleCode, RuleConfig> rulesConfiguration = configuration.GetRulesConfiguration();
+            IReadOnlyDictionary<RuleCode, RuleConfiguration> rulesConfiguration = configuration.GetRulesConfiguration();
             Assert.Single(rulesConfiguration.Keys);
-            RuleConfig ruleConfiguration = rulesConfiguration[RuleCode.PB0001];
-            Assert.True(ruleConfiguration.ShouldInherit);
+            RuleConfiguration ruleConfiguration = rulesConfiguration[RuleCode.PB0001];
+            Assert.True(ruleConfiguration.Inherit);
             Assert.Equal(Severity.Error, ruleConfiguration.Severity);
         }
 
@@ -155,14 +148,14 @@ namespace ProtoR.DataAccess.IntegrationTests.Repositories
             await this.configurationCache.PutAsync(id, new ConfigurationCacheItem
             {
                 SchemaGroupId = 10,
-                ShouldInherit = true,
+                Inherit = true,
                 ForwardCompatible = true,
                 BackwardCompatible = false,
                 Transitive = true,
             });
-            ConfigurationSet configuration = await this.repository.GetById(id);
+            Configuration configuration = await this.repository.GetById(id);
 
-            configuration.SetCompatibility(true, false);
+            configuration.SetGroupConfiguration(new GroupConfiguration(false, true, false, false));
             await this.repository.Update(configuration);
 
             ConfigurationCacheItem cacheItem = this.configurationCache.Get(id);
@@ -178,7 +171,7 @@ namespace ProtoR.DataAccess.IntegrationTests.Repositories
             await this.configurationCache.PutAsync(id, new ConfigurationCacheItem
             {
                 SchemaGroupId = 10,
-                ShouldInherit = true,
+                Inherit = true,
                 ForwardCompatible = true,
                 BackwardCompatible = false,
                 Transitive = true,
@@ -187,14 +180,14 @@ namespace ProtoR.DataAccess.IntegrationTests.Repositories
             {
                 ConfigurationId = id,
                 RuleCode = RuleCode.PB0001.ToString(),
-                ShouldInherit = true,
+                Inherit = true,
                 Severity = Severity.Error.Id,
             });
-            ConfigurationSet configuration = await this.repository.GetById(id);
+            Configuration configuration = await this.repository.GetById(id);
 
-            configuration.SetRulesConfiguration(new Dictionary<RuleCode, RuleConfig>
+            configuration.SetRulesConfiguration(new Dictionary<RuleCode, RuleConfiguration>
             {
-                { RuleCode.PB0001, new RuleConfig(false, Severity.Warning) },
+                { RuleCode.PB0001, new RuleConfiguration(false, Severity.Warning) },
             });
             await this.repository.Update(configuration);
 
@@ -206,7 +199,7 @@ namespace ProtoR.DataAccess.IntegrationTests.Repositories
 
             Assert.Single(ruleCacheItems);
             var ruleCacheItem = ruleCacheItems.First();
-            Assert.False(ruleCacheItem.ShouldInherit);
+            Assert.False(ruleCacheItem.Inherit);
             Assert.Equal(Severity.Warning.Id, ruleCacheItem.Severity);
         }
 
@@ -218,7 +211,7 @@ namespace ProtoR.DataAccess.IntegrationTests.Repositories
             await this.configurationCache.PutAsync(configurationId, new ConfigurationCacheItem
             {
                 SchemaGroupId = schemaGroupId,
-                ShouldInherit = true,
+                Inherit = true,
                 ForwardCompatible = true,
                 BackwardCompatible = true,
                 Transitive = true,
@@ -227,16 +220,16 @@ namespace ProtoR.DataAccess.IntegrationTests.Repositories
             {
                 ConfigurationId = configurationId,
                 RuleCode = RuleCode.PB0001.ToString(),
-                ShouldInherit = true,
+                Inherit = true,
                 Severity = Severity.Error.Id,
             });
 
-            ConfigurationSet configuration = await this.repository.GetBySchemaGroupId(schemaGroupId);
+            Configuration configuration = await this.repository.GetBySchemaGroupId(schemaGroupId);
 
-            IReadOnlyDictionary<RuleCode, RuleConfig> rulesConfiguration = configuration.GetRulesConfiguration();
+            IReadOnlyDictionary<RuleCode, RuleConfiguration> rulesConfiguration = configuration.GetRulesConfiguration();
             Assert.Single(rulesConfiguration.Keys);
-            RuleConfig ruleConfiguration = rulesConfiguration[RuleCode.PB0001];
-            Assert.True(ruleConfiguration.ShouldInherit);
+            RuleConfiguration ruleConfiguration = rulesConfiguration[RuleCode.PB0001];
+            Assert.True(ruleConfiguration.Inherit);
             Assert.Equal(Severity.Error, ruleConfiguration.Severity);
         }
     }

@@ -14,6 +14,8 @@ namespace ProtoR.Application.Configuration
 
         public bool BackwardCompatible { get; set; }
 
+        public bool Inherit { get; set; }
+
         public IEnumerable<RuleConfigurationDto> RuleConfigurations { get; set; }
     }
 }

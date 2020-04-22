@@ -8,14 +8,12 @@ namespace ProtoR.Infrastructure.DataAccess.Repositories
     using Apache.Ignite.Core.Cache;
     using Apache.Ignite.Core.DataStructures;
     using Apache.Ignite.Linq;
-    using ProtoR.Domain.ConfigurationSetAggregate;
-    using ProtoR.Domain.GlobalConfigurationAggregate;
-    using ProtoR.Domain.SchemaGroupAggregate;
+    using ProtoR.Domain.ConfigurationAggregate;
     using ProtoR.Domain.SchemaGroupAggregate.Rules;
     using ProtoR.Domain.SeedWork;
     using ProtoR.Infrastructure.DataAccess.CacheItems;
 
-    public class ConfigurationRepository : IConfigurationSetRepository
+    public class ConfigurationRepository : IConfigurationRepository
     {
         private readonly IIgnite ignite;
         private readonly string configurationCacheName;
@@ -30,15 +28,15 @@ namespace ProtoR.Infrastructure.DataAccess.Repositories
             this.ruleConfigurationGroupCacheName = configurationProvider.RuleConfigurationCacheName;
         }
 
-        public async Task<long> Add(ConfigurationSet configuration)
+        public async Task<long> Add(Configuration configuration)
         {
             var configurationCacheItem = new ConfigurationCacheItem
             {
                 SchemaGroupId = configuration.SchemaGroupId,
-                ShouldInherit = configuration.ShouldInherit,
-                ForwardCompatible = configuration.ForwardCompatible,
-                BackwardCompatible = configuration.BackwardCompatible,
-                Transitive = configuration.Transitive,
+                Inherit = configuration.GroupConfiguration.Inherit,
+                ForwardCompatible = configuration.GroupConfiguration.ForwardCompatible,
+                BackwardCompatible = configuration.GroupConfiguration.BackwardCompatible,
+                Transitive = configuration.GroupConfiguration.Transitive,
             };
 
             ICache<long, ConfigurationCacheItem> configurationCache = this.ignite.GetCache<long, ConfigurationCacheItem>(this.configurationCacheName);
@@ -62,7 +60,7 @@ namespace ProtoR.Infrastructure.DataAccess.Repositories
                     {
                         ConfigurationId = configurationId,
                         RuleCode = c.Key.ToString(),
-                        ShouldInherit = c.Value.ShouldInherit,
+                        Inherit = c.Value.Inherit,
                         Severity = c.Value.Severity.Id,
                     }));
 
@@ -72,7 +70,7 @@ namespace ProtoR.Infrastructure.DataAccess.Repositories
             return configurationId;
         }
 
-        public Task<ConfigurationSet> GetById(long id)
+        public Task<Configuration> GetById(long id)
         {
             ICache<long, ConfigurationCacheItem> configurationCache = this.ignite.GetCache<long, ConfigurationCacheItem>(this.configurationCacheName);
             ConfigurationCacheItem configurationCacheItem = configurationCache.Get(id);
@@ -80,7 +78,7 @@ namespace ProtoR.Infrastructure.DataAccess.Repositories
             return Task.FromResult(this.HydrateConfiguration(id, configurationCacheItem));
         }
 
-        public Task<ConfigurationSet> GetBySchemaGroupId(long? groupId)
+        public Task<Configuration> GetBySchemaGroupId(long? groupId)
         {
             ICache<long, ConfigurationCacheItem> configurationCache = this.ignite.GetCache<long, ConfigurationCacheItem>(this.configurationCacheName);
             ICacheEntry<long, ConfigurationCacheItem> configurationCacheItem = configurationCache
@@ -91,22 +89,22 @@ namespace ProtoR.Infrastructure.DataAccess.Repositories
             return Task.FromResult(this.HydrateConfiguration(configurationCacheItem.Key, configurationCacheItem.Value));
         }
 
-        public async Task Update(ConfigurationSet configuration)
+        public async Task Update(Configuration configuration)
         {
             var configurationCacheItem = new ConfigurationCacheItem
             {
                 SchemaGroupId = configuration.SchemaGroupId,
-                ShouldInherit = configuration.ShouldInherit,
-                ForwardCompatible = configuration.ForwardCompatible,
-                BackwardCompatible = configuration.BackwardCompatible,
-                Transitive = configuration.Transitive,
+                Inherit = configuration.GroupConfiguration.Inherit,
+                ForwardCompatible = configuration.GroupConfiguration.ForwardCompatible,
+                BackwardCompatible = configuration.GroupConfiguration.BackwardCompatible,
+                Transitive = configuration.GroupConfiguration.Transitive,
             };
 
             ICache<long, ConfigurationCacheItem> configurationCache = this.ignite.GetCache<long, ConfigurationCacheItem>(this.configurationCacheName);
             await configurationCache.PutAsync(configuration.Id, configurationCacheItem);
 
             ICache<long, RuleConfigurationCacheItem> ruleConfigurationCache = this.ignite.GetCache<long, RuleConfigurationCacheItem>(this.ruleConfigurationGroupCacheName);
-            Dictionary<string, RuleConfig> updatedRules = configuration
+            Dictionary<string, RuleConfiguration> updatedRules = configuration
                 .GetRulesConfiguration()
                 .ToDictionary(r => r.Key.ToString(), r => r.Value);
 
@@ -116,10 +114,10 @@ namespace ProtoR.Infrastructure.DataAccess.Repositories
                 .ToList()
                 .Select(c =>
                 {
-                    RuleConfig updatedRule = updatedRules[c.Value.RuleCode];
+                    RuleConfiguration updatedRule = updatedRules[c.Value.RuleCode];
                     RuleConfigurationCacheItem cacheItem = c.Value;
 
-                    cacheItem.ShouldInherit = updatedRule.ShouldInherit;
+                    cacheItem.Inherit = updatedRule.Inherit;
                     cacheItem.Severity = updatedRule.Severity.Id;
 
                     return new KeyValuePair<long, RuleConfigurationCacheItem>(c.Key, cacheItem);
@@ -128,29 +126,30 @@ namespace ProtoR.Infrastructure.DataAccess.Repositories
             await ruleConfigurationCache.PutAllAsync(ruleConfigurationCacheItems);
         }
 
-        private ConfigurationSet HydrateConfiguration(long id, ConfigurationCacheItem configurationCacheItem)
+        private Configuration HydrateConfiguration(long id, ConfigurationCacheItem configurationCacheItem)
         {
             var severities = Enumeration
                 .GetAll<Severity>()
                 .ToDictionary(s => s.Id);
 
             ICache<long, RuleConfigurationCacheItem> ruleConfigurationCache = this.ignite.GetCache<long, RuleConfigurationCacheItem>(this.ruleConfigurationGroupCacheName);
-            Dictionary<RuleCode, RuleConfig> rulesConfiguration = ruleConfigurationCache
+            Dictionary<RuleCode, RuleConfiguration> rulesConfiguration = ruleConfigurationCache
                 .AsCacheQueryable()
                 .Where(c => c.Value.ConfigurationId == id)
                 .ToList()
                 .ToDictionary(
                     c => (RuleCode)Enum.Parse(typeof(RuleCode), c.Value.RuleCode),
-                    c => new RuleConfig(c.Value.ShouldInherit, severities[c.Value.Severity]));
+                    c => new RuleConfiguration(c.Value.Inherit, severities[c.Value.Severity]));
 
-            return new ConfigurationSet(
+            return new Configuration(
                 id,
                 rulesConfiguration,
                 configurationCacheItem.SchemaGroupId,
-                configurationCacheItem.ShouldInherit,
-                configurationCacheItem.ForwardCompatible,
-                configurationCacheItem.BackwardCompatible,
-                configurationCacheItem.Transitive);
+                new GroupConfiguration(
+                    configurationCacheItem.ForwardCompatible,
+                    configurationCacheItem.BackwardCompatible,
+                    configurationCacheItem.Transitive,
+                    configurationCacheItem.Inherit));
         }
     }
 }

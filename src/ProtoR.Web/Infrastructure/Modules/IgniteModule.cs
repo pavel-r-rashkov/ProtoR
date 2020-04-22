@@ -2,10 +2,8 @@ namespace ProtoR.Web.Infrastructure.Modules
 {
     using Apache.Ignite.Core;
     using Autofac;
-    using Google.Protobuf.Reflection;
-    using ProtoR.Domain.ConfigurationSetAggregate;
+    using ProtoR.Domain.ConfigurationAggregate;
     using ProtoR.Domain.SchemaGroupAggregate;
-    using ProtoR.Domain.SchemaGroupAggregate.Schemas;
     using ProtoR.Infrastructure.DataAccess.Repositories;
 
     public class IgniteModule : Module
@@ -24,13 +22,13 @@ namespace ProtoR.Web.Infrastructure.Modules
                 .SingleInstance();
 
             builder
-                .RegisterType<SchemaGroupRepository>()
-                .As<ISchemaGroupRepository<ProtoBufSchema, FileDescriptorSet>>()
+                .RegisterType<ProtoBufSchemaGroupRepository>()
+                .As<IProtoBufSchemaGroupRepository>()
                 .InstancePerLifetimeScope();
 
             builder
                 .RegisterType<ConfigurationRepository>()
-                .As<IConfigurationSetRepository>()
+                .As<IConfigurationRepository>()
                 .InstancePerLifetimeScope();
         }
     }

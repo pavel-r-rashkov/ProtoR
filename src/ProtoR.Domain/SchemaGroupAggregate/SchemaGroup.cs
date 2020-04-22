@@ -3,24 +3,29 @@ namespace ProtoR.Domain.SchemaGroupAggregate
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using ProtoR.Domain.GlobalConfigurationAggregate;
+    using ProtoR.Domain.ConfigurationAggregate;
     using ProtoR.Domain.SchemaGroupAggregate.Rules;
     using ProtoR.Domain.SchemaGroupAggregate.Schemas;
     using ProtoR.Domain.SeedWork;
     using Version = ProtoR.Domain.SchemaGroupAggregate.Schemas.Version;
 
-    public class SchemaGroup<TSchema, TSchemaContents> : Entity, IAggregateRoot
+    public abstract class SchemaGroup<TSchema, TSchemaContents> : Entity, IAggregateRoot
         where TSchema : Schema<TSchemaContents>
     {
         private readonly SortedSet<TSchema> schemas;
         private readonly IEnumerable<Rule<TSchema, TSchemaContents>> rules;
+        private readonly ISchemaFactory<TSchema, TSchemaContents> schemaFactory;
 
-        public SchemaGroup(string name)
+        public SchemaGroup(
+            string name,
+            IEnumerable<Rule<TSchema, TSchemaContents>> rules,
+            ISchemaFactory<TSchema, TSchemaContents> schemaFactory)
             : this(
                 default,
                 name,
                 new List<TSchema>(),
-                new List<Rule<TSchema, TSchemaContents>>())
+                rules,
+                schemaFactory)
         {
         }
 
@@ -28,12 +33,14 @@ namespace ProtoR.Domain.SchemaGroupAggregate
             long id,
             string name,
             IEnumerable<TSchema> schemas,
-            IEnumerable<Rule<TSchema, TSchemaContents>> rules)
+            IEnumerable<Rule<TSchema, TSchemaContents>> rules,
+            ISchemaFactory<TSchema, TSchemaContents> schemaFactory)
             : base(id)
         {
             this.Name = name;
             this.schemas = new SortedSet<TSchema>(schemas, new SchemaVersionComparer<TSchemaContents>());
             this.rules = rules;
+            this.schemaFactory = schemaFactory;
         }
 
         public string Name { get; }
@@ -45,30 +52,24 @@ namespace ProtoR.Domain.SchemaGroupAggregate
 
         public IEnumerable<RuleViolation> AddSchema(
             string schemaContents,
-            ConfigurationSet config,
-            ISchemaFactory<TSchema, TSchemaContents> schemaFactory)
+            GroupConfiguration groupConfiguration,
+            IReadOnlyDictionary<RuleCode, RuleConfiguration> rulesConfiguration)
         {
-            if (config == null)
+            if (groupConfiguration == null)
             {
-                throw new ArgumentNullException($"{nameof(config)} cannot be null");
+                throw new ArgumentNullException($"{nameof(groupConfiguration)} cannot be null");
             }
 
-            if (schemaFactory == null)
+            if (rulesConfiguration == null)
             {
-                throw new ArgumentNullException($"{nameof(schemaFactory)} cannot be null");
-            }
-
-            if (config.SchemaGroupId.Value != this.Id)
-            {
-                throw new ArgumentException($"Config with schema group id {config.SchemaGroupId} cannot be used for schema group with id {this.Id}");
+                throw new ArgumentNullException($"{nameof(rulesConfiguration)} cannot be null");
             }
 
             TSchema lastSchema = this.schemas.LastOrDefault();
             Version newVersion = lastSchema?.Version.Next() ?? Version.Initial;
-            TSchema newSchema = schemaFactory.CreateNew(newVersion, schemaContents);
+            TSchema newSchema = this.schemaFactory.CreateNew(newVersion, schemaContents);
 
             var ruleViolations = new List<RuleViolation>();
-            IReadOnlyDictionary<RuleCode, RuleConfig> rulesConfig = config.GetRulesConfiguration();
 
             if (lastSchema != null)
             {
@@ -79,17 +80,17 @@ namespace ProtoR.Domain.SchemaGroupAggregate
                 {
                     TSchema oldSchema = schemaEnumerator.Current;
 
-                    if (config.BackwardCompatible)
+                    if (groupConfiguration.BackwardCompatible)
                     {
-                        ruleViolations.AddRange(this.ValidateSchemas(newSchema, oldSchema, rulesConfig, true));
+                        ruleViolations.AddRange(this.ValidateSchemas(newSchema, oldSchema, rulesConfiguration, true));
                     }
 
-                    if (config.ForwardCompatible)
+                    if (groupConfiguration.ForwardCompatible)
                     {
-                        ruleViolations.AddRange(this.ValidateSchemas(newSchema, oldSchema, rulesConfig, false));
+                        ruleViolations.AddRange(this.ValidateSchemas(newSchema, oldSchema, rulesConfiguration, false));
                     }
                 }
-                while (schemaEnumerator.MoveNext() && config.Transitive);
+                while (schemaEnumerator.MoveNext() && groupConfiguration.Transitive);
             }
 
             IEnumerable<RuleViolation> fatalViolations = ruleViolations.Where(ruleViolation => ruleViolation.Severity.IsFatal);
@@ -105,14 +106,14 @@ namespace ProtoR.Domain.SchemaGroupAggregate
         private List<RuleViolation> ValidateSchemas(
             TSchema newSchema,
             TSchema oldSchema,
-            IReadOnlyDictionary<RuleCode, RuleConfig> rulesConfig,
+            IReadOnlyDictionary<RuleCode, RuleConfiguration> rulesConfiguration,
             bool backwardCompatible)
         {
             var ruleViolations = new List<RuleViolation>();
             var firstSchema = backwardCompatible ? newSchema : oldSchema;
             var secondSchema = backwardCompatible ? oldSchema : newSchema;
 
-            foreach (var rule in this.rules.Where(rule => rulesConfig[rule.Code].Severity > Severity.Hidden))
+            foreach (var rule in this.rules.Where(rule => rulesConfiguration[rule.Code].Severity > Severity.Hidden))
             {
                 ValidationResult validationResult = rule.Validate(firstSchema, secondSchema);
 
@@ -120,7 +121,7 @@ namespace ProtoR.Domain.SchemaGroupAggregate
                 {
                     ruleViolations.Add(new RuleViolation(
                         validationResult,
-                        rulesConfig[rule.Code].Severity,
+                        rulesConfiguration[rule.Code].Severity,
                         newSchema.Version,
                         oldSchema.Version,
                         backwardCompatible));

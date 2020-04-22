@@ -9,7 +9,7 @@ namespace ProtoR.DataAccess.IntegrationTests.Repositories
     using Google.Protobuf.Reflection;
     using Moq;
     using ProtoR.DataAccess.IntegrationTests.Fixtures;
-    using ProtoR.Domain.GlobalConfigurationAggregate;
+    using ProtoR.Domain.ConfigurationAggregate;
     using ProtoR.Domain.SchemaGroupAggregate;
     using ProtoR.Domain.SchemaGroupAggregate.Rules;
     using ProtoR.Domain.SchemaGroupAggregate.Schemas;
@@ -23,7 +23,7 @@ namespace ProtoR.DataAccess.IntegrationTests.Repositories
     public sealed class SchemaGroupRepositoryTests : IDisposable
     {
         private readonly IgniteFixture igniteFixture;
-        private readonly SchemaGroupRepository repository;
+        private readonly ProtoBufSchemaGroupRepository repository;
         private readonly IUserProvider userProviderStub = new UserProviderStub();
         private readonly ICache<long, SchemaCacheItem> schemaCache;
         private readonly ICache<long, SchemaGroupCacheItem> schemaGroupCache;
@@ -31,7 +31,7 @@ namespace ProtoR.DataAccess.IntegrationTests.Repositories
         public SchemaGroupRepositoryTests(IgniteFixture igniteFixture)
         {
             this.igniteFixture = igniteFixture;
-            this.repository = new SchemaGroupRepository(
+            this.repository = new ProtoBufSchemaGroupRepository(
                 this.igniteFixture.Ignite,
                 this.userProviderStub,
                 this.igniteFixture.Configuration);
@@ -50,7 +50,7 @@ namespace ProtoR.DataAccess.IntegrationTests.Repositories
         {
             var name = "Schema Group Name";
 
-            long id = await this.repository.Add(new SchemaGroup<ProtoBufSchema, FileDescriptorSet>(name));
+            long id = await this.repository.Add(new ProtoBufSchemaGroup(name));
 
             Assert.True(id > 0);
             SchemaGroupCacheItem insertedItem = this.schemaGroupCache.Get(id);
@@ -91,15 +91,18 @@ namespace ProtoR.DataAccess.IntegrationTests.Repositories
         public async Task Update_WithNewSchemas_ShouldInsertNewSchemas()
         {
             var name = "Test Group Name";
-            await this.repository.Add(new SchemaGroup<ProtoBufSchema, FileDescriptorSet>(name));
-            SchemaGroup<ProtoBufSchema, FileDescriptorSet> schemaGroup = await this.repository.GetByName(name);
+            await this.repository.Add(new ProtoBufSchemaGroup(name));
+            ProtoBufSchemaGroup schemaGroup = await this.repository.GetByName(name);
 
             var schemaFactoryMock = new Mock<ISchemaFactory<ProtoBufSchema, FileDescriptorSet>>();
             schemaFactoryMock
                 .Setup(f => f.CreateNew(It.IsAny<Version>(), It.IsAny<string>()))
                 .Returns(new ProtoBufSchema(0, new Version(1), string.Empty));
 
-            schemaGroup.AddSchema(string.Empty, this.CreateConfigurationSet(schemaGroup.Id), schemaFactoryMock.Object);
+            schemaGroup.AddSchema(
+                "syntax = \"proto3\";",
+                this.CreateGroupConfiguration(),
+                this.CreateRuleConfiguration());
 
             await this.repository.Update(schemaGroup);
 
@@ -133,20 +136,16 @@ namespace ProtoR.DataAccess.IntegrationTests.Repositories
             });
         }
 
-        private ConfigurationSet CreateConfigurationSet(long groupId)
+        private GroupConfiguration CreateGroupConfiguration()
         {
-            Dictionary<RuleCode, RuleConfig> rulesConfiguration = RuleFactory
-                .GetProtoBufRules()
-                .ToDictionary(r => r.Code, r => new RuleConfig(false, Severity.Info));
+            return new GroupConfiguration(true, false, false, false);
+        }
 
-            return new ConfigurationSet(
-                1,
-                rulesConfiguration,
-                groupId,
-                false,
-                false,
-                true,
-                false);
+        private Dictionary<RuleCode, RuleConfiguration> CreateRuleConfiguration()
+        {
+            return RuleFactory
+                .GetProtoBufRules()
+                .ToDictionary(r => r.Code, r => new RuleConfiguration(false, Severity.Info));
         }
     }
 }

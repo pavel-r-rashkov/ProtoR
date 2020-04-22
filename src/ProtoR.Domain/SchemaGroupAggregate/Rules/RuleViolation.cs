@@ -1,6 +1,7 @@
 namespace ProtoR.Domain.SchemaGroupAggregate.Rules
 {
     using System.Collections.Generic;
+    using ProtoR.Domain.ConfigurationAggregate;
     using ProtoR.Domain.SchemaGroupAggregate.Schemas;
     using ProtoR.Domain.SeedWork;
 

@@ -1,5 +1,6 @@
 namespace ProtoR.Domain.UnitTests.SchemaGroupAggregateTests.RulesTests
 {
+    using ProtoR.Domain.ConfigurationAggregate;
     using ProtoR.Domain.SchemaGroupAggregate;
     using ProtoR.Domain.SchemaGroupAggregate.Rules;
     using ProtoR.Domain.SchemaGroupAggregate.Schemas;

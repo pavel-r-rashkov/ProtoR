@@ -64,6 +64,7 @@ namespace ProtoR.Infrastructure.DataAccess.DataProviders
                     c.Value.Transitive,
                     c.Value.ForwardCompatible,
                     c.Value.BackwardCompatible,
+                    c.Value.Inherit,
                 })
                 .FirstOrDefault();
 
@@ -79,6 +80,7 @@ namespace ProtoR.Infrastructure.DataAccess.DataProviders
                 Transitive = configurationProjection.Transitive,
                 ForwardCompatible = configurationProjection.ForwardCompatible,
                 BackwardCompatible = configurationProjection.BackwardCompatible,
+                Inherit = configurationProjection.Inherit,
             };
 
             ICache<long, RuleConfigurationCacheItem> ruleConfigurationCache = this.ignite.GetCache<long, RuleConfigurationCacheItem>(this.ruleConfigurationCacheName);
@@ -89,14 +91,14 @@ namespace ProtoR.Infrastructure.DataAccess.DataProviders
                 {
                     c.Value.RuleCode,
                     c.Value.Severity,
-                    c.Value.ShouldInherit,
+                    c.Value.Inherit,
                 })
                 .ToList()
                 .Select(c => new RuleConfigurationDto
                 {
                     RuleCode = c.RuleCode,
                     Severity = c.Severity,
-                    Inherit = c.ShouldInherit,
+                    Inherit = c.Inherit,
                 });
 
             return Task.FromResult(configuration);

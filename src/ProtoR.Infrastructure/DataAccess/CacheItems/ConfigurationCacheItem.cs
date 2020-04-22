@@ -4,7 +4,7 @@ namespace ProtoR.Infrastructure.DataAccess.CacheItems
     {
         public long? SchemaGroupId { get; set; }
 
-        public bool ShouldInherit { get; set; }
+        public bool Inherit { get; set; }
 
         public bool ForwardCompatible { get; set; }
 

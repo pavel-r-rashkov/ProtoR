@@ -8,21 +8,19 @@ namespace ProtoR.Infrastructure.DataAccess.Repositories
     using Apache.Ignite.Core.Cache;
     using Apache.Ignite.Core.DataStructures;
     using Apache.Ignite.Linq;
-    using Google.Protobuf.Reflection;
     using ProtoR.Domain.SchemaGroupAggregate;
-    using ProtoR.Domain.SchemaGroupAggregate.Rules;
     using ProtoR.Domain.SchemaGroupAggregate.Schemas;
     using ProtoR.Infrastructure.DataAccess.CacheItems;
     using Version = ProtoR.Domain.SchemaGroupAggregate.Schemas.Version;
 
-    public class SchemaGroupRepository : ISchemaGroupRepository<ProtoBufSchema, FileDescriptorSet>
+    public class ProtoBufSchemaGroupRepository : IProtoBufSchemaGroupRepository
     {
         private readonly IIgnite ignite;
         private readonly IUserProvider userProvider;
         private readonly string schemaCacheName;
         private readonly string schemaGroupCacheName;
 
-        public SchemaGroupRepository(
+        public ProtoBufSchemaGroupRepository(
             IIgnite ignite,
             IUserProvider userProvider,
             IIgniteConfigurationProvider configurationProvider)
@@ -33,7 +31,7 @@ namespace ProtoR.Infrastructure.DataAccess.Repositories
             this.schemaGroupCacheName = configurationProvider.SchemaGroupCacheName;
         }
 
-        public async Task<long> Add(SchemaGroup<ProtoBufSchema, FileDescriptorSet> schemaGroup)
+        public async Task<long> Add(ProtoBufSchemaGroup schemaGroup)
         {
             var schemaGroupCacheItem = new SchemaGroupCacheItem
             {
@@ -53,7 +51,7 @@ namespace ProtoR.Infrastructure.DataAccess.Repositories
             return id;
         }
 
-        public Task<SchemaGroup<ProtoBufSchema, FileDescriptorSet>> GetByName(string name)
+        public Task<ProtoBufSchemaGroup> GetByName(string name)
         {
             ICache<long, SchemaGroupCacheItem> schemaGroupCache = this.ignite.GetCache<long, SchemaGroupCacheItem>(this.schemaGroupCacheName);
             ICacheEntry<long, SchemaGroupCacheItem> schemaCacheItem = schemaGroupCache
@@ -61,26 +59,19 @@ namespace ProtoR.Infrastructure.DataAccess.Repositories
                 .FirstOrDefault(c => c.Value.Name.ToUpper() == name.ToUpper());
 
             ICache<long, SchemaCacheItem> schemaCache = this.ignite.GetCache<long, SchemaCacheItem>(this.schemaCacheName);
-
-            var t = schemaCache
-                .AsCacheQueryable()
-                .Where(c => c.Value.SchemaGroupId == schemaCacheItem.Key)
-                .ToList();
-
             IEnumerable<ProtoBufSchema> schemaCacheItems = schemaCache
                 .AsCacheQueryable()
                 .Where(c => c.Value.SchemaGroupId == schemaCacheItem.Key)
                 .ToList()
                 .Select(c => new ProtoBufSchema(c.Key, new Version(c.Value.Version), c.Value.Contents));
 
-            return Task.FromResult(new SchemaGroup<ProtoBufSchema, FileDescriptorSet>(
+            return Task.FromResult(new ProtoBufSchemaGroup(
                 schemaCacheItem.Key,
                 schemaCacheItem.Value.Name,
-                schemaCacheItems,
-                RuleFactory.GetProtoBufRules()));
+                schemaCacheItems));
         }
 
-        public async Task Update(SchemaGroup<ProtoBufSchema, FileDescriptorSet> schemaGroup)
+        public async Task Update(ProtoBufSchemaGroup schemaGroup)
         {
             ICache<long, SchemaCacheItem> schemaCache = this.ignite.GetCache<long, SchemaCacheItem>(this.schemaCacheName);
             IAtomicSequence idGenerator = this.ignite.GetAtomicSequence(
