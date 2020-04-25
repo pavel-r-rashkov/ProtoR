@@ -3,6 +3,7 @@
     using System;
     using Autofac.Extensions.DependencyInjection;
     using Microsoft.AspNetCore.Hosting;
+    using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.Hosting;
     using Serilog;
     using Serilog.Events;
@@ -38,6 +39,10 @@
             return Host
                 .CreateDefaultBuilder(args)
                 .UseServiceProviderFactory(new AutofacServiceProviderFactory())
+                .ConfigureAppConfiguration(configuration =>
+                {
+                    configuration.AddEnvironmentVariables(prefix: "PROTOR_");
+                })
                 .ConfigureWebHostDefaults(webHostBuilder =>
                 {
                     webHostBuilder.UseStartup<Startup>();

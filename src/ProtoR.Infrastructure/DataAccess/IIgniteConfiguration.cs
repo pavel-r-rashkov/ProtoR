@@ -1,8 +1,6 @@
 namespace ProtoR.Infrastructure.DataAccess
 {
-    using System.Collections.Generic;
-
-    public interface IIgniteConfigurationProvider
+    public interface IIgniteConfiguration
     {
         string SchemaCacheName { get; }
 
@@ -16,7 +14,7 @@ namespace ProtoR.Infrastructure.DataAccess
 
         int CommunicationPort { get; }
 
-        IEnumerable<string> NodeEndpoints { get; }
+        string NodeEndpoints { get; }
 
         string StoragePath { get; }
     }

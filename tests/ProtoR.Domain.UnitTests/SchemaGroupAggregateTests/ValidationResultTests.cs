@@ -1,6 +1,7 @@
 namespace ProtoR.Domain.UnitTests.SchemaGroupAggregateTests
 {
     using ProtoR.Domain.SchemaGroupAggregate;
+    using ProtoR.Domain.SchemaGroupAggregate.Rules;
     using Xunit;
 
     public class ValidationResultTests
@@ -8,7 +9,7 @@ namespace ProtoR.Domain.UnitTests.SchemaGroupAggregateTests
         [Fact]
         public void ValidationResult_ShouldBeCreated()
         {
-            var validationResult = new ValidationResult(true, "description");
+            var validationResult = new ValidationResult(RuleCode.PB0001, true, "description");
 
             Assert.NotNull(validationResult);
         }
@@ -16,8 +17,8 @@ namespace ProtoR.Domain.UnitTests.SchemaGroupAggregateTests
         [Fact]
         public void Equality_WithEqualProperties_ShouldBeTrue()
         {
-            var firstValidationResult = new ValidationResult(true, "description");
-            var secondValidationResult = new ValidationResult(true, "description");
+            var firstValidationResult = new ValidationResult(RuleCode.PB0001, true, "description");
+            var secondValidationResult = new ValidationResult(RuleCode.PB0001, true, "description");
 
             Assert.Equal(firstValidationResult, secondValidationResult);
         }
@@ -25,8 +26,8 @@ namespace ProtoR.Domain.UnitTests.SchemaGroupAggregateTests
         [Fact]
         public void EqualityOperator_WithEqualValidationResults_ShouldBeTrue()
         {
-            var firstValidationResult = new ValidationResult(true, "description");
-            var secondValidationResult = new ValidationResult(true, "description");
+            var firstValidationResult = new ValidationResult(RuleCode.PB0001, true, "description");
+            var secondValidationResult = new ValidationResult(RuleCode.PB0001, true, "description");
 
             Assert.True(firstValidationResult == secondValidationResult);
         }
@@ -43,7 +44,7 @@ namespace ProtoR.Domain.UnitTests.SchemaGroupAggregateTests
         [Fact]
         public void EqualityOperator_WithExactlyOneValueNull_ShouldBeFalse()
         {
-            ValidationResult firstValidationResult = new ValidationResult(true, "description");
+            ValidationResult firstValidationResult = new ValidationResult(RuleCode.PB0001, true, "description");
             ValidationResult secondValidationResult = null;
 
             Assert.False(firstValidationResult == secondValidationResult);
@@ -52,8 +53,8 @@ namespace ProtoR.Domain.UnitTests.SchemaGroupAggregateTests
         [Fact]
         public void InequalityOperator_WithDifferentValidationResults_ShouldBeTrue()
         {
-            var firstValidationResult = new ValidationResult(true, "description");
-            var secondValidationResult = new ValidationResult(false, "description");
+            var firstValidationResult = new ValidationResult(RuleCode.PB0001, true, "description");
+            var secondValidationResult = new ValidationResult(RuleCode.PB0001, false, "description");
 
             Assert.True(firstValidationResult != secondValidationResult);
         }
@@ -61,8 +62,8 @@ namespace ProtoR.Domain.UnitTests.SchemaGroupAggregateTests
         [Fact]
         public void GetHashCode_WithEqualValidationResults_ShouldBeEqual()
         {
-            var firstValidationResult = new ValidationResult(true, "description");
-            var secondValidationResult = new ValidationResult(true, "description");
+            var firstValidationResult = new ValidationResult(RuleCode.PB0001, true, "description");
+            var secondValidationResult = new ValidationResult(RuleCode.PB0001, true, "description");
 
             Assert.True(firstValidationResult.GetHashCode() == secondValidationResult.GetHashCode());
         }

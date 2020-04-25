@@ -12,7 +12,7 @@ namespace ProtoR.Domain.UnitTests.SchemaGroupAggregateTests.RulesTests
         public void RuleViolation_ShouldBeCreated()
         {
             var ruleViolation = new RuleViolation(
-                new ValidationResult(true, "Description"),
+                new ValidationResult(RuleCode.PB0001, true, "Description"),
                 Severity.Error,
                 new Version(1),
                 new Version(2),
@@ -25,14 +25,14 @@ namespace ProtoR.Domain.UnitTests.SchemaGroupAggregateTests.RulesTests
         public void Equality_WithEqualProperties_ShouldBeTrue()
         {
             var firstRuleViolation = new RuleViolation(
-                new ValidationResult(true, "Description"),
+                new ValidationResult(RuleCode.PB0001, true, "Description"),
                 Severity.Error,
                 new Version(1),
                 new Version(2),
                 true);
 
             var secondRuleViolation = new RuleViolation(
-                new ValidationResult(true, "Description"),
+                new ValidationResult(RuleCode.PB0001, true, "Description"),
                 Severity.Error,
                 new Version(1),
                 new Version(2),

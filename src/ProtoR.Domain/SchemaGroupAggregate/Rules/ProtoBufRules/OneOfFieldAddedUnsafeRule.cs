@@ -26,8 +26,8 @@ namespace ProtoR.Domain.SchemaGroupAggregate.Rules.ProtoBufRules
                 this.VisitScope);
 
             return addedOneOfFields.Any()
-                ? new ValidationResult(false, this.FormatRemovedOneOfFields(addedOneOfFields))
-                : new ValidationResult(true, "No OneOf fields were added in unsafe manner");
+                ? new ValidationResult(this.Code, false, this.FormatRemovedOneOfFields(addedOneOfFields))
+                : new ValidationResult(this.Code, true, "No OneOf fields were added in unsafe manner");
         }
 
         private IList<string> VisitScope(ProtoBufSchemaScope a, ProtoBufSchemaScope b)

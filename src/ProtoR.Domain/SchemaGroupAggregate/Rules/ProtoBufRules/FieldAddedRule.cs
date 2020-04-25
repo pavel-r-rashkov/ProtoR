@@ -26,8 +26,8 @@ namespace ProtoR.Domain.SchemaGroupAggregate.Rules.ProtoBufRules
                 this.VisitScope);
 
             return addedFields.Any()
-                ? new ValidationResult(false, this.FormatAddedFields(addedFields))
-                : new ValidationResult(true, "No Fields were added");
+                ? new ValidationResult(this.Code, false, this.FormatAddedFields(addedFields))
+                : new ValidationResult(this.Code, true, "No Fields were added");
         }
 
         private IList<string> VisitScope(ProtoBufSchemaScope a, ProtoBufSchemaScope b)

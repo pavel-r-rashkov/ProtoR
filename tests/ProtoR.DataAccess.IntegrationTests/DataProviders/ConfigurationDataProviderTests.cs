@@ -24,10 +24,10 @@ namespace ProtoR.DataAccess.IntegrationTests.DataProviders
         public ConfigurationDataProviderTests(IgniteFixture igniteFixture)
         {
             this.igniteFixture = igniteFixture;
-            this.dataProvider = new ConfigurationDataProvider(this.igniteFixture.Ignite, this.igniteFixture.Configuration);
-            this.configurationCache = this.igniteFixture.Ignite.GetCache<long, ConfigurationCacheItem>(this.igniteFixture.Configuration.ConfigurationCacheName);
-            this.rulesConfigurationCache = this.igniteFixture.Ignite.GetCache<long, RuleConfigurationCacheItem>(this.igniteFixture.Configuration.RuleConfigurationCacheName);
-            this.groupCache = this.igniteFixture.Ignite.GetCache<long, SchemaGroupCacheItem>(this.igniteFixture.Configuration.SchemaGroupCacheName);
+            this.dataProvider = new ConfigurationDataProvider(this.igniteFixture.IgniteFactory, this.igniteFixture.Configuration);
+            this.configurationCache = this.igniteFixture.IgniteFactory.Instance().GetCache<long, ConfigurationCacheItem>(this.igniteFixture.Configuration.ConfigurationCacheName);
+            this.rulesConfigurationCache = this.igniteFixture.IgniteFactory.Instance().GetCache<long, RuleConfigurationCacheItem>(this.igniteFixture.Configuration.RuleConfigurationCacheName);
+            this.groupCache = this.igniteFixture.IgniteFactory.Instance().GetCache<long, SchemaGroupCacheItem>(this.igniteFixture.Configuration.SchemaGroupCacheName);
             this.fixture.Customizations.Add(new UtcRandomDateTimeSequenceGenerator());
         }
 

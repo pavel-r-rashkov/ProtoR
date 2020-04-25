@@ -8,6 +8,7 @@
   <ItemGroup>
     <PackageReference Include="Apache.Ignite" Version="2.8.0" />
     <PackageReference Include="Apache.Ignite.Linq" Version="2.8.0" />
+	<PackageReference Include="Autofac.Extensions.DependencyInjection" Version="6.0.0" />
   </ItemGroup>
 
   <PropertyGroup>

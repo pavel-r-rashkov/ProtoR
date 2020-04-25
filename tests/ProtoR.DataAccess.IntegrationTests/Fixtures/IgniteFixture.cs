@@ -1,8 +1,8 @@
 namespace ProtoR.DataAccess.IntegrationTests.Fixtures
 {
     using System;
-    using Apache.Ignite.Core;
-    using Apache.Ignite.Core.Cache;
+    using MediatR;
+    using Moq;
     using ProtoR.Infrastructure.DataAccess;
     using ProtoR.Infrastructure.DataAccess.CacheItems;
 
@@ -11,13 +11,13 @@ namespace ProtoR.DataAccess.IntegrationTests.Fixtures
         public IgniteFixture()
         {
             this.Configuration = new IgniteTestConfiguration();
-            var igniteFactory = new IgniteFactory(this.Configuration);
-            this.Ignite = igniteFactory.InitalizeIgnite();
+            this.IgniteFactory = new IgniteFactory(this.Configuration, new Mock<IMediator>().Object);
+            this.IgniteFactory.InitalizeIgnite();
         }
 
-        public IIgnite Ignite { get; }
+        public IIgniteFactory IgniteFactory { get; }
 
-        public IIgniteConfigurationProvider Configuration { get; }
+        public IIgniteConfiguration Configuration { get; }
 
         public void CleanIgniteCache()
         {
@@ -29,12 +29,12 @@ namespace ProtoR.DataAccess.IntegrationTests.Fixtures
 
         public void Dispose()
         {
-            this.Ignite.Dispose();
+            this.IgniteFactory.Instance().Dispose();
         }
 
         private void CleanCache<TKey, TValue>(string cacheName)
         {
-            var cache = this.Ignite.GetCache<TKey, TValue>(cacheName);
+            var cache = this.IgniteFactory.Instance().GetCache<TKey, TValue>(cacheName);
             cache.RemoveAll();
         }
     }

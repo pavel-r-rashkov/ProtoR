@@ -26,8 +26,8 @@ namespace ProtoR.Domain.SchemaGroupAggregate.Rules.ProtoBufRules
                 this.VisitScope);
 
             return missingReservations.Any()
-                ? new ValidationResult(false, this.FormatMissingReservations(missingReservations))
-                : new ValidationResult(true, "No field reservations are missing.");
+                ? new ValidationResult(this.Code, false, this.FormatMissingReservations(missingReservations))
+                : new ValidationResult(this.Code, true, "No field reservations are missing.");
         }
 
         private IList<FieldReservation> VisitScope(ProtoBufSchemaScope a, ProtoBufSchemaScope b)

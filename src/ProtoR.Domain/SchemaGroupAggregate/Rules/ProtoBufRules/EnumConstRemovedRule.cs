@@ -26,8 +26,8 @@ namespace ProtoR.Domain.SchemaGroupAggregate.Rules.ProtoBufRules
                 this.VisitScope);
 
             return removedEnumConstants.Any()
-                ? new ValidationResult(false, this.FormatRemovedEnumConstants(removedEnumConstants))
-                : new ValidationResult(true, "No enum constants were removed");
+                ? new ValidationResult(this.Code, false, this.FormatRemovedEnumConstants(removedEnumConstants))
+                : new ValidationResult(this.Code, true, "No enum constants were removed");
         }
 
         private IList<string> VisitScope(ProtoBufSchemaScope a, ProtoBufSchemaScope b)

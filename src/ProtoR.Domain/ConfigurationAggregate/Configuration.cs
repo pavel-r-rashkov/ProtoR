@@ -27,6 +27,33 @@ namespace ProtoR.Domain.ConfigurationAggregate
 
         public GroupConfiguration GroupConfiguration { get; private set; }
 
+        public static Configuration DefaultGroupConfiguration(long groupId)
+        {
+            var rulesConfiguration = RuleFactory.GetProtoBufRules().ToDictionary(
+                r => r.Code,
+                r => new RuleConfiguration(true, Severity.Hidden));
+
+            return new Configuration(
+                default,
+                rulesConfiguration,
+                groupId,
+                new GroupConfiguration(false, true, false, true));
+        }
+
+        public static Configuration DefaultGlobalConfiguration()
+        {
+            // TODO default global rules configuration
+            var rulesConfiguration = RuleFactory.GetProtoBufRules().ToDictionary(
+                r => r.Code,
+                r => new RuleConfiguration(false, Severity.Hidden));
+
+            return new Configuration(
+                default,
+                rulesConfiguration,
+                null,
+                new GroupConfiguration(false, true, false, false));
+        }
+
         public IReadOnlyDictionary<RuleCode, RuleConfiguration> GetRulesConfiguration()
         {
             return new ReadOnlyDictionary<RuleCode, RuleConfiguration>(this.rulesConfiguration);

@@ -1,11 +1,9 @@
 namespace ProtoR.Web.Infrastructure
 {
     using System;
-    using System.Collections.Generic;
-    using System.Linq;
     using ProtoR.Infrastructure.DataAccess;
 
-    public class IgniteConfigurationProvider : IIgniteConfigurationProvider
+    public class IgniteConfiguration : IIgniteConfiguration
     {
         private string schemaCacheName;
         private string schemaGroupCacheName;
@@ -13,7 +11,7 @@ namespace ProtoR.Web.Infrastructure
         private string ruleConfigurationCacheName;
         private int discoveryPort;
         private int communicationPort;
-        private IEnumerable<string> nodeEndpoints;
+        private string nodeEndpoints;
         private string storagePath;
 
         public string SchemaCacheName
@@ -124,7 +122,7 @@ namespace ProtoR.Web.Infrastructure
             }
         }
 
-        public IEnumerable<string> NodeEndpoints
+        public string NodeEndpoints
         {
             get
             {
@@ -136,16 +134,6 @@ namespace ProtoR.Web.Infrastructure
                 if (value == null)
                 {
                     throw new ArgumentNullException($"{nameof(this.NodeEndpoints)} cannot be null");
-                }
-
-                if (!value.Any())
-                {
-                    throw new ArgumentException($"At least one endpoint is required for {nameof(this.NodeEndpoints)}");
-                }
-
-                if (value.Any(e => string.IsNullOrWhiteSpace(e)))
-                {
-                    throw new ArgumentException($"{nameof(this.NodeEndpoints)} cannot contain null or empty endpoints");
                 }
 
                 this.nodeEndpoints = value;

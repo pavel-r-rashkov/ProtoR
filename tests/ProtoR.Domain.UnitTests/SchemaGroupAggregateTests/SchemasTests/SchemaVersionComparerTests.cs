@@ -7,7 +7,6 @@ namespace ProtoR.Domain.UnitTests.SchemaGroupAggregateTests.SchemasTests
     using Xunit;
     using Version = ProtoR.Domain.SchemaGroupAggregate.Schemas.Version;
 
-    // TODO: Replace with schema factory
     public class SchemaVersionComparerTests
     {
         private readonly string validSchema = SchemaFixtureUtils.GetProtoBuf("ValidSchema");

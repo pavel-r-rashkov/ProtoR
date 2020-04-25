@@ -24,9 +24,9 @@ namespace ProtoR.DataAccess.IntegrationTests.Repositories
         public ConfigurationRepositoryTests(IgniteFixture igniteFixture)
         {
             this.igniteFixture = igniteFixture;
-            this.repository = new ConfigurationRepository(this.igniteFixture.Ignite, this.igniteFixture.Configuration);
-            this.configurationCache = this.igniteFixture.Ignite.GetCache<long, ConfigurationCacheItem>(this.igniteFixture.Configuration.ConfigurationCacheName);
-            this.ruleConfigurationCache = this.igniteFixture.Ignite.GetCache<long, RuleConfigurationCacheItem>(this.igniteFixture.Configuration.RuleConfigurationCacheName);
+            this.repository = new ConfigurationRepository(this.igniteFixture.IgniteFactory, this.igniteFixture.Configuration);
+            this.configurationCache = this.igniteFixture.IgniteFactory.Instance().GetCache<long, ConfigurationCacheItem>(this.igniteFixture.Configuration.ConfigurationCacheName);
+            this.ruleConfigurationCache = this.igniteFixture.IgniteFactory.Instance().GetCache<long, RuleConfigurationCacheItem>(this.igniteFixture.Configuration.RuleConfigurationCacheName);
         }
 
         public void Dispose()

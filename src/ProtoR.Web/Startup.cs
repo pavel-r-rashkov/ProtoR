@@ -11,8 +11,11 @@
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Hosting;
+    using Microsoft.Extensions.Options;
     using Microsoft.OpenApi.Models;
+    using ProtoR.Application.Mapper;
     using ProtoR.Infrastructure.DataAccess;
+    using ProtoR.Infrastructure.DataAccess.DependencyInjection;
     using ProtoR.Web.Infrastructure;
     using ProtoR.Web.Infrastructure.Modules;
     using ProtoR.Web.Infrastructure.Swagger;
@@ -29,13 +32,24 @@
 
         public ILifetimeScope AutofacContainer { get; private set; }
 
+        public void ConfigureContainer(ContainerBuilder builder)
+        {
+            builder.RegisterModule(new MediatorModule());
+            builder.RegisterModule(new CommonModule());
+            builder.RegisterModule(new AutoMapperModule(typeof(Startup).Assembly, typeof(ApplicationProfile).Assembly));
+            var igniteConfiguration = this.Configuration.Get(typeof(IgniteConfiguration)) as IIgniteConfiguration;
+            builder.RegisterModule(new IgniteModule(igniteConfiguration));
+        }
+
         // This method gets called by the runtime. Use this method to add services to the container.
-        public static void ConfigureServices(IServiceCollection services)
+        public void ConfigureServices(IServiceCollection services)
         {
             services
                 .AddControllers()
                 .AddHybridModelBinder()
                 .AddFluentValidation(config => config.RegisterValidatorsFromAssemblyContaining<Startup>());
+
+            services.Configure<IgniteConfiguration>(this.Configuration);
 
             services.AddSwaggerGen(config =>
             {
@@ -54,29 +68,28 @@
             });
         }
 
-        public void ConfigureContainer(ContainerBuilder builder)
-        {
-            builder.RegisterModule(new MediatorModule());
-            builder.RegisterModule(new CommonModule());
-            builder.RegisterModule(new AutoMapperModule(typeof(Startup).Assembly));
-
-            var igniteFactory = new IgniteFactory(this.GetIgniteConfiguration());
-            builder.RegisterModule(new IgniteModule(igniteFactory.InitalizeIgnite()));
-        }
-
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(
+            IApplicationBuilder app,
+            IWebHostEnvironment env)
         {
             this.AutofacContainer = app.ApplicationServices.GetAutofacRoot();
-            app.UseSwagger();
-            app.UseSwaggerUI(options =>
-            {
-                options.SwaggerEndpoint("/swagger/v1/swagger.json", "Web App V1");
-                options.RoutePrefix = string.Empty;
-            });
+
+            var igniteFactory = this.AutofacContainer.Resolve<IIgniteFactory>();
+            igniteFactory.InitalizeIgnite();
+
+            var plugin = igniteFactory.Instance().GetPlugin<AutoFacPlugin>(nameof(AutoFacPluginProvider));
+            plugin.Scope = this.AutofacContainer;
 
             if (env.IsDevelopment())
             {
+                app.UseSwagger();
+                app.UseSwaggerUI(options =>
+                {
+                    options.SwaggerEndpoint("/swagger/v1/swagger.json", "Web App V1");
+                    options.RoutePrefix = string.Empty;
+                });
+
                 app.UseDeveloperExceptionPage();
             }
 
@@ -87,21 +100,6 @@
             {
                 endpoints.MapControllers();
             });
-        }
-
-        private IIgniteConfigurationProvider GetIgniteConfiguration()
-        {
-            return new IgniteConfigurationProvider()
-            {
-                SchemaCacheName = "PROTOR_SCHEMA_CACHE",
-                SchemaGroupCacheName = "PROTOR_SCHEMA_GROUP_CACHE",
-                ConfigurationCacheName = "PROTOR_CONFIGURATION_CACHE",
-                RuleConfigurationCacheName = "PROTOR_RULE_CONFIGURATION_CACHE",
-                DiscoveryPort = this.Configuration.GetValue<int>("PROTOR_DISCOVERY_PORT"),
-                CommunicationPort = this.Configuration.GetValue<int>("PROTOR_COMMUNICATION_PORT"),
-                NodeEndpoints = this.Configuration.GetValue<string>("PROTOR_NODE_ENDPOINTS").Split(',', StringSplitOptions.RemoveEmptyEntries),
-                StoragePath = this.Configuration.GetValue<string>("PROTOR_STORAGE_PATH"),
-            };
         }
     }
 }

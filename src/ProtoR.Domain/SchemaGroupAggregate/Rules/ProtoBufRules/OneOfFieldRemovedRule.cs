@@ -26,8 +26,8 @@ namespace ProtoR.Domain.SchemaGroupAggregate.Rules.ProtoBufRules
                 this.VisitScope);
 
             return removedOneOfFields.Any()
-                ? new ValidationResult(false, this.FormatRemovedOneOfFields(removedOneOfFields))
-                : new ValidationResult(true, "No OneOf fields were removed");
+                ? new ValidationResult(this.Code, false, this.FormatRemovedOneOfFields(removedOneOfFields))
+                : new ValidationResult(this.Code, true, "No OneOf fields were removed");
         }
 
         private IList<string> VisitScope(ProtoBufSchemaScope a, ProtoBufSchemaScope b)

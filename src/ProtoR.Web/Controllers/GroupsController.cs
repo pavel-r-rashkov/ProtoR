@@ -2,6 +2,7 @@ namespace ProtoR.Web.Controllers
 {
     using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations;
+    using System.Linq;
     using System.Threading.Tasks;
     using AutoMapper;
     using MediatR;
@@ -9,17 +10,22 @@ namespace ProtoR.Web.Controllers
     using ProtoR.Application.Configuration;
     using ProtoR.Application.Group;
     using ProtoR.Application.Schema;
+    using ProtoR.Infrastructure.DataAccess;
     using ProtoR.Web.Resources.ConfigurationResource;
     using ProtoR.Web.Resources.GroupResource;
     using ProtoR.Web.Resources.SchemaResource;
 
     public class GroupsController : BaseController
     {
+        private readonly IIgniteFactory igniteFactory;
+
         public GroupsController(
             IMediator mediator,
-            IMapper mapper)
+            IMapper mapper,
+            IIgniteFactory igniteFactory)
             : base(mediator, mapper)
         {
+            this.igniteFactory = igniteFactory;
         }
 
         [HttpGet]
@@ -75,9 +81,32 @@ namespace ProtoR.Web.Controllers
         public async Task<ActionResult> PostSchema(SchemaWriteModel schema)
         {
             var command = this.Mapper.Map<CreateSchemaCommand>(schema);
-            string version = await this.Mediator.Send(command);
 
-            return this.CreatedAtAction(nameof(this.GetSchema), new { schema.GroupName, Version = version });
+            var clusterService = this.igniteFactory
+                .Instance()
+                .GetServices()
+                .GetServiceProxy<IClusterSingletonService>(nameof(IClusterSingletonService));
+
+            var commandResult = await clusterService.AddSchema(command);
+
+            if (!string.IsNullOrWhiteSpace(commandResult.SchemaParseErrors))
+            {
+                return this.BadRequest(commandResult.SchemaParseErrors);
+            }
+
+            if (commandResult.RuleViolations.Any(v => v.IsFatal))
+            {
+                return this.BadRequest(commandResult.RuleViolations);
+            }
+
+            return this.CreatedAtAction(
+                nameof(this.GetSchema),
+                new
+                {
+                    schema.GroupName,
+                    Version = commandResult.NewVersion,
+                },
+                commandResult.RuleViolations);
         }
 
         [HttpGet]

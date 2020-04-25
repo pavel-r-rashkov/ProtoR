@@ -26,8 +26,8 @@ namespace ProtoR.Domain.SchemaGroupAggregate.Rules.ProtoBufRules
                 this.VisitScope);
 
             return renamedEnumConstants.Any()
-                ? new ValidationResult(false, $"Enum consts were renamed:{Environment.NewLine}{this.FormatRenamedEnumConstants(renamedEnumConstants)}")
-                : new ValidationResult(true, "No Enum consts were renamed.");
+                ? new ValidationResult(this.Code, false, $"Enum consts were renamed:{Environment.NewLine}{this.FormatRenamedEnumConstants(renamedEnumConstants)}")
+                : new ValidationResult(this.Code, true, "No Enum consts were renamed.");
         }
 
         private IList<EnumConstant> VisitScope(ProtoBufSchemaScope a, ProtoBufSchemaScope b)

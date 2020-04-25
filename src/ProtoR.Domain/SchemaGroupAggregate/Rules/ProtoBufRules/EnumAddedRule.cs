@@ -23,8 +23,8 @@ namespace ProtoR.Domain.SchemaGroupAggregate.Rules.ProtoBufRules
             IEnumerable<string> addedEnumTypes = ProtoBufSchemaScope.ParallelTraverse(a.RootScope(), b.RootScope(), this.VisitScope);
 
             return addedEnumTypes.Any()
-                ? new ValidationResult(false, this.FormatRemovedEnumTypes(addedEnumTypes))
-                : new ValidationResult(true, "No enum types were added");
+                ? new ValidationResult(this.Code, false, this.FormatRemovedEnumTypes(addedEnumTypes))
+                : new ValidationResult(this.Code, true, "No enum types were added");
         }
 
         private IList<string> VisitScope(ProtoBufSchemaScope a, ProtoBufSchemaScope b)

@@ -20,10 +20,10 @@ namespace ProtoR.Infrastructure.DataAccess.Repositories
         private readonly string ruleConfigurationGroupCacheName;
 
         public ConfigurationRepository(
-            IIgnite ignite,
-            IIgniteConfigurationProvider configurationProvider)
+            IIgniteFactory igniteFactory,
+            IIgniteConfiguration configurationProvider)
         {
-            this.ignite = ignite;
+            this.ignite = igniteFactory.Instance();
             this.configurationCacheName = configurationProvider.ConfigurationCacheName;
             this.ruleConfigurationGroupCacheName = configurationProvider.RuleConfigurationCacheName;
         }
@@ -85,6 +85,11 @@ namespace ProtoR.Infrastructure.DataAccess.Repositories
                 .AsCacheQueryable()
                 .Where(c => c.Value.SchemaGroupId == groupId)
                 .FirstOrDefault();
+
+            if (configurationCacheItem == null)
+            {
+                return Task.FromResult((Configuration)null);
+            }
 
             return Task.FromResult(this.HydrateConfiguration(configurationCacheItem.Key, configurationCacheItem.Value));
         }

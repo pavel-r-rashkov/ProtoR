@@ -20,7 +20,7 @@ namespace ProtoR.DataAccess.IntegrationTests.Repositories
     using Version = ProtoR.Domain.SchemaGroupAggregate.Schemas.Version;
 
     [Collection(CollectionNames.IgniteCollection)]
-    public sealed class SchemaGroupRepositoryTests : IDisposable
+    public sealed class ProtoBufSchemaGroupRepositoryTests : IDisposable
     {
         private readonly IgniteFixture igniteFixture;
         private readonly ProtoBufSchemaGroupRepository repository;
@@ -28,16 +28,22 @@ namespace ProtoR.DataAccess.IntegrationTests.Repositories
         private readonly ICache<long, SchemaCacheItem> schemaCache;
         private readonly ICache<long, SchemaGroupCacheItem> schemaGroupCache;
 
-        public SchemaGroupRepositoryTests(IgniteFixture igniteFixture)
+        public ProtoBufSchemaGroupRepositoryTests(IgniteFixture igniteFixture)
         {
             this.igniteFixture = igniteFixture;
+
             this.repository = new ProtoBufSchemaGroupRepository(
-                this.igniteFixture.Ignite,
+                this.igniteFixture.IgniteFactory,
                 this.userProviderStub,
                 this.igniteFixture.Configuration);
 
-            this.schemaCache = this.igniteFixture.Ignite.GetCache<long, SchemaCacheItem>(this.igniteFixture.Configuration.SchemaCacheName);
-            this.schemaGroupCache = this.igniteFixture.Ignite.GetCache<long, SchemaGroupCacheItem>(this.igniteFixture.Configuration.SchemaGroupCacheName);
+            this.schemaCache = this.igniteFixture.IgniteFactory
+                .Instance()
+                .GetCache<long, SchemaCacheItem>(this.igniteFixture.Configuration.SchemaCacheName);
+
+            this.schemaGroupCache = this.igniteFixture.IgniteFactory
+                .Instance()
+                .GetCache<long, SchemaGroupCacheItem>(this.igniteFixture.Configuration.SchemaGroupCacheName);
         }
 
         public void Dispose()

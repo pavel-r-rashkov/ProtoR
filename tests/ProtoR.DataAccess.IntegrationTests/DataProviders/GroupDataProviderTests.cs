@@ -23,8 +23,8 @@ namespace ProtoR.DataAccess.IntegrationTests.DataProviders
         public GroupDataProviderTests(IgniteFixture igniteFixture)
         {
             this.igniteFixture = igniteFixture;
-            this.dataProvider = new GroupDataProvider(this.igniteFixture.Ignite, this.igniteFixture.Configuration);
-            this.groupCache = this.igniteFixture.Ignite.GetCache<long, SchemaGroupCacheItem>(this.igniteFixture.Configuration.SchemaGroupCacheName);
+            this.dataProvider = new GroupDataProvider(this.igniteFixture.IgniteFactory, this.igniteFixture.Configuration);
+            this.groupCache = this.igniteFixture.IgniteFactory.Instance().GetCache<long, SchemaGroupCacheItem>(this.igniteFixture.Configuration.SchemaGroupCacheName);
             this.fixture.Customizations.Add(new UtcRandomDateTimeSequenceGenerator());
         }
 

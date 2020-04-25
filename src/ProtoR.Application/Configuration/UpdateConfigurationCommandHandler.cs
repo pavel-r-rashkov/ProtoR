@@ -14,10 +14,14 @@ namespace ProtoR.Application.Configuration
     public class UpdateConfigurationCommandHandler : AsyncRequestHandler<UpdateConfigurationCommand>
     {
         private readonly IConfigurationRepository configurationRepository;
+        private readonly IUnitOfWork unitOfWork;
 
-        public UpdateConfigurationCommandHandler(IConfigurationRepository configurationRepository)
+        public UpdateConfigurationCommandHandler(
+            IConfigurationRepository configurationRepository,
+            IUnitOfWork unitOfWork)
         {
             this.configurationRepository = configurationRepository;
+            this.unitOfWork = unitOfWork;
         }
 
         protected override async Task Handle(UpdateConfigurationCommand request, CancellationToken cancellationToken)
@@ -43,6 +47,7 @@ namespace ProtoR.Application.Configuration
             configuration.SetRulesConfiguration(rulesConfiguration);
 
             await this.configurationRepository.Update(configuration);
+            await this.unitOfWork.SaveChanges();
         }
     }
 }

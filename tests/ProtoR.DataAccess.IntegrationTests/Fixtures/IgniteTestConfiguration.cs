@@ -3,7 +3,7 @@ namespace ProtoR.DataAccess.IntegrationTests.Fixtures
     using System.Collections.Generic;
     using ProtoR.Infrastructure.DataAccess;
 
-    public class IgniteTestConfiguration : IIgniteConfigurationProvider
+    public class IgniteTestConfiguration : IIgniteConfiguration
     {
         public string SchemaCacheName => "PROTOR_SCHEMA_CACHE_INTEGRATION";
 
@@ -17,7 +17,7 @@ namespace ProtoR.DataAccess.IntegrationTests.Fixtures
 
         public int CommunicationPort => 9100;
 
-        public IEnumerable<string> NodeEndpoints => new[] { "127.0.0.1:10100" };
+        public string NodeEndpoints => "127.0.0.1:10100";
 
         public string StoragePath => @"/tmp/protor-cache-integration";
     }

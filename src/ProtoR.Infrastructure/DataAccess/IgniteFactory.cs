@@ -1,8 +1,10 @@
 namespace ProtoR.Infrastructure.DataAccess
 {
     using System;
+    using System.Diagnostics;
     using System.IO;
     using System.Linq;
+    using System.Threading.Tasks;
     using Apache.Ignite.Core;
     using Apache.Ignite.Core.Binary;
     using Apache.Ignite.Core.Cache.Configuration;
@@ -12,41 +14,68 @@ namespace ProtoR.Infrastructure.DataAccess
     using Apache.Ignite.Core.Discovery.Tcp;
     using Apache.Ignite.Core.Discovery.Tcp.Static;
     using Apache.Ignite.Core.Failure;
+    using MediatR;
+    using ProtoR.Application.Configuration;
     using ProtoR.Infrastructure.DataAccess.CacheItems;
+    using ProtoR.Infrastructure.DataAccess.DependencyInjection;
 
-    public class IgniteFactory
+    public class IgniteFactory : IIgniteFactory
     {
-        private readonly IIgniteConfigurationProvider configurationProvider;
+        private readonly IIgniteConfiguration externalConfiguration;
+        private readonly IMediator mediator;
+        private IIgnite ignite;
 
-        public IgniteFactory(IIgniteConfigurationProvider configurationProvider)
+        public IgniteFactory(
+            IIgniteConfiguration externalConfiguration,
+            IMediator mediator)
         {
-            this.configurationProvider = configurationProvider;
+            this.externalConfiguration = externalConfiguration;
+            this.mediator = mediator;
         }
 
-        public IIgnite InitalizeIgnite()
+        public IIgnite Instance()
         {
-            IgniteConfiguration configuration = this.CreateIgniteConfig();
-            IIgnite ignite = Ignition.Start(configuration);
-            ICluster cluster = ignite.GetCluster();
+            if (this.ignite == null)
+            {
+                throw new InvalidOperationException("Ignite is not initialized");
+            }
+
+            return this.ignite;
+        }
+
+        public void InitalizeIgnite()
+        {
+            IgniteConfiguration configuration = this.CreateIgniteConfig(this.externalConfiguration);
+            this.ignite = Ignition.Start(configuration);
+            ICluster cluster = this.ignite.GetCluster();
 
             if (!cluster.IsActive())
             {
+                Debug.WriteLine("-------- Activate cluster");
                 cluster.SetActive(true);
             }
             else
             {
-                // Console.WriteLine("-------- Join / Change topology");
-                // var list = cluster.GetBaselineTopology();
-                // list.Add(cluster.GetLocalNode());
-                // cluster.SetBaselineTopology(list);
+                Debug.WriteLine("-------- Join / Change topology");
+                var baseLine = cluster.GetBaselineTopology();
+                baseLine.Add(cluster.GetLocalNode());
+                cluster.SetBaselineTopology(baseLine);
             }
 
-            return ignite;
+            this.CreateGlobalConfiguration().GetAwaiter().GetResult();
+
+            var services = cluster.ForNodes(cluster.GetNodes()).GetServices();
+            services.DeployClusterSingleton(nameof(IClusterSingletonService), new ClusterSingletonService());
         }
 
-        private IgniteConfiguration CreateIgniteConfig()
+        private async Task CreateGlobalConfiguration()
         {
-            string storagePath = this.configurationProvider.StoragePath;
+            await this.mediator.Send(new CreateGlobalConfigurationCommand());
+        }
+
+        private IgniteConfiguration CreateIgniteConfig(IIgniteConfiguration externalConfiguration)
+        {
+            string storagePath = externalConfiguration.StoragePath;
 
             return new IgniteConfiguration
             {
@@ -54,19 +83,22 @@ namespace ProtoR.Infrastructure.DataAccess
                 {
                     Serializer = new BinaryReflectiveSerializer { ForceTimestamp = true },
                 },
+                PluginConfigurations = new[] { new AutoFacPluginConfiguration() },
                 FailureHandler = new NoOpFailureHandler(), // For Debug
                 ClientMode = false,
                 DiscoverySpi = new TcpDiscoverySpi
                 {
-                    LocalPort = this.configurationProvider.DiscoveryPort,
+                    LocalPort = externalConfiguration.DiscoveryPort,
                     IpFinder = new TcpDiscoveryStaticIpFinder
                     {
-                        Endpoints = this.configurationProvider.NodeEndpoints.ToList(),
+                        Endpoints = externalConfiguration.NodeEndpoints
+                            .Split(new[] { ',', ';' }, StringSplitOptions.RemoveEmptyEntries)
+                            .ToList(),
                     },
                 },
                 CommunicationSpi = new TcpCommunicationSpi
                 {
-                    LocalPort = this.configurationProvider.CommunicationPort,
+                    LocalPort = externalConfiguration.CommunicationPort,
                 },
                 DataStorageConfiguration = new DataStorageConfiguration
                 {
@@ -89,7 +121,7 @@ namespace ProtoR.Infrastructure.DataAccess
                 CacheConfiguration = new[]
                 {
                     new CacheConfiguration(
-                        this.configurationProvider.SchemaCacheName,
+                        externalConfiguration.SchemaCacheName,
                         new QueryEntity
                         {
                             KeyType = typeof(long),
@@ -110,7 +142,7 @@ namespace ProtoR.Infrastructure.DataAccess
                         WriteSynchronizationMode = CacheWriteSynchronizationMode.FullSync,
                     },
                     new CacheConfiguration(
-                        this.configurationProvider.SchemaGroupCacheName,
+                        externalConfiguration.SchemaGroupCacheName,
                         new QueryEntity
                         {
                             KeyType = typeof(long),
@@ -129,7 +161,7 @@ namespace ProtoR.Infrastructure.DataAccess
                         WriteSynchronizationMode = CacheWriteSynchronizationMode.FullSync,
                     },
                     new CacheConfiguration(
-                        this.configurationProvider.ConfigurationCacheName,
+                        externalConfiguration.ConfigurationCacheName,
                         new QueryEntity
                         {
                             KeyType = typeof(long),
@@ -150,7 +182,7 @@ namespace ProtoR.Infrastructure.DataAccess
                         WriteSynchronizationMode = CacheWriteSynchronizationMode.FullSync,
                     },
                     new CacheConfiguration(
-                        this.configurationProvider.RuleConfigurationCacheName,
+                        externalConfiguration.RuleConfigurationCacheName,
                         new QueryEntity
                         {
                             KeyType = typeof(long),

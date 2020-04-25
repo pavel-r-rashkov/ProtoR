@@ -21,14 +21,14 @@ namespace ProtoR.Infrastructure.DataAccess.Repositories
         private readonly string schemaGroupCacheName;
 
         public ProtoBufSchemaGroupRepository(
-            IIgnite ignite,
+            IIgniteFactory igniteFactory,
             IUserProvider userProvider,
-            IIgniteConfigurationProvider configurationProvider)
+            IIgniteConfiguration configuration)
         {
-            this.ignite = ignite;
+            this.ignite = igniteFactory.Instance();
             this.userProvider = userProvider;
-            this.schemaCacheName = configurationProvider.SchemaCacheName;
-            this.schemaGroupCacheName = configurationProvider.SchemaGroupCacheName;
+            this.schemaCacheName = configuration.SchemaCacheName;
+            this.schemaGroupCacheName = configuration.SchemaGroupCacheName;
         }
 
         public async Task<long> Add(ProtoBufSchemaGroup schemaGroup)

@@ -32,8 +32,8 @@ namespace ProtoR.Domain.SchemaGroupAggregate.Rules.ProtoBufRules
                 this.VisitScope);
 
             return changedTypes.Any()
-                ? new ValidationResult(false, this.FormatRemovedFields(changedTypes))
-                : new ValidationResult(true, "No types were changed");
+                ? new ValidationResult(this.Code, false, this.FormatRemovedFields(changedTypes))
+                : new ValidationResult(this.Code, true, "No types were changed");
         }
 
         private protected virtual bool CompareFieldTypes(

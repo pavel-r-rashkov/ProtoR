@@ -17,10 +17,10 @@ namespace ProtoR.Infrastructure.DataAccess.DataProviders
         private readonly string ruleConfigurationCacheName;
 
         public ConfigurationDataProvider(
-            IIgnite ignite,
-            IIgniteConfigurationProvider configurationProvider)
+            IIgniteFactory igniteFactory,
+            IIgniteConfiguration configurationProvider)
         {
-            this.ignite = ignite;
+            this.ignite = igniteFactory.Instance();
             this.groupCacheName = configurationProvider.SchemaGroupCacheName;
             this.configurationCacheName = configurationProvider.ConfigurationCacheName;
             this.ruleConfigurationCacheName = configurationProvider.RuleConfigurationCacheName;

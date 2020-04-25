@@ -16,10 +16,10 @@ namespace ProtoR.Infrastructure.DataAccess.DataProviders
         private readonly string schemaCacheName;
 
         public SchemaDataProvider(
-            IIgnite ignite,
-            IIgniteConfigurationProvider configurationProvider)
+            IIgniteFactory igniteFactory,
+            IIgniteConfiguration configurationProvider)
         {
-            this.ignite = ignite;
+            this.ignite = igniteFactory.Instance();
             this.groupCacheName = configurationProvider.SchemaGroupCacheName;
             this.schemaCacheName = configurationProvider.SchemaCacheName;
         }

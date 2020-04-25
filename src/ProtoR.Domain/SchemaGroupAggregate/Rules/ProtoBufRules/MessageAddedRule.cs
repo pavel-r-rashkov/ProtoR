@@ -26,8 +26,8 @@ namespace ProtoR.Domain.SchemaGroupAggregate.Rules.ProtoBufRules
                 this.VisitScope);
 
             return addedMessageTypes.Any()
-                ? new ValidationResult(false, this.FormatRemovedMessageTypes(addedMessageTypes))
-                : new ValidationResult(true, "No message types were added");
+                ? new ValidationResult(this.Code, false, this.FormatRemovedMessageTypes(addedMessageTypes))
+                : new ValidationResult(this.Code, true, "No message types were added");
         }
 
         private IList<string> VisitScope(ProtoBufSchemaScope a, ProtoBufSchemaScope b)

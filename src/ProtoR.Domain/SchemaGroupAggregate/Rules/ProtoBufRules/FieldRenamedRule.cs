@@ -26,8 +26,8 @@ namespace ProtoR.Domain.SchemaGroupAggregate.Rules.ProtoBufRules
                 this.VisitScope);
 
             return renamedFields.Any()
-                ? new ValidationResult(false, $"Fields were renamed:{Environment.NewLine}{this.FormatRenamedFields(renamedFields)}")
-                : new ValidationResult(true, "No fields were renamed.");
+                ? new ValidationResult(this.Code, false, $"Fields were renamed:{Environment.NewLine}{this.FormatRenamedFields(renamedFields)}")
+                : new ValidationResult(this.Code, true, "No fields were renamed.");
         }
 
         private IList<Field> VisitScope(ProtoBufSchemaScope a, ProtoBufSchemaScope b)
