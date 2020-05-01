@@ -62,6 +62,7 @@ namespace ProtoR.Infrastructure.DataAccess
                 cluster.SetBaselineTopology(baseLine);
             }
 
+            this.InitializeCaches();
             this.CreateGlobalConfiguration().GetAwaiter().GetResult();
 
             var services = cluster.ForNodes(cluster.GetNodes()).GetServices();
@@ -73,12 +74,36 @@ namespace ProtoR.Infrastructure.DataAccess
             await this.mediator.Send(new CreateGlobalConfigurationCommand());
         }
 
+        private void InitializeCaches()
+        {
+            this.ignite.GetOrCreateCache<long, ConfigurationCacheItem>(this.externalConfiguration.ConfigurationCacheName);
+            this.ignite.GetOrCreateCache<long, RuleConfigurationCacheItem>(this.externalConfiguration.RuleConfigurationCacheName);
+            this.ignite.GetOrCreateCache<long, SchemaCacheItem>(this.externalConfiguration.SchemaCacheName);
+            this.ignite.GetOrCreateCache<long, SchemaGroupCacheItem>(this.externalConfiguration.SchemaGroupCacheName);
+
+            this.CreateSequence<ConfigurationCacheItem>();
+            this.CreateSequence<RuleConfigurationCacheItem>();
+            this.CreateSequence<SchemaCacheItem>();
+            this.CreateSequence<SchemaGroupCacheItem>();
+
+            // TODO Update ignite DB user/password
+        }
+
+        private void CreateSequence<T>()
+        {
+            this.ignite.GetAtomicSequence(
+                $"{typeof(T).Name.ToUpperInvariant()}{CacheConstants.IdSequenceSufix}",
+                0,
+                true);
+        }
+
         private IgniteConfiguration CreateIgniteConfig(IIgniteConfiguration externalConfiguration)
         {
             string storagePath = externalConfiguration.StoragePath;
 
             return new IgniteConfiguration
             {
+                AuthenticationEnabled = true,
                 BinaryConfiguration = new BinaryConfiguration
                 {
                     Serializer = new BinaryReflectiveSerializer { ForceTimestamp = true },
