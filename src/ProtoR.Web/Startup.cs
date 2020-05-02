@@ -1,4 +1,4 @@
-﻿namespace Web
+﻿namespace ProtoR.Web
 {
     using System;
     using System.IO;
@@ -11,11 +11,9 @@
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Hosting;
-    using Microsoft.Extensions.Options;
     using Microsoft.OpenApi.Models;
     using ProtoR.Application.Mapper;
     using ProtoR.Infrastructure.DataAccess;
-    using ProtoR.Infrastructure.DataAccess.DependencyInjection;
     using ProtoR.Web.Infrastructure;
     using ProtoR.Web.Infrastructure.Modules;
     using ProtoR.Web.Infrastructure.Swagger;
@@ -32,7 +30,7 @@
 
         public ILifetimeScope AutofacContainer { get; private set; }
 
-        public void ConfigureContainer(ContainerBuilder builder)
+        public virtual void ConfigureContainer(ContainerBuilder builder)
         {
             builder.RegisterModule(new MediatorModule());
             builder.RegisterModule(new CommonModule());
@@ -77,9 +75,7 @@
 
             var igniteFactory = this.AutofacContainer.Resolve<IIgniteFactory>();
             igniteFactory.InitalizeIgnite();
-
-            var plugin = igniteFactory.Instance().GetPlugin<AutoFacPlugin>(nameof(AutoFacPluginProvider));
-            plugin.Scope = this.AutofacContainer;
+            igniteFactory.SetAutoFacPlugin(this.AutofacContainer);
 
             if (env.IsDevelopment())
             {

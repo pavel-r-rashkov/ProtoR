@@ -17,6 +17,11 @@ jobs:
         with:
           name: integration-tests
           path: TestResults/integration-tests.xml
+      - name: Upload component test results
+        uses: actions/upload-artifact@v1
+        with:
+          name: component-tests
+          path: TestResults/component-tests.xml
       - name: Upload unit test results
         uses: actions/upload-artifact@v1
         with:

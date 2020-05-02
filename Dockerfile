@@ -11,6 +11,7 @@ COPY src/ProtoR.Application/*.csproj ./src/ProtoR.Application/
 COPY src/ProtoR.Infrastructure/*.csproj ./src/ProtoR.Infrastructure/
 COPY tests/ProtoR.Domain.UnitTests/*.csproj ./tests/ProtoR.Domain.UnitTests/
 COPY tests/ProtoR.DataAccess.IntegrationTests/*.csproj ./tests/ProtoR.DataAccess.IntegrationTests/
+COPY tests/ProtoR.ComponentTests/*.csproj ./tests/ProtoR.ComponentTests/
 COPY Directory.Build.props .
 RUN dotnet restore
 
@@ -21,6 +22,7 @@ COPY src/ProtoR.Application/. ./src/ProtoR.Application/
 COPY src/ProtoR.Infrastructure/. ./src/ProtoR.Infrastructure/
 COPY tests/ProtoR.Domain.UnitTests/. ./tests/ProtoR.Domain.UnitTests/
 COPY tests/ProtoR.DataAccess.IntegrationTests/. ./tests/ProtoR.DataAccess.IntegrationTests/
+COPY tests/ProtoR.ComponentTests/. ./tests/ProtoR.ComponentTests/
 COPY default.ruleset .
 COPY tests.ruleset .
 RUN dotnet build --no-restore -c ${build_config}
@@ -37,6 +39,12 @@ LABEL protor-test=true
 RUN apt-get update && apt-get install -y openjdk-11-jre-headless
 WORKDIR /app/tests/ProtoR.DataAccess.IntegrationTests
 ENTRYPOINT ["dotnet", "test", "--no-restore", "--logger", "\"xunit;LogFilePath=../../TestResults/integration-tests.xml\""]
+
+# integration tests
+FROM build AS component-tests
+LABEL protor-test=true
+WORKDIR /app/tests/ProtoR.ComponentTests
+ENTRYPOINT ["dotnet", "test", "--no-restore", "--logger", "\"xunit;LogFilePath=../../TestResults/component-tests.xml\""]
 
 # publish
 FROM build AS publish

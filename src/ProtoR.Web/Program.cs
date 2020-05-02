@@ -1,4 +1,4 @@
-﻿namespace Web
+﻿namespace ProtoR.Web
 {
     using System;
     using Autofac.Extensions.DependencyInjection;

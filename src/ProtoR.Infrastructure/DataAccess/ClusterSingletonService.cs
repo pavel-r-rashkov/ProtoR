@@ -14,7 +14,7 @@ namespace ProtoR.Infrastructure.DataAccess
     [Serializable]
     public class ClusterSingletonService : IService, IClusterSingletonService
     {
-        private static readonly SemaphoreSlim Semaphore = new SemaphoreSlim(1);
+        private static readonly SemaphoreSlim Semaphore = new SemaphoreSlim(1, 1);
         [InstanceResource]
         private readonly IIgnite ignite = null;
         [NonSerialized]

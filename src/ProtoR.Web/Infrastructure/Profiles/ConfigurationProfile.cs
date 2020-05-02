@@ -11,6 +11,8 @@ namespace ProtoR.Web.Infrastructure.Profiles
             this.CreateMap<ConfigurationDto, ConfigurationReadModel>();
 
             this.CreateMap<ConfigurationWriteModel, UpdateConfigurationCommand>();
+
+            this.CreateMap<RuleConfigurationDto, RuleConfigurationModel>().ReverseMap();
         }
     }
 }

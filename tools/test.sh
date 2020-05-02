@@ -37,3 +37,17 @@ docker cp protor-integration-tests:/app/TestResults $solution_dir_path/
 # Clean integration tests container
 echo -e '\e[1mRemoving integration tests container...\e[0m'
 docker rm protor-integration-tests
+
+# Run component tests
+docker build -t protor-component-tests --target component-tests .
+echo -e '\e[1mWaiting for component tests to finish...\e[0m'
+docker run --name protor-component-tests protor-component-tests
+docker wait protor-component-tests
+
+# Copy component test results
+echo -e '\e[1mCopying component tests results from container...\e[0m'
+docker cp protor-component-tests:/app/TestResults $solution_dir_path/
+
+# Clean component tests container
+echo -e '\e[1mRemoving component tests container...\e[0m'
+docker rm protor-component-tests

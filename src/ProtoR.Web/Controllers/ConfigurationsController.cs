@@ -28,7 +28,7 @@ namespace ProtoR.Web.Controllers
 
         [HttpPut]
         [Route("{ConfigurationId}")]
-        public async Task<ActionResult<ConfigurationReadModel>> Get(ConfigurationWriteModel configuration)
+        public async Task<ActionResult> Get(ConfigurationWriteModel configuration)
         {
             var updateCommand = this.Mapper.Map<UpdateConfigurationCommand>(configuration);
             await this.Mediator.Send(updateCommand);

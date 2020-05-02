@@ -14,6 +14,7 @@ namespace ProtoR.Infrastructure.DataAccess
     using Apache.Ignite.Core.Discovery.Tcp;
     using Apache.Ignite.Core.Discovery.Tcp.Static;
     using Apache.Ignite.Core.Failure;
+    using Autofac;
     using MediatR;
     using ProtoR.Application.Configuration;
     using ProtoR.Infrastructure.DataAccess.CacheItems;
@@ -41,6 +42,12 @@ namespace ProtoR.Infrastructure.DataAccess
             }
 
             return this.ignite;
+        }
+
+        public void SetAutoFacPlugin(ILifetimeScope scope)
+        {
+            var plugin = this.Instance().GetPlugin<AutoFacPlugin>(nameof(AutoFacPluginProvider));
+            plugin.Scope = scope;
         }
 
         public void InitalizeIgnite()

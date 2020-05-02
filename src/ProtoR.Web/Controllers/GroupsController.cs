@@ -1,7 +1,6 @@
 namespace ProtoR.Web.Controllers
 {
     using System.Collections.Generic;
-    using System.ComponentModel.DataAnnotations;
     using System.Linq;
     using System.Threading.Tasks;
     using AutoMapper;
@@ -17,15 +16,11 @@ namespace ProtoR.Web.Controllers
 
     public class GroupsController : BaseController
     {
-        private readonly IIgniteFactory igniteFactory;
-
         public GroupsController(
             IMediator mediator,
-            IMapper mapper,
-            IIgniteFactory igniteFactory)
+            IMapper mapper)
             : base(mediator, mapper)
         {
-            this.igniteFactory = igniteFactory;
         }
 
         [HttpGet]
@@ -41,7 +36,12 @@ namespace ProtoR.Web.Controllers
         public async Task<ActionResult<IEnumerable<GroupReadModel>>> Post(GroupWriteModel group)
         {
             var command = this.Mapper.Map<CreateGroupCommand>(group);
-            await this.Mediator.Send(command);
+            var created = await this.Mediator.Send(command);
+
+            if (!created)
+            {
+                return this.BadRequest($"Group with name {group.Name} already exists");
+            }
 
             return this.CreatedAtAction(nameof(this.GetByName), new { GroupName = group.Name }, null);
         }
@@ -81,13 +81,7 @@ namespace ProtoR.Web.Controllers
         public async Task<ActionResult> PostSchema(SchemaWriteModel schema)
         {
             var command = this.Mapper.Map<CreateSchemaCommand>(schema);
-
-            var clusterService = this.igniteFactory
-                .Instance()
-                .GetServices()
-                .GetServiceProxy<IClusterSingletonService>(nameof(IClusterSingletonService));
-
-            var commandResult = await clusterService.AddSchema(command);
+            var commandResult = await this.Mediator.Send(command);
 
             if (!string.IsNullOrWhiteSpace(commandResult.SchemaParseErrors))
             {

@@ -7,7 +7,7 @@ namespace ProtoR.Web.Validators
     {
         public RuleConfigurationModelValidator()
         {
-            this.RuleFor(r => r.Code).Matches("(PB)[\\d]{4}");
+            this.RuleFor(r => r.RuleCode).Matches("(PB)[\\d]{4}");
             this.RuleFor(r => r.Severity)
                 .GreaterThan(0)
                 .LessThan(5);
