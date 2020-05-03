@@ -33,7 +33,7 @@ namespace ProtoR.Web.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<IEnumerable<GroupReadModel>>> Post(GroupWriteModel group)
+        public async Task<ActionResult> Post(GroupWriteModel group)
         {
             var command = this.Mapper.Map<CreateGroupCommand>(group);
             var created = await this.Mediator.Send(command);
@@ -48,12 +48,21 @@ namespace ProtoR.Web.Controllers
 
         [HttpGet]
         [Route("{GroupName}")]
-        public async Task<ActionResult<IEnumerable<GroupReadModel>>> GetByName([FromRoute]GetByNameQuery query)
+        public async Task<ActionResult<GroupReadModel>> GetByName([FromRoute]GetByNameQuery query)
         {
             GroupDto groupDto = await this.Mediator.Send(query);
             var groupResource = this.Mapper.Map<GroupReadModel>(groupDto);
 
             return this.Ok(groupResource);
+        }
+
+        [HttpDelete]
+        [Route("{GroupName}")]
+        public async Task<ActionResult> Delete(DeleteGroupCommand command)
+        {
+            await this.Mediator.Send(command);
+
+            return this.NoContent();
         }
 
         [HttpGet]
@@ -105,7 +114,7 @@ namespace ProtoR.Web.Controllers
 
         [HttpGet]
         [Route("{GroupName}/Configuration")]
-        public async Task<ActionResult<IEnumerable<GroupReadModel>>> GetConfiguration([FromRoute]GetByGroupNameQuery query)
+        public async Task<ActionResult<ConfigurationReadModel>> GetConfiguration([FromRoute]GetByGroupNameQuery query)
         {
             ConfigurationDto configurationDto = await this.Mediator.Send(query);
             var configurationResource = this.Mapper.Map<ConfigurationReadModel>(configurationDto);

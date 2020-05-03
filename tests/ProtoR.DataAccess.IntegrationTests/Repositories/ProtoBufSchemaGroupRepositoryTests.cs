@@ -6,6 +6,7 @@ namespace ProtoR.DataAccess.IntegrationTests.Repositories
     using System.Threading.Tasks;
     using Apache.Ignite.Core.Cache;
     using Apache.Ignite.Linq;
+    using AutoFixture;
     using Google.Protobuf.Reflection;
     using Moq;
     using ProtoR.DataAccess.IntegrationTests.Fixtures;
@@ -25,8 +26,11 @@ namespace ProtoR.DataAccess.IntegrationTests.Repositories
         private readonly IgniteFixture igniteFixture;
         private readonly ProtoBufSchemaGroupRepository repository;
         private readonly IUserProvider userProviderStub = new UserProviderStub();
+        private readonly Fixture fixture = new Fixture();
         private readonly ICache<long, SchemaCacheItem> schemaCache;
         private readonly ICache<long, SchemaGroupCacheItem> schemaGroupCache;
+        private readonly ICache<long, ConfigurationCacheItem> configurationCache;
+        private readonly ICache<long, RuleConfigurationCacheItem> ruleConfigurationCache;
 
         public ProtoBufSchemaGroupRepositoryTests(IgniteFixture igniteFixture)
         {
@@ -37,6 +41,8 @@ namespace ProtoR.DataAccess.IntegrationTests.Repositories
                 this.userProviderStub,
                 this.igniteFixture.Configuration);
 
+            this.fixture.Customizations.Add(new UtcRandomDateTimeSequenceGenerator());
+
             this.schemaCache = this.igniteFixture.IgniteFactory
                 .Instance()
                 .GetCache<long, SchemaCacheItem>(this.igniteFixture.Configuration.SchemaCacheName);
@@ -44,6 +50,14 @@ namespace ProtoR.DataAccess.IntegrationTests.Repositories
             this.schemaGroupCache = this.igniteFixture.IgniteFactory
                 .Instance()
                 .GetCache<long, SchemaGroupCacheItem>(this.igniteFixture.Configuration.SchemaGroupCacheName);
+
+            this.configurationCache = this.igniteFixture.IgniteFactory
+                .Instance()
+                .GetCache<long, ConfigurationCacheItem>(this.igniteFixture.Configuration.ConfigurationCacheName);
+
+            this.ruleConfigurationCache = this.igniteFixture.IgniteFactory
+                .Instance()
+                .GetCache<long, RuleConfigurationCacheItem>(this.igniteFixture.Configuration.RuleConfigurationCacheName);
         }
 
         public void Dispose()
@@ -118,6 +132,34 @@ namespace ProtoR.DataAccess.IntegrationTests.Repositories
                 .ToList();
 
             Assert.NotEmpty(schemas);
+        }
+
+        [Fact]
+        public async Task DeleteGroup_ShouldDeleteGroupAndAssociatedItems()
+        {
+            var group = this.fixture.Create<SchemaGroupCacheItem>();
+            var groupId = 1;
+            this.schemaGroupCache.Put(groupId, group);
+
+            var schema = this.fixture.Create<SchemaCacheItem>();
+            schema.SchemaGroupId = groupId;
+            this.schemaCache.Put(1, schema);
+
+            var configuration = this.fixture.Create<ConfigurationCacheItem>();
+            configuration.SchemaGroupId = groupId;
+            this.configurationCache.Put(1, configuration);
+
+            var ruleConfiguration = this.fixture.Create<RuleConfigurationCacheItem>();
+            ruleConfiguration.ConfigurationId = 1;
+            this.ruleConfigurationCache.Put(1, ruleConfiguration);
+
+            ProtoBufSchemaGroup groupAggregate = await this.repository.GetByName(group.Name);
+            await this.repository.Delete(groupAggregate);
+
+            Assert.Empty(this.schemaGroupCache.AsCacheQueryable().ToList());
+            Assert.Empty(this.schemaCache.AsCacheQueryable().ToList());
+            Assert.Empty(this.configurationCache.AsCacheQueryable().ToList());
+            Assert.Empty(this.ruleConfigurationCache.AsCacheQueryable().ToList());
         }
 
         private async Task InsertSchemaGroup(long id, string name)

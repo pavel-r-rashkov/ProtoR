@@ -10,5 +10,7 @@ namespace ProtoR.Domain.SchemaGroupAggregate
         Task Update(ProtoBufSchemaGroup schemaGroup);
 
         Task<long> Add(ProtoBufSchemaGroup schemaGroup);
+
+        Task Delete(ProtoBufSchemaGroup schemaGroup);
     }
 }

@@ -171,5 +171,18 @@ namespace ProtoR.ComponentTests
 
             Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
         }
+
+        [Fact]
+        public async Task DeleteGroup_ShouldReturnNoContent()
+        {
+            var uriBuilder = new UriBuilder(Constants.BaseAddress)
+            {
+                Path = $"api/Groups/TestGroup",
+            };
+
+            var response = await this.client.DeleteAsync(uriBuilder.Uri);
+
+            Assert.True(response.IsSuccessStatusCode);
+        }
     }
 }
