@@ -191,5 +191,32 @@ namespace ProtoR.Domain.UnitTests.ConfigurationAggregateTests
             Assert.Equal(rulesConfiguration[RuleCode.PB0001].Severity, Severity.Error);
             Assert.Equal(rulesConfiguration[RuleCode.PB0002].Severity, Severity.Hidden);
         }
+
+        [Fact]
+        public void DefaultGroupConfiguration_ShouldReturnDefaultGroupConfiguration()
+        {
+            var groupId = this.fixture.Create<long>();
+            var configuration = Configuration.DefaultGroupConfiguration(groupId);
+
+            Assert.Equal(groupId, configuration.SchemaGroupId);
+            Assert.DoesNotContain(
+                configuration.GetRulesConfiguration(),
+                pair => !pair.Value.Inherit);
+            Assert.True(configuration.GroupConfiguration.Inherit);
+        }
+
+        [Fact]
+        public void DefaultGlobalConfiguration_ShouldReturnDefaultGlobalConfiguration()
+        {
+            var configuration = Configuration.DefaultGlobalConfiguration();
+
+            Assert.Null(configuration.SchemaGroupId);
+            Assert.DoesNotContain(
+                configuration.GetRulesConfiguration(),
+                pair => pair.Value.Severity != Severity.Hidden);
+            Assert.True(configuration.GroupConfiguration.BackwardCompatible);
+            Assert.False(configuration.GroupConfiguration.ForwardCompatible);
+            Assert.False(configuration.GroupConfiguration.Transitive);
+        }
     }
 }

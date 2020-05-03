@@ -9,7 +9,6 @@ namespace ProtoR.Web.Controllers
     using ProtoR.Application.Configuration;
     using ProtoR.Application.Group;
     using ProtoR.Application.Schema;
-    using ProtoR.Infrastructure.DataAccess;
     using ProtoR.Web.Resources.ConfigurationResource;
     using ProtoR.Web.Resources.GroupResource;
     using ProtoR.Web.Resources.SchemaResource;
@@ -110,6 +109,21 @@ namespace ProtoR.Web.Controllers
                     Version = commandResult.NewVersion,
                 },
                 commandResult.RuleViolations);
+        }
+
+        [HttpPost]
+        [Route("{GroupName}/SchemaTest")]
+        public async Task<ActionResult> ValidationCheck(SchemaWriteModel schema)
+        {
+            var command = this.Mapper.Map<ValidateSchemaCommand>(schema);
+            var commandResult = await this.Mediator.Send(command);
+
+            if (!string.IsNullOrWhiteSpace(commandResult.SchemaParseErrors))
+            {
+                return this.BadRequest(commandResult.SchemaParseErrors);
+            }
+
+            return this.Ok(commandResult.RuleViolations);
         }
 
         [HttpGet]

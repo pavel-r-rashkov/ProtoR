@@ -5,6 +5,6 @@ namespace ProtoR.Infrastructure.DataAccess
 
     public interface IClusterSingletonService
     {
-         Task<CreateSchemaCommandResult> AddSchema(CreateSchemaCommand command);
+         Task<SchemaValidationResultDto> AddSchema(CreateSchemaCommand command);
     }
 }

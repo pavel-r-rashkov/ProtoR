@@ -173,6 +173,42 @@ namespace ProtoR.ComponentTests
         }
 
         [Fact]
+        public async Task SchemaTest_WithValidSchema_ShouldReturn200Ok()
+        {
+            var uriBuilder = new UriBuilder(Constants.BaseAddress)
+            {
+                Path = $"api/Groups/TestGroup/SchemaTest",
+            };
+            var group = new SchemaWriteModel
+            {
+                Contents = "syntax = \"proto3\";",
+            };
+
+            using var contents = new JsonHttpContent(group);
+            var response = await this.client.PostAsync(uriBuilder.Uri, contents);
+
+            Assert.True(response.IsSuccessStatusCode);
+        }
+
+        [Fact]
+        public async Task SchemaTest_WithInvalidSchema_ShouldReturn400BadRequest()
+        {
+            var uriBuilder = new UriBuilder(Constants.BaseAddress)
+            {
+                Path = $"api/Groups/TestGroup/SchemaTest",
+            };
+            var group = new SchemaWriteModel
+            {
+                Contents = "Invalid schema",
+            };
+
+            using var contents = new JsonHttpContent(group);
+            var response = await this.client.PostAsync(uriBuilder.Uri, contents);
+
+            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        }
+
+        [Fact]
         public async Task DeleteGroup_ShouldReturnNoContent()
         {
             var uriBuilder = new UriBuilder(Constants.BaseAddress)

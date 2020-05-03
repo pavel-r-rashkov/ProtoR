@@ -55,6 +55,22 @@ namespace ProtoR.Domain.SchemaGroupAggregate
             GroupConfiguration groupConfiguration,
             IReadOnlyDictionary<RuleCode, RuleConfiguration> rulesConfiguration)
         {
+            var (ruleViolations, newSchema) = this.TestSchema(schemaContents, groupConfiguration, rulesConfiguration);
+            IEnumerable<RuleViolation> fatalViolations = ruleViolations.Where(ruleViolation => ruleViolation.Severity.IsFatal);
+
+            if (!fatalViolations.Any())
+            {
+                this.schemas.Add(newSchema);
+            }
+
+            return ruleViolations;
+        }
+
+        public (IEnumerable<RuleViolation>, TSchema) TestSchema(
+            string schemaContents,
+            GroupConfiguration groupConfiguration,
+            IReadOnlyDictionary<RuleCode, RuleConfiguration> rulesConfiguration)
+        {
             if (groupConfiguration == null)
             {
                 throw new ArgumentNullException($"{nameof(groupConfiguration)} cannot be null");
@@ -93,14 +109,7 @@ namespace ProtoR.Domain.SchemaGroupAggregate
                 while (schemaEnumerator.MoveNext() && groupConfiguration.Transitive);
             }
 
-            IEnumerable<RuleViolation> fatalViolations = ruleViolations.Where(ruleViolation => ruleViolation.Severity.IsFatal);
-
-            if (!fatalViolations.Any())
-            {
-                this.schemas.Add(newSchema);
-            }
-
-            return ruleViolations;
+            return (ruleViolations, newSchema);
         }
 
         private List<RuleViolation> ValidateSchemas(

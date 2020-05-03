@@ -11,6 +11,8 @@ namespace ProtoR.Web.Infrastructure.Profiles
             this.CreateMap<SchemaDto, SchemaReadModel>();
 
             this.CreateMap<SchemaWriteModel, CreateSchemaCommand>();
+
+            this.CreateMap<SchemaWriteModel, ValidateSchemaCommand>();
         }
     }
 }

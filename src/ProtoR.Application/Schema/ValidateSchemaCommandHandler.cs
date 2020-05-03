@@ -11,37 +11,34 @@ namespace ProtoR.Application.Schema
     using ProtoR.Domain.SchemaGroupAggregate;
     using ProtoR.Domain.SchemaGroupAggregate.Rules;
     using ProtoR.Domain.SchemaGroupAggregate.Schemas;
-    using ProtoR.Domain.SeedWork;
 
-    public class CreateSchemaCommandHandler : IRequestHandler<CreateSchemaCommand, SchemaValidationResultDto>
+    public class ValidateSchemaCommandHandler : IRequestHandler<ValidateSchemaCommand, SchemaValidationResultDto>
     {
-        private readonly IProtoBufSchemaGroupRepository schemaGroupRepository;
-        private readonly IConfigurationRepository configurationRepository;
         private readonly IMapper mapper;
-        private readonly IUnitOfWork unitOfWork;
+        private readonly IProtoBufSchemaGroupRepository groupRepository;
+        private readonly IConfigurationRepository configurationRepository;
 
-        public CreateSchemaCommandHandler(
+        public ValidateSchemaCommandHandler(
             IMapper mapper,
-            IProtoBufSchemaGroupRepository schemaGroupRepository,
-            IConfigurationRepository configurationRepository,
-            IUnitOfWork unitOfWork)
+            IProtoBufSchemaGroupRepository groupRepository,
+            IConfigurationRepository configurationRepository)
         {
             this.mapper = mapper;
-            this.schemaGroupRepository = schemaGroupRepository;
+            this.groupRepository = groupRepository;
             this.configurationRepository = configurationRepository;
-            this.unitOfWork = unitOfWork;
         }
 
-        public async Task<SchemaValidationResultDto> Handle(CreateSchemaCommand request, CancellationToken cancellationToken)
+        public async Task<SchemaValidationResultDto> Handle(ValidateSchemaCommand request, CancellationToken cancellationToken)
         {
-            ProtoBufSchemaGroup schemaGroup = await this.schemaGroupRepository.GetByName(request.GroupName);
-            Configuration configuration = await this.configurationRepository.GetBySchemaGroupId(schemaGroup.Id);
-            Configuration globalConfiguration = await this.configurationRepository.GetBySchemaGroupId(null);
+            var group = await this.groupRepository.GetByName(request.GroupName);
+            var configuration = await this.configurationRepository.GetBySchemaGroupId(group.Id);
+            var globalConfiguration = await this.configurationRepository.GetBySchemaGroupId(null);
             IEnumerable<RuleViolation> violations;
+            ProtoBufSchema newSchema;
 
             try
             {
-                violations = schemaGroup.AddSchema(
+                (violations, newSchema) = group.TestSchema(
                     request.Contents,
                     this.GetGroupConfiguration(configuration, globalConfiguration),
                     configuration.MergeRuleConfiguration(globalConfiguration));
@@ -54,18 +51,10 @@ namespace ProtoR.Application.Schema
                 };
             }
 
-            if (!violations.Any(v => v.Severity.IsFatal))
-            {
-                await this.schemaGroupRepository.Update(schemaGroup);
-                await this.unitOfWork.SaveChanges();
-            }
-
-            var violationsDto = this.mapper.Map<IEnumerable<RuleViolationDto>>(violations);
-
             return new SchemaValidationResultDto
             {
-                NewVersion = schemaGroup.Schemas.ToList().Last().Version.ToString(),
-                RuleViolations = violationsDto,
+                NewVersion = newSchema.Version.ToString(),
+                RuleViolations = this.mapper.Map<IEnumerable<RuleViolationDto>>(violations),
             };
         }
 

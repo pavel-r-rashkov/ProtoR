@@ -35,7 +35,7 @@ namespace ProtoR.Infrastructure.DataAccess
             this.autoFacPlugin = this.ignite.GetPlugin<AutoFacPlugin>(nameof(AutoFacPluginProvider));
         }
 
-        public async Task<CreateSchemaCommandResult> AddSchema(CreateSchemaCommand command)
+        public async Task<SchemaValidationResultDto> AddSchema(CreateSchemaCommand command)
         {
             var mediator = this.autoFacPlugin.Scope.Resolve<IMediator>();
             await Semaphore.WaitAsync();
