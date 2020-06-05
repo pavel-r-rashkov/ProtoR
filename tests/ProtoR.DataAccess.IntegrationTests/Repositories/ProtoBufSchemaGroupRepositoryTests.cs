@@ -9,12 +9,13 @@ namespace ProtoR.DataAccess.IntegrationTests.Repositories
     using AutoFixture;
     using Google.Protobuf.Reflection;
     using Moq;
+    using ProtoR.Application;
     using ProtoR.DataAccess.IntegrationTests.Fixtures;
+    using ProtoR.Domain.CategoryAggregate;
     using ProtoR.Domain.ConfigurationAggregate;
     using ProtoR.Domain.SchemaGroupAggregate;
     using ProtoR.Domain.SchemaGroupAggregate.Rules;
     using ProtoR.Domain.SchemaGroupAggregate.Schemas;
-    using ProtoR.Infrastructure;
     using ProtoR.Infrastructure.DataAccess.CacheItems;
     using ProtoR.Infrastructure.DataAccess.Repositories;
     using Xunit;
@@ -70,7 +71,7 @@ namespace ProtoR.DataAccess.IntegrationTests.Repositories
         {
             var name = "Schema Group Name";
 
-            long id = await this.repository.Add(new ProtoBufSchemaGroup(name));
+            long id = await this.repository.Add(new ProtoBufSchemaGroup(name, Category.DefaultCategoryId));
 
             Assert.True(id > 0);
             SchemaGroupCacheItem insertedItem = this.schemaGroupCache.Get(id);
@@ -111,7 +112,7 @@ namespace ProtoR.DataAccess.IntegrationTests.Repositories
         public async Task Update_WithNewSchemas_ShouldInsertNewSchemas()
         {
             var name = "Test Group Name";
-            await this.repository.Add(new ProtoBufSchemaGroup(name));
+            await this.repository.Add(new ProtoBufSchemaGroup(name, Category.DefaultCategoryId));
             ProtoBufSchemaGroup schemaGroup = await this.repository.GetByName(name);
 
             var schemaFactoryMock = new Mock<ISchemaFactory<ProtoBufSchema, FileDescriptorSet>>();

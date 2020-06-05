@@ -35,6 +35,13 @@ namespace ProtoR.Application.Schema
         public async Task<SchemaValidationResultDto> Handle(CreateSchemaCommand request, CancellationToken cancellationToken)
         {
             ProtoBufSchemaGroup schemaGroup = await this.schemaGroupRepository.GetByName(request.GroupName);
+
+            if (schemaGroup == null)
+            {
+                // TODO
+                throw new Exception("Group Not found");
+            }
+
             Configuration configuration = await this.configurationRepository.GetBySchemaGroupId(schemaGroup.Id);
             Configuration globalConfiguration = await this.configurationRepository.GetBySchemaGroupId(null);
             IEnumerable<RuleViolation> violations;

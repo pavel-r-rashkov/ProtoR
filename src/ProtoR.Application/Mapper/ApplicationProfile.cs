@@ -1,7 +1,9 @@
 namespace ProtoR.Application.Mapper
 {
     using AutoMapper;
+    using ProtoR.Application.Permission;
     using ProtoR.Application.Schema;
+    using ProtoR.Domain.RoleAggregate;
     using ProtoR.Domain.SchemaGroupAggregate.Rules;
 
     public class ApplicationProfile : Profile
@@ -16,6 +18,8 @@ namespace ProtoR.Application.Mapper
                 .ForMember(d => d.IsBackwardIncompatible, opt => opt.MapFrom(s => s.BackwardCompatibilityViolation))
                 .ForMember(d => d.Description, opt => opt.MapFrom(s => s.ValidationResult.Description))
                 .ForMember(d => d.ConflictingVersion, opt => opt.MapFrom(s => s.OldVersion.VersionNumber));
+
+            this.CreateMap<Permission, PermissionDto>();
         }
     }
 }

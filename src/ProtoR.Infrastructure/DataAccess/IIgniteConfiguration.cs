@@ -10,6 +10,24 @@ namespace ProtoR.Infrastructure.DataAccess
 
         string RuleConfigurationCacheName { get; }
 
+        string RoleCacheName { get; }
+
+        string UserCacheName { get; }
+
+        string UserRoleCacheName { get; }
+
+        string UserCategoryCacheName { get; }
+
+        string RolePermissionCacheName { get; }
+
+        string CategoryCacheName { get; }
+
+        string ClientCacheName { get; }
+
+        string ClientRoleCacheName { get; }
+
+        string ClientCategoryCacheName { get; }
+
         int DiscoveryPort { get; }
 
         int CommunicationPort { get; }
@@ -17,5 +35,7 @@ namespace ProtoR.Infrastructure.DataAccess
         string NodeEndpoints { get; }
 
         string StoragePath { get; }
+
+        bool EnablePersistence { get; }
     }
 }

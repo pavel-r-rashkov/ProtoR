@@ -5,6 +5,7 @@ namespace ProtoR.Web.Controllers
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
     using ProtoR.Application.Configuration;
+    using ProtoR.Web.Infrastructure.Identity;
     using ProtoR.Web.Resources.ConfigurationResource;
 
     public class ConfigurationsController : BaseController
@@ -18,6 +19,7 @@ namespace ProtoR.Web.Controllers
 
         [HttpGet]
         [Route("{ConfigurationId}")]
+        [PermissionClaim(Permission.ConfigurationRead)]
         public async Task<ActionResult<ConfigurationReadModel>> Get([FromRoute]GetByIdQuery query)
         {
             ConfigurationDto configurationDto = await this.Mediator.Send(query);
@@ -28,12 +30,13 @@ namespace ProtoR.Web.Controllers
 
         [HttpPut]
         [Route("{ConfigurationId}")]
+        [PermissionClaim(Permission.ConfigurationWrite)]
         public async Task<ActionResult> Get(ConfigurationWriteModel configuration)
         {
             var updateCommand = this.Mapper.Map<UpdateConfigurationCommand>(configuration);
             await this.Mediator.Send(updateCommand);
 
-            return this.Ok();
+            return this.NoContent();
         }
     }
 }

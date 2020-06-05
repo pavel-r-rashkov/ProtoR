@@ -11,13 +11,18 @@ namespace ProtoR.Infrastructure.DataAccess
 
         public IgniteUnitOfWork(IIgniteFactory igniteFactory)
         {
-            var transactions = igniteFactory.Instance().GetTransactions();
-            this.transaction = transactions.TxStart();
+            this.transaction = igniteFactory
+                .Instance()
+                .GetTransactions()
+                .TxStart();
         }
 
         public void Dispose()
         {
-            this.transaction.Dispose();
+            if (this.transaction != null)
+            {
+                this.transaction.Dispose();
+            }
         }
 
         public async Task SaveChanges()

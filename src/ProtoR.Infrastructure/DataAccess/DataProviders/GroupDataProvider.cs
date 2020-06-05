@@ -6,55 +6,69 @@ namespace ProtoR.Infrastructure.DataAccess.DataProviders
     using Apache.Ignite.Core;
     using Apache.Ignite.Core.Cache;
     using Apache.Ignite.Linq;
+    using ProtoR.Application;
     using ProtoR.Application.Group;
+    using ProtoR.Domain.CategoryAggregate;
     using ProtoR.Infrastructure.DataAccess.CacheItems;
 
     public class GroupDataProvider : IGroupDataProvider
     {
         private readonly IIgnite ignite;
-        private readonly string groupCacheName;
+        private readonly ICache<long, SchemaGroupCacheItem> groupCache;
 
         public GroupDataProvider(
             IIgniteFactory igniteFactory,
             IIgniteConfiguration configurationProvider)
         {
             this.ignite = igniteFactory.Instance();
-            this.groupCacheName = configurationProvider.SchemaGroupCacheName;
+            this.groupCache = this.ignite.GetCache<long, SchemaGroupCacheItem>(configurationProvider.SchemaGroupCacheName);
         }
 
         public Task<GroupDto> GetByName(string groupName)
         {
-            ICache<long, SchemaGroupCacheItem> groupCache = this.ignite.GetCache<long, SchemaGroupCacheItem>(this.groupCacheName);
-            var group = groupCache
+            var group = this.groupCache
                 .AsCacheQueryable()
                 .Where(c => c.Value.Name.ToUpper() == groupName.ToUpper())
                 .Select(c => new
                 {
                     Id = c.Key,
                     c.Value.Name,
+                    c.Value.CategoryId,
                     c.Value.CreatedOn,
                     c.Value.CreatedBy,
                 })
                 .FirstOrDefault();
 
+            if (group == null)
+            {
+                return Task.FromResult((GroupDto)null);
+            }
+
             return Task.FromResult(new GroupDto
             {
                 Id = group.Id,
                 Name = group.Name,
+                CategoryId = group.CategoryId,
                 CreatedOn = group.CreatedOn,
                 CreatedBy = group.CreatedBy,
             });
         }
 
-        public Task<IEnumerable<GroupDto>> GetGroups()
+        public Task<IEnumerable<GroupDto>> GetGroups(IEnumerable<long> categories)
         {
-            ICache<long, SchemaGroupCacheItem> groupCache = this.ignite.GetCache<long, SchemaGroupCacheItem>(this.groupCacheName);
-            var groups = groupCache
-                .AsCacheQueryable()
+            var cacheQueryable = this.groupCache.AsCacheQueryable();
+
+            if (categories != null)
+            {
+                cacheQueryable = cacheQueryable.Where(g => categories.Contains(g.Value.CategoryId));
+            }
+
+            var groups = cacheQueryable
                 .Select(c => new
                 {
                     Id = c.Key,
                     c.Value.Name,
+                    c.Value.CategoryId,
                     c.Value.CreatedOn,
                     c.Value.CreatedBy,
                 })
@@ -64,9 +78,21 @@ namespace ProtoR.Infrastructure.DataAccess.DataProviders
             {
                 Id = g.Id,
                 Name = g.Name,
+                CategoryId = g.CategoryId,
                 CreatedOn = g.CreatedOn,
                 CreatedBy = g.CreatedBy,
             }));
+        }
+
+        public Task<long> GetCategoryId(long groupId)
+        {
+            var categoryId = this.groupCache
+                .AsCacheQueryable()
+                .Where(g => g.Key == groupId)
+                .Select(g => g.Value.CategoryId)
+                .FirstOrDefault();
+
+            return Task.FromResult(categoryId);
         }
     }
 }

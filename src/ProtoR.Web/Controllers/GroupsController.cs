@@ -9,6 +9,7 @@ namespace ProtoR.Web.Controllers
     using ProtoR.Application.Configuration;
     using ProtoR.Application.Group;
     using ProtoR.Application.Schema;
+    using ProtoR.Web.Infrastructure.Identity;
     using ProtoR.Web.Resources.ConfigurationResource;
     using ProtoR.Web.Resources.GroupResource;
     using ProtoR.Web.Resources.SchemaResource;
@@ -23,6 +24,7 @@ namespace ProtoR.Web.Controllers
         }
 
         [HttpGet]
+        [PermissionClaim(Permission.GroupRead)]
         public async Task<ActionResult<IEnumerable<GroupReadModel>>> Get()
         {
             IEnumerable<GroupDto> groupsDto = await this.Mediator.Send(new GetGroupsQuery());
@@ -32,6 +34,7 @@ namespace ProtoR.Web.Controllers
         }
 
         [HttpPost]
+        [PermissionClaim(Permission.GroupWrite)]
         public async Task<ActionResult> Post(GroupWriteModel group)
         {
             var command = this.Mapper.Map<CreateGroupCommand>(group);
@@ -39,14 +42,26 @@ namespace ProtoR.Web.Controllers
 
             if (!created)
             {
-                return this.BadRequest($"Group with name {group.Name} already exists");
+                return this.BadRequest($"Group with name {group.GroupName} already exists");
             }
 
-            return this.CreatedAtAction(nameof(this.GetByName), new { GroupName = group.Name }, null);
+            return this.CreatedAtAction(nameof(this.GetByName), new { group.GroupName }, null);
+        }
+
+        [HttpPut]
+        [Route("{GroupName}")]
+        [PermissionClaim(Permission.GroupWrite)]
+        public async Task<ActionResult> Put(GroupPutModel group)
+        {
+            var command = this.Mapper.Map<UpdateGroupCommand>(group);
+            await this.Mediator.Send(command);
+
+            return this.NoContent();
         }
 
         [HttpGet]
         [Route("{GroupName}")]
+        [PermissionClaim(Permission.GroupRead)]
         public async Task<ActionResult<GroupReadModel>> GetByName([FromRoute]GetByNameQuery query)
         {
             GroupDto groupDto = await this.Mediator.Send(query);
@@ -57,6 +72,7 @@ namespace ProtoR.Web.Controllers
 
         [HttpDelete]
         [Route("{GroupName}")]
+        [PermissionClaim(Permission.GroupWrite)]
         public async Task<ActionResult> Delete(DeleteGroupCommand command)
         {
             await this.Mediator.Send(command);
@@ -66,6 +82,7 @@ namespace ProtoR.Web.Controllers
 
         [HttpGet]
         [Route("{GroupName}/Schemas")]
+        [PermissionClaim(Permission.SchemaRead)]
         public async Task<ActionResult<IEnumerable<SchemaReadModel>>> GetSchemas([FromRoute]GetGroupSchemasQuery query)
         {
             IEnumerable<SchemaDto> schemasDto = await this.Mediator.Send(query);
@@ -76,6 +93,7 @@ namespace ProtoR.Web.Controllers
 
         [HttpGet]
         [Route("{GroupName}/Schemas/{Version}")]
+        [PermissionClaim(Permission.SchemaRead)]
         public async Task<ActionResult<SchemaReadModel>> GetSchema([FromRoute]GetByVersionQuery query)
         {
             SchemaDto schemaDto = await this.Mediator.Send(query);
@@ -86,6 +104,7 @@ namespace ProtoR.Web.Controllers
 
         [HttpPost]
         [Route("{GroupName}/Schemas")]
+        [PermissionClaim(Permission.SchemaWrite)]
         public async Task<ActionResult> PostSchema(SchemaWriteModel schema)
         {
             var command = this.Mapper.Map<CreateSchemaCommand>(schema);
@@ -113,6 +132,7 @@ namespace ProtoR.Web.Controllers
 
         [HttpPost]
         [Route("{GroupName}/SchemaTest")]
+        [PermissionClaim(Permission.SchemaRead)]
         public async Task<ActionResult> ValidationCheck(SchemaWriteModel schema)
         {
             var command = this.Mapper.Map<ValidateSchemaCommand>(schema);
@@ -128,6 +148,7 @@ namespace ProtoR.Web.Controllers
 
         [HttpGet]
         [Route("{GroupName}/Configuration")]
+        [PermissionClaim(Permission.ConfigurationRead)]
         public async Task<ActionResult<ConfigurationReadModel>> GetConfiguration([FromRoute]GetByGroupNameQuery query)
         {
             ConfigurationDto configurationDto = await this.Mediator.Send(query);

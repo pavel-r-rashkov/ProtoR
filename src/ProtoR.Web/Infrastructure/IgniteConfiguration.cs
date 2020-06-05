@@ -9,6 +9,15 @@ namespace ProtoR.Web.Infrastructure
         private string schemaGroupCacheName;
         private string configurationCacheName;
         private string ruleConfigurationCacheName;
+        private string userCacheName;
+        private string roleCacheName;
+        private string userRoleCacheName;
+        private string rolePermissionCacheName;
+        private string categoryCacheName;
+        private string clientCacheName;
+        private string clientRoleCacheName;
+        private string clientCategoryCacheName;
+        private string userCategoryCacheName;
         private int discoveryPort;
         private int communicationPort;
         private string nodeEndpoints;
@@ -86,6 +95,60 @@ namespace ProtoR.Web.Infrastructure
             }
         }
 
+        public string UserCacheName
+        {
+            get
+            {
+                return this.userCacheName;
+            }
+
+            set
+            {
+                if (string.IsNullOrWhiteSpace(value))
+                {
+                    throw new ArgumentException($"{nameof(this.UserCacheName)} cannot be null or empty");
+                }
+
+                this.userCacheName = value;
+            }
+        }
+
+        public string RoleCacheName
+        {
+            get
+            {
+                return this.roleCacheName;
+            }
+
+            set
+            {
+                if (string.IsNullOrWhiteSpace(value))
+                {
+                    throw new ArgumentException($"{nameof(this.RoleCacheName)} cannot be null or empty");
+                }
+
+                this.roleCacheName = value;
+            }
+        }
+
+        public string UserRoleCacheName
+        {
+            get
+            {
+                return this.userRoleCacheName;
+            }
+
+            set
+            {
+                if (string.IsNullOrWhiteSpace(value))
+                {
+                    throw new ArgumentException($"{nameof(this.UserRoleCacheName)} cannot be null or empty");
+                }
+
+                this.userRoleCacheName = value;
+            }
+        }
+
         public int DiscoveryPort
         {
             get
@@ -157,5 +220,115 @@ namespace ProtoR.Web.Infrastructure
                 this.storagePath = value;
             }
         }
+
+        public string RolePermissionCacheName
+        {
+            get
+            {
+                return this.rolePermissionCacheName;
+            }
+
+            set
+            {
+                if (string.IsNullOrWhiteSpace(value))
+                {
+                    throw new ArgumentException($"{nameof(this.RolePermissionCacheName)} cannot be null or empty");
+                }
+
+                this.rolePermissionCacheName = value;
+            }
+        }
+
+        public string CategoryCacheName
+        {
+            get
+            {
+                return this.categoryCacheName;
+            }
+
+            set
+            {
+                if (string.IsNullOrWhiteSpace(value))
+                {
+                    throw new ArgumentException($"{nameof(this.CategoryCacheName)} cannot be null or empty");
+                }
+
+                this.categoryCacheName = value;
+            }
+        }
+
+        public string ClientCacheName
+        {
+            get
+            {
+                return this.clientCacheName;
+            }
+
+            set
+            {
+                if (string.IsNullOrWhiteSpace(value))
+                {
+                    throw new ArgumentException($"{nameof(this.ClientCacheName)} cannot be null or empty");
+                }
+
+                this.clientCacheName = value;
+            }
+        }
+
+        public string ClientRoleCacheName
+        {
+            get
+            {
+                return this.clientRoleCacheName;
+            }
+
+            set
+            {
+                if (string.IsNullOrWhiteSpace(value))
+                {
+                    throw new ArgumentException($"{nameof(this.ClientRoleCacheName)} cannot be null or empty");
+                }
+
+                this.clientRoleCacheName = value;
+            }
+        }
+
+        public string ClientCategoryCacheName
+        {
+            get
+            {
+                return this.clientCategoryCacheName;
+            }
+
+            set
+            {
+                if (string.IsNullOrWhiteSpace(value))
+                {
+                    throw new ArgumentException($"{nameof(this.ClientCategoryCacheName)} cannot be null or empty");
+                }
+
+                this.clientCategoryCacheName = value;
+            }
+        }
+
+        public string UserCategoryCacheName
+        {
+            get
+            {
+                return this.userCategoryCacheName;
+            }
+
+            set
+            {
+                if (string.IsNullOrWhiteSpace(value))
+                {
+                    throw new ArgumentException($"{nameof(this.UserCategoryCacheName)} cannot be null or empty");
+                }
+
+                this.userCategoryCacheName = value;
+            }
+        }
+
+        public bool EnablePersistence { get; set; }
     }
 }

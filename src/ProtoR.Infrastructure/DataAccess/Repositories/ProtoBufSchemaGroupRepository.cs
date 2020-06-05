@@ -8,6 +8,7 @@ namespace ProtoR.Infrastructure.DataAccess.Repositories
     using Apache.Ignite.Core.Cache;
     using Apache.Ignite.Core.DataStructures;
     using Apache.Ignite.Linq;
+    using ProtoR.Application;
     using ProtoR.Domain.SchemaGroupAggregate;
     using ProtoR.Domain.SchemaGroupAggregate.Schemas;
     using ProtoR.Infrastructure.DataAccess.CacheItems;
@@ -40,6 +41,7 @@ namespace ProtoR.Infrastructure.DataAccess.Repositories
             var schemaGroupCacheItem = new SchemaGroupCacheItem
             {
                 Name = schemaGroup.Name,
+                CategoryId = schemaGroup.CategoryId,
                 CreatedBy = this.userProvider.GetCurrentUserName(),
                 CreatedOn = DateTime.UtcNow,
             };
@@ -58,25 +60,36 @@ namespace ProtoR.Infrastructure.DataAccess.Repositories
         public Task<ProtoBufSchemaGroup> GetByName(string name)
         {
             ICache<long, SchemaGroupCacheItem> schemaGroupCache = this.ignite.GetCache<long, SchemaGroupCacheItem>(this.schemaGroupCacheName);
-            ICacheEntry<long, SchemaGroupCacheItem> schemaCacheItem = schemaGroupCache
+            ICacheEntry<long, SchemaGroupCacheItem> schemaGroupCacheItem = schemaGroupCache
                 .AsCacheQueryable()
                 .FirstOrDefault(c => c.Value.Name.ToUpper() == name.ToUpper());
+
+            if (schemaGroupCacheItem == null)
+            {
+                return Task.FromResult((ProtoBufSchemaGroup)null);
+            }
 
             ICache<long, SchemaCacheItem> schemaCache = this.ignite.GetCache<long, SchemaCacheItem>(this.schemaCacheName);
             IEnumerable<ProtoBufSchema> schemaCacheItems = schemaCache
                 .AsCacheQueryable()
-                .Where(c => c.Value.SchemaGroupId == schemaCacheItem.Key)
+                .Where(c => c.Value.SchemaGroupId == schemaGroupCacheItem.Key)
                 .ToList()
                 .Select(c => new ProtoBufSchema(c.Key, new Version(c.Value.Version), c.Value.Contents));
 
             return Task.FromResult(new ProtoBufSchemaGroup(
-                schemaCacheItem.Key,
-                schemaCacheItem.Value.Name,
+                schemaGroupCacheItem.Key,
+                schemaGroupCacheItem.Value.Name,
+                schemaGroupCacheItem.Value.CategoryId,
                 schemaCacheItems));
         }
 
         public async Task Update(ProtoBufSchemaGroup schemaGroup)
         {
+            var schemaGroupCache = this.ignite.GetCache<long, SchemaGroupCacheItem>(this.schemaGroupCacheName);
+            var schemaGroupCacheItem = await schemaGroupCache.GetAsync(schemaGroup.Id);
+            schemaGroupCacheItem.CategoryId = schemaGroup.CategoryId;
+            await schemaGroupCache.PutAsync(schemaGroup.Id, schemaGroupCacheItem);
+
             var schemaCache = this.ignite.GetCache<long, SchemaCacheItem>(this.schemaCacheName);
             IAtomicSequence idGenerator = this.ignite.GetAtomicSequence(
                 $"{typeof(SchemaCacheItem).Name.ToUpperInvariant()}{CacheConstants.IdSequenceSufix}",

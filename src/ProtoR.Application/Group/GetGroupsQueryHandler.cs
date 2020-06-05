@@ -8,15 +8,21 @@ namespace ProtoR.Application.Group
     public class GetGroupsQueryHandler : IRequestHandler<GetGroupsQuery, IEnumerable<GroupDto>>
     {
         private readonly IGroupDataProvider dataProvider;
+        private readonly IUserProvider userProvider;
 
-        public GetGroupsQueryHandler(IGroupDataProvider dataProvider)
+        public GetGroupsQueryHandler(
+            IGroupDataProvider dataProvider,
+            IUserProvider userProvider)
         {
             this.dataProvider = dataProvider;
+            this.userProvider = userProvider;
         }
 
         public async Task<IEnumerable<GroupDto>> Handle(GetGroupsQuery request, CancellationToken cancellationToken)
         {
-            return await this.dataProvider.GetGroups();
+            var categories = this.userProvider.GetCategoryRestrictions();
+
+            return await this.dataProvider.GetGroups(categories);
         }
     }
 }

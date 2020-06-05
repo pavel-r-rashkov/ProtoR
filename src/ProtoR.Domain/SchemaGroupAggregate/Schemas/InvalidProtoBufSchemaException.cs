@@ -1,5 +1,6 @@
 namespace ProtoR.Domain.SchemaGroupAggregate.Schemas
 {
+    using System;
     using System.Collections.Generic;
     using ProtoBuf.Reflection;
 
@@ -14,7 +15,7 @@ namespace ProtoR.Domain.SchemaGroupAggregate.Schemas
         {
         }
 
-        public InvalidProtoBufSchemaException(string message, System.Exception innerException)
+        public InvalidProtoBufSchemaException(string message, Exception innerException)
             : base(message, innerException)
         {
         }

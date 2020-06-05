@@ -2,8 +2,10 @@ namespace ProtoR.Web.Controllers
 {
     using AutoMapper;
     using MediatR;
+    using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
 
+    [Authorize("ProtoRClientPolicy")]
     [Route("api/[controller]")]
     [ApiController]
     public class BaseController : ControllerBase

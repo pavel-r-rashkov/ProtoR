@@ -7,6 +7,8 @@ namespace ProtoR.Application.Configuration
     using System.Threading;
     using System.Threading.Tasks;
     using MediatR;
+    using ProtoR.Application.Group;
+    using ProtoR.Domain.CategoryAggregate;
     using ProtoR.Domain.ConfigurationAggregate;
     using ProtoR.Domain.SchemaGroupAggregate.Rules;
     using ProtoR.Domain.SeedWork;
@@ -14,14 +16,20 @@ namespace ProtoR.Application.Configuration
     public class UpdateConfigurationCommandHandler : AsyncRequestHandler<UpdateConfigurationCommand>
     {
         private readonly IConfigurationRepository configurationRepository;
+        private readonly IGroupDataProvider groupDataProvider;
         private readonly IUnitOfWork unitOfWork;
+        private readonly IUserProvider userProvider;
 
         public UpdateConfigurationCommandHandler(
             IConfigurationRepository configurationRepository,
-            IUnitOfWork unitOfWork)
+            IGroupDataProvider groupDataProvider,
+            IUnitOfWork unitOfWork,
+            IUserProvider userProvider)
         {
             this.configurationRepository = configurationRepository;
+            this.groupDataProvider = groupDataProvider;
             this.unitOfWork = unitOfWork;
+            this.userProvider = userProvider;
         }
 
         protected override async Task Handle(UpdateConfigurationCommand request, CancellationToken cancellationToken)
@@ -29,6 +37,26 @@ namespace ProtoR.Application.Configuration
             Configuration configuration = request.ConfigurationId.Equals("global", StringComparison.InvariantCultureIgnoreCase)
                 ? await this.configurationRepository.GetBySchemaGroupId(null)
                 : await this.configurationRepository.GetById(Convert.ToInt64(request.ConfigurationId, CultureInfo.InvariantCulture));
+
+            if (configuration == null)
+            {
+                // TODO
+                throw new Exception("Configuration not found");
+            }
+
+            var categories = this.userProvider.GetCategoryRestrictions();
+
+            if (categories != null && configuration.SchemaGroupId != null)
+            {
+                var categoryId = await this.groupDataProvider.GetCategoryId(configuration.SchemaGroupId.Value);
+
+                if (!categories.Contains(categoryId))
+                {
+                    throw new InaccessibleCategoryException(
+                        categoryId,
+                        this.userProvider.GetCurrentUserName());
+                }
+            }
 
             configuration.SetGroupConfiguration(new GroupConfiguration(
                 request.ForwardCompatible,

@@ -7,6 +7,8 @@ namespace ProtoR.Application.Group
     {
         Task<GroupDto> GetByName(string groupName);
 
-        Task<IEnumerable<GroupDto>> GetGroups();
+        Task<IEnumerable<GroupDto>> GetGroups(IEnumerable<long> categories);
+
+        Task<long> GetCategoryId(long groupId);
     }
 }

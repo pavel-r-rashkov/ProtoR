@@ -70,12 +70,17 @@ namespace ProtoR.Infrastructure.DataAccess.Repositories
             return configurationId;
         }
 
-        public Task<Configuration> GetById(long id)
+        public async Task<Configuration> GetById(long id)
         {
-            ICache<long, ConfigurationCacheItem> configurationCache = this.ignite.GetCache<long, ConfigurationCacheItem>(this.configurationCacheName);
-            ConfigurationCacheItem configurationCacheItem = configurationCache.Get(id);
+            var configurationCache = this.ignite.GetCache<long, ConfigurationCacheItem>(this.configurationCacheName);
+            var result = await configurationCache.TryGetAsync(id);
 
-            return Task.FromResult(this.HydrateConfiguration(id, configurationCacheItem));
+            if (!result.Success)
+            {
+                return null;
+            }
+
+            return this.HydrateConfiguration(id, result.Value);
         }
 
         public Task<Configuration> GetBySchemaGroupId(long? groupId)

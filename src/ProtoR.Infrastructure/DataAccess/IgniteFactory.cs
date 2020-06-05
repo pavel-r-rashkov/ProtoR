@@ -2,7 +2,6 @@ namespace ProtoR.Infrastructure.DataAccess
 {
     using System;
     using System.Diagnostics;
-    using System.IO;
     using System.Linq;
     using System.Threading.Tasks;
     using Apache.Ignite.Core;
@@ -16,7 +15,7 @@ namespace ProtoR.Infrastructure.DataAccess
     using Apache.Ignite.Core.Failure;
     using Autofac;
     using MediatR;
-    using ProtoR.Application.Configuration;
+    using ProtoR.Application.Registry;
     using ProtoR.Infrastructure.DataAccess.CacheItems;
     using ProtoR.Infrastructure.DataAccess.DependencyInjection;
 
@@ -55,6 +54,7 @@ namespace ProtoR.Infrastructure.DataAccess
             IgniteConfiguration configuration = this.CreateIgniteConfig(this.externalConfiguration);
             this.ignite = Ignition.Start(configuration);
             ICluster cluster = this.ignite.GetCluster();
+            cluster.SetBaselineAutoAdjustEnabledFlag(false);
 
             if (!cluster.IsActive())
             {
@@ -70,15 +70,15 @@ namespace ProtoR.Infrastructure.DataAccess
             }
 
             this.InitializeCaches();
-            this.CreateGlobalConfiguration().GetAwaiter().GetResult();
+            this.CreateInitialData().GetAwaiter().GetResult();
 
             var services = cluster.ForNodes(cluster.GetNodes()).GetServices();
             services.DeployClusterSingleton(nameof(IClusterSingletonService), new ClusterSingletonService());
         }
 
-        private async Task CreateGlobalConfiguration()
+        private async Task CreateInitialData()
         {
-            await this.mediator.Send(new CreateGlobalConfigurationCommand());
+            await this.mediator.Send(new InitRegistryCommand());
         }
 
         private void InitializeCaches()
@@ -87,20 +87,31 @@ namespace ProtoR.Infrastructure.DataAccess
             this.ignite.GetOrCreateCache<long, RuleConfigurationCacheItem>(this.externalConfiguration.RuleConfigurationCacheName);
             this.ignite.GetOrCreateCache<long, SchemaCacheItem>(this.externalConfiguration.SchemaCacheName);
             this.ignite.GetOrCreateCache<long, SchemaGroupCacheItem>(this.externalConfiguration.SchemaGroupCacheName);
+            this.ignite.GetOrCreateCache<long, UserCacheItem>(this.externalConfiguration.UserCacheName);
+            this.ignite.GetOrCreateCache<UserRoleKey, EmptyCacheItem>(this.externalConfiguration.UserRoleCacheName);
+            this.ignite.GetOrCreateCache<UserCategoryKey, EmptyCacheItem>(this.externalConfiguration.UserCategoryCacheName);
+            this.ignite.GetOrCreateCache<long, RoleCacheItem>(this.externalConfiguration.RoleCacheName);
+            this.ignite.GetOrCreateCache<RolePermissionKey, EmptyCacheItem>(this.externalConfiguration.RolePermissionCacheName);
+            this.ignite.GetOrCreateCache<long, CategoryCacheItem>(this.externalConfiguration.CategoryCacheName);
+            this.ignite.GetOrCreateCache<long, ClientCacheItem>(this.externalConfiguration.ClientCacheName);
+            this.ignite.GetOrCreateCache<ClientRoleKey, EmptyCacheItem>(this.externalConfiguration.ClientRoleCacheName);
+            this.ignite.GetOrCreateCache<ClientCategoryKey, EmptyCacheItem>(this.externalConfiguration.ClientCategoryCacheName);
 
             this.CreateSequence<ConfigurationCacheItem>();
             this.CreateSequence<RuleConfigurationCacheItem>();
             this.CreateSequence<SchemaCacheItem>();
             this.CreateSequence<SchemaGroupCacheItem>();
-
-            // TODO Update ignite DB user/password
+            this.CreateSequence<UserCacheItem>();
+            this.CreateSequence<RoleCacheItem>();
+            this.CreateSequence<CategoryCacheItem>(1);
+            this.CreateSequence<ClientCacheItem>();
         }
 
-        private void CreateSequence<T>()
+        private void CreateSequence<T>(long initialValue = 0)
         {
             this.ignite.GetAtomicSequence(
                 $"{typeof(T).Name.ToUpperInvariant()}{CacheConstants.IdSequenceSufix}",
-                0,
+                initialValue,
                 true);
         }
 
@@ -110,13 +121,15 @@ namespace ProtoR.Infrastructure.DataAccess
 
             return new IgniteConfiguration
             {
-                AuthenticationEnabled = true,
+                // Authentication can be enabled only when persistence is active
+                AuthenticationEnabled = externalConfiguration.EnablePersistence,
+                WorkDirectory = storagePath,
                 BinaryConfiguration = new BinaryConfiguration
                 {
                     Serializer = new BinaryReflectiveSerializer { ForceTimestamp = true },
                 },
                 PluginConfigurations = new[] { new AutoFacPluginConfiguration() },
-                FailureHandler = new NoOpFailureHandler(), // For Debug
+                FailureHandler = new NoOpFailureHandler(), // TODO For Debug
                 ClientMode = false,
                 DiscoverySpi = new TcpDiscoverySpi
                 {
@@ -134,13 +147,13 @@ namespace ProtoR.Infrastructure.DataAccess
                 },
                 DataStorageConfiguration = new DataStorageConfiguration
                 {
-                    StoragePath = Path.Combine(storagePath, "storage"),
-                    WalPath = Path.Combine(storagePath, "wal"),
-                    WalArchivePath = Path.Combine(storagePath, "wal-archive"),
+                    // StoragePath = Path.Combine(storagePath, "storage"),
+                    // WalPath = Path.Combine(storagePath, "wal"),
+                    // WalArchivePath = Path.Combine(storagePath, "wal-archive"),
                     DefaultDataRegionConfiguration = new DataRegionConfiguration
                     {
                         Name = "defaultRegion",
-                        PersistenceEnabled = true,
+                        PersistenceEnabled = externalConfiguration.EnablePersistence,
                     },
                     DataRegionConfigurations = new[]
                     {
@@ -184,7 +197,8 @@ namespace ProtoR.Infrastructure.DataAccess
                             {
                                 new QueryField("ID", typeof(long)) { IsKeyField = true },
                                 new QueryField("Name", typeof(string)) { NotNull = true },
-                                new QueryField("CreatedBy", typeof(string)) { NotNull = true },
+                                new QueryField("CategoryId", typeof(long)) { NotNull = true },
+                                new QueryField("CreatedBy", typeof(string)),
                                 new QueryField("CreatedOn", typeof(DateTime)) { NotNull = true },
                             },
                         })
@@ -227,6 +241,171 @@ namespace ProtoR.Infrastructure.DataAccess
                                 new QueryField("ConfigurationId", typeof(long)) { NotNull = true },
                                 new QueryField("Inherit", typeof(bool)) { NotNull = true },
                                 new QueryField("Severity", typeof(int)) { NotNull = true },
+                            },
+                        })
+                    {
+                        AtomicityMode = CacheAtomicityMode.Transactional,
+                        WriteSynchronizationMode = CacheWriteSynchronizationMode.FullSync,
+                    },
+                    new CacheConfiguration(
+                        externalConfiguration.UserCacheName,
+                        new QueryEntity
+                        {
+                            KeyType = typeof(long),
+                            KeyFieldName = "ID",
+                            ValueType = typeof(UserCacheItem),
+                            Fields = new[]
+                            {
+                                new QueryField("ID", typeof(long)) { IsKeyField = true },
+                                new QueryField("UserName", typeof(string)) { NotNull = true },
+                                new QueryField("NormalizedUserName", typeof(string)) { NotNull = true },
+                                new QueryField("PasswordHash", typeof(string)) { NotNull = true },
+                                new QueryField("CreatedBy", typeof(string)),
+                                new QueryField("CreatedOn", typeof(DateTime)) { NotNull = true },
+                            },
+                        })
+                    {
+                        AtomicityMode = CacheAtomicityMode.Transactional,
+                        WriteSynchronizationMode = CacheWriteSynchronizationMode.FullSync,
+                    },
+                    new CacheConfiguration(
+                        externalConfiguration.UserCategoryCacheName,
+                        new QueryEntity
+                        {
+                            KeyType = typeof(UserCategoryKey),
+                            ValueType = typeof(EmptyCacheItem),
+                            Fields = new[]
+                            {
+                                new QueryField("UserId", typeof(long)) { IsKeyField = true },
+                                new QueryField("CategoryId", typeof(long)) { IsKeyField = true },
+                            },
+                        })
+                    {
+                        AtomicityMode = CacheAtomicityMode.Transactional,
+                        WriteSynchronizationMode = CacheWriteSynchronizationMode.FullSync,
+                    },
+                    new CacheConfiguration(
+                        externalConfiguration.UserRoleCacheName,
+                        new QueryEntity
+                        {
+                            KeyType = typeof(UserRoleKey),
+                            ValueType = typeof(EmptyCacheItem),
+                            Fields = new[]
+                            {
+                                new QueryField("UserId", typeof(long)) { IsKeyField = true },
+                                new QueryField("RoleId", typeof(long)) { IsKeyField = true },
+                            },
+                        })
+                    {
+                        AtomicityMode = CacheAtomicityMode.Transactional,
+                        WriteSynchronizationMode = CacheWriteSynchronizationMode.FullSync,
+                    },
+                    new CacheConfiguration(
+                        externalConfiguration.RoleCacheName,
+                        new QueryEntity
+                        {
+                            KeyType = typeof(long),
+                            KeyFieldName = "ID",
+                            ValueType = typeof(RoleCacheItem),
+                            Fields = new[]
+                            {
+                                new QueryField("ID", typeof(long)) { IsKeyField = true },
+                                new QueryField("Name", typeof(string)) { NotNull = true },
+                                new QueryField("NormalizedName", typeof(string)) { NotNull = true },
+                                new QueryField("CreatedBy", typeof(string)),
+                                new QueryField("CreatedOn", typeof(DateTime)) { NotNull = true },
+                            },
+                        })
+                    {
+                        AtomicityMode = CacheAtomicityMode.Transactional,
+                        WriteSynchronizationMode = CacheWriteSynchronizationMode.FullSync,
+                    },
+                    new CacheConfiguration(
+                        externalConfiguration.RolePermissionCacheName,
+                        new QueryEntity
+                        {
+                            KeyType = typeof(RolePermissionKey),
+                            ValueType = typeof(EmptyCacheItem),
+                            Fields = new[]
+                            {
+                                new QueryField("RoleId", typeof(long)) { IsKeyField = true },
+                                new QueryField("PermissionId", typeof(int)) { IsKeyField = true },
+                            },
+                        })
+                    {
+                        AtomicityMode = CacheAtomicityMode.Transactional,
+                        WriteSynchronizationMode = CacheWriteSynchronizationMode.FullSync,
+                    },
+                    new CacheConfiguration(
+                        externalConfiguration.CategoryCacheName,
+                        new QueryEntity
+                        {
+                            KeyType = typeof(long),
+                            KeyFieldName = "ID",
+                            ValueType = typeof(CategoryCacheItem),
+                            Fields = new[]
+                            {
+                                new QueryField("ID", typeof(long)) { IsKeyField = true },
+                                new QueryField("Name", typeof(string)) { NotNull = true },
+                                new QueryField("CreatedBy", typeof(string)),
+                                new QueryField("CreatedOn", typeof(DateTime)) { NotNull = true },
+                            },
+                        })
+                    {
+                        AtomicityMode = CacheAtomicityMode.Transactional,
+                        WriteSynchronizationMode = CacheWriteSynchronizationMode.FullSync,
+                    },
+                    new CacheConfiguration(
+                        externalConfiguration.ClientCacheName,
+                        new QueryEntity
+                        {
+                            KeyType = typeof(long),
+                            KeyFieldName = "ID",
+                            ValueType = typeof(ClientCacheItem),
+                            Fields = new[]
+                            {
+                                new QueryField("ID", typeof(long)) { IsKeyField = true },
+                                new QueryField("ClientId", typeof(string)) { NotNull = true },
+                                new QueryField("ClientName", typeof(string)) { NotNull = true },
+                                new QueryField("Secret", typeof(string)) { NotNull = false },
+                                new QueryField("GrantTypes", typeof(string)) { NotNull = true },
+                                new QueryField("RedirectUris", typeof(string)) { NotNull = true },
+                                new QueryField("PostLogoutRedirectUris", typeof(string)) { NotNull = true },
+                                new QueryField("AllowedCorsOrigins", typeof(string)) { NotNull = true },
+                                new QueryField("CreatedBy", typeof(string)),
+                                new QueryField("CreatedOn", typeof(DateTime)) { NotNull = true },
+                            },
+                        })
+                    {
+                        AtomicityMode = CacheAtomicityMode.Transactional,
+                        WriteSynchronizationMode = CacheWriteSynchronizationMode.FullSync,
+                    },
+                    new CacheConfiguration(
+                        externalConfiguration.ClientCategoryCacheName,
+                        new QueryEntity
+                        {
+                            KeyType = typeof(ClientCategoryKey),
+                            ValueType = typeof(EmptyCacheItem),
+                            Fields = new[]
+                            {
+                                new QueryField("ClientId", typeof(long)) { IsKeyField = true },
+                                new QueryField("CategoryId", typeof(long)) { IsKeyField = true },
+                            },
+                        })
+                    {
+                        AtomicityMode = CacheAtomicityMode.Transactional,
+                        WriteSynchronizationMode = CacheWriteSynchronizationMode.FullSync,
+                    },
+                    new CacheConfiguration(
+                        externalConfiguration.ClientRoleCacheName,
+                        new QueryEntity
+                        {
+                            KeyType = typeof(ClientRoleKey),
+                            ValueType = typeof(EmptyCacheItem),
+                            Fields = new[]
+                            {
+                                new QueryField("ClientId", typeof(long)) { IsKeyField = true },
+                                new QueryField("RoleId", typeof(long)) { IsKeyField = true },
                             },
                         })
                     {

@@ -2,31 +2,19 @@ namespace ProtoR.ComponentTests
 {
     using System;
     using System.Net;
-    using System.Net.Http;
     using System.Threading.Tasks;
-    using Moq;
     using ProtoR.ComponentTests.Configuration;
-    using ProtoR.Domain.SchemaGroupAggregate;
     using ProtoR.Web.Resources.GroupResource;
     using ProtoR.Web.Resources.SchemaResource;
     using Xunit;
 
-    [Collection(CollectionNames.TestApplicationCollection)]
-    public sealed class GroupTests : IDisposable
+    public class GroupTests : TestBase
     {
-        private readonly HttpClient client;
-        private readonly ComponentTestApplicationFactory applicationFactory;
-
-        public GroupTests(ComponentTestApplicationFactory applicationFactory)
+        public GroupTests(
+            ComponentTestApplicationFactory applicationFactory,
+            TestTokenProvider tokenProvider)
+            : base(applicationFactory, tokenProvider)
         {
-            this.applicationFactory = applicationFactory ?? throw new ArgumentNullException(nameof(applicationFactory));
-            this.client = applicationFactory.CreateClient();
-        }
-
-        public void Dispose()
-        {
-            this.applicationFactory.ResetMockSetup();
-            this.client.Dispose();
         }
 
         [Fact]
@@ -37,7 +25,7 @@ namespace ProtoR.ComponentTests
                 Path = "api/Groups",
             };
 
-            var response = await this.client.GetAsync(uriBuilder.Uri);
+            var response = await this.Client.GetAsync(uriBuilder.Uri);
 
             Assert.True(response.IsSuccessStatusCode);
         }
@@ -47,10 +35,10 @@ namespace ProtoR.ComponentTests
         {
             var uriBuilder = new UriBuilder(Constants.BaseAddress)
             {
-                Path = $"api/Groups/TestGroupName",
+                Path = $"api/Groups/Test Group",
             };
 
-            var response = await this.client.GetAsync(uriBuilder.Uri);
+            var response = await this.Client.GetAsync(uriBuilder.Uri);
 
             Assert.True(response.IsSuccessStatusCode);
         }
@@ -60,10 +48,10 @@ namespace ProtoR.ComponentTests
         {
             var uriBuilder = new UriBuilder(Constants.BaseAddress)
             {
-                Path = $"api/Groups/TestGroupName/Schemas",
+                Path = $"api/Groups/Test Group/Schemas",
             };
 
-            var response = await this.client.GetAsync(uriBuilder.Uri);
+            var response = await this.Client.GetAsync(uriBuilder.Uri);
 
             Assert.True(response.IsSuccessStatusCode);
         }
@@ -75,10 +63,10 @@ namespace ProtoR.ComponentTests
         {
             var uriBuilder = new UriBuilder(Constants.BaseAddress)
             {
-                Path = $"api/Groups/TestGroupName/Schemas/{version}",
+                Path = $"api/Groups/Test Group/Schemas/{version}",
             };
 
-            var response = await this.client.GetAsync(uriBuilder.Uri);
+            var response = await this.Client.GetAsync(uriBuilder.Uri);
 
             Assert.True(response.IsSuccessStatusCode);
         }
@@ -88,10 +76,10 @@ namespace ProtoR.ComponentTests
         {
             var uriBuilder = new UriBuilder(Constants.BaseAddress)
             {
-                Path = $"api/Groups/TestGroupName/Configuration",
+                Path = $"api/Groups/Test Group/Configuration",
             };
 
-            var response = await this.client.GetAsync(uriBuilder.Uri);
+            var response = await this.Client.GetAsync(uriBuilder.Uri);
 
             Assert.True(response.IsSuccessStatusCode);
         }
@@ -99,21 +87,18 @@ namespace ProtoR.ComponentTests
         [Fact]
         public async Task CreateGroup_ShouldReturn200Ok()
         {
-            this.applicationFactory.GroupRepositoryMock
-                .Setup(r => r.GetByName(It.IsAny<string>()))
-                .ReturnsAsync((ProtoBufSchemaGroup)null);
-
             var uriBuilder = new UriBuilder(Constants.BaseAddress)
             {
                 Path = $"api/Groups",
             };
             var group = new GroupWriteModel
             {
-                Name = "New group name",
+                GroupName = "New group name",
+                CategoryId = this.ApplicationFactory.NonDefaultCategoryId,
             };
 
             using var contents = new JsonHttpContent(group);
-            var response = await this.client.PostAsync(uriBuilder.Uri, contents);
+            var response = await this.Client.PostAsync(uriBuilder.Uri, contents);
 
             Assert.True(response.IsSuccessStatusCode);
         }
@@ -127,11 +112,11 @@ namespace ProtoR.ComponentTests
             };
             var group = new GroupWriteModel
             {
-                Name = "New group name",
+                GroupName = "Test Group",
             };
 
             using var contents = new JsonHttpContent(group);
-            var response = await this.client.PostAsync(uriBuilder.Uri, contents);
+            var response = await this.Client.PostAsync(uriBuilder.Uri, contents);
 
             Assert.False(response.IsSuccessStatusCode);
         }
@@ -141,7 +126,7 @@ namespace ProtoR.ComponentTests
         {
             var uriBuilder = new UriBuilder(Constants.BaseAddress)
             {
-                Path = $"api/Groups/TestGroup/Schemas",
+                Path = $"api/Groups/Test Group/Schemas",
             };
             var group = new SchemaWriteModel
             {
@@ -149,7 +134,7 @@ namespace ProtoR.ComponentTests
             };
 
             using var contents = new JsonHttpContent(group);
-            var response = await this.client.PostAsync(uriBuilder.Uri, contents);
+            var response = await this.Client.PostAsync(uriBuilder.Uri, contents);
 
             Assert.True(response.IsSuccessStatusCode);
         }
@@ -159,7 +144,7 @@ namespace ProtoR.ComponentTests
         {
             var uriBuilder = new UriBuilder(Constants.BaseAddress)
             {
-                Path = $"api/Groups/TestGroup/Schemas",
+                Path = $"api/Groups/Test Group/Schemas",
             };
             var group = new SchemaWriteModel
             {
@@ -167,7 +152,7 @@ namespace ProtoR.ComponentTests
             };
 
             using var contents = new JsonHttpContent(group);
-            var response = await this.client.PostAsync(uriBuilder.Uri, contents);
+            var response = await this.Client.PostAsync(uriBuilder.Uri, contents);
 
             Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
         }
@@ -177,7 +162,7 @@ namespace ProtoR.ComponentTests
         {
             var uriBuilder = new UriBuilder(Constants.BaseAddress)
             {
-                Path = $"api/Groups/TestGroup/SchemaTest",
+                Path = $"api/Groups/Test Group/SchemaTest",
             };
             var group = new SchemaWriteModel
             {
@@ -185,7 +170,7 @@ namespace ProtoR.ComponentTests
             };
 
             using var contents = new JsonHttpContent(group);
-            var response = await this.client.PostAsync(uriBuilder.Uri, contents);
+            var response = await this.Client.PostAsync(uriBuilder.Uri, contents);
 
             Assert.True(response.IsSuccessStatusCode);
         }
@@ -195,7 +180,7 @@ namespace ProtoR.ComponentTests
         {
             var uriBuilder = new UriBuilder(Constants.BaseAddress)
             {
-                Path = $"api/Groups/TestGroup/SchemaTest",
+                Path = $"api/Groups/Test Group/SchemaTest",
             };
             var group = new SchemaWriteModel
             {
@@ -203,7 +188,7 @@ namespace ProtoR.ComponentTests
             };
 
             using var contents = new JsonHttpContent(group);
-            var response = await this.client.PostAsync(uriBuilder.Uri, contents);
+            var response = await this.Client.PostAsync(uriBuilder.Uri, contents);
 
             Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
         }
@@ -213,10 +198,10 @@ namespace ProtoR.ComponentTests
         {
             var uriBuilder = new UriBuilder(Constants.BaseAddress)
             {
-                Path = $"api/Groups/TestGroup",
+                Path = $"api/Groups/Test Group",
             };
 
-            var response = await this.client.DeleteAsync(uriBuilder.Uri);
+            var response = await this.Client.DeleteAsync(uriBuilder.Uri);
 
             Assert.True(response.IsSuccessStatusCode);
         }

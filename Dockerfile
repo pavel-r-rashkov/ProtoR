@@ -38,12 +38,15 @@ FROM build AS integration-tests
 LABEL protor-test=true
 RUN apt-get update && apt-get install -y openjdk-11-jre-headless
 WORKDIR /app/tests/ProtoR.DataAccess.IntegrationTests
+ENV COMPlus_EnableAlternateStackCheck=1
 ENTRYPOINT ["dotnet", "test", "--no-restore", "--logger", "\"xunit;LogFilePath=../../TestResults/integration-tests.xml\""]
 
-# integration tests
+# component tests
 FROM build AS component-tests
 LABEL protor-test=true
+RUN apt-get update && apt-get install -y openjdk-11-jre-headless
 WORKDIR /app/tests/ProtoR.ComponentTests
+ENV COMPlus_EnableAlternateStackCheck=1
 ENTRYPOINT ["dotnet", "test", "--no-restore", "--logger", "\"xunit;LogFilePath=../../TestResults/component-tests.xml\""]
 
 # publish
@@ -55,7 +58,7 @@ RUN dotnet publish --no-build -c ${build_config} -o out
 
 # run
 FROM mcr.microsoft.com/dotnet/core/aspnet:3.0 AS runtime
-# RUN apt-get update && apt-get install -y openjdk-11-jre-headless
+RUN apt-get update && apt-get install -y openjdk-11-jre-headless
 WORKDIR /app
 COPY --from=publish /app/src/ProtoR.Web/out ./
 EXPOSE 80
@@ -68,4 +71,5 @@ RUN if [ "$build_config" = "Debug" ] ; then \
   && curl -sSL https://aka.ms/getvsdbgsh | bash /dev/stdin -v latest -l /vsdbg \
   ; fi
 
+ENV COMPlus_EnableAlternateStackCheck=1
 ENTRYPOINT ["dotnet", "ProtoR.Web.dll"]

@@ -1,7 +1,7 @@
 namespace ProtoR.Web.Infrastructure.Modules
 {
     using Autofac;
-    using ProtoR.Infrastructure;
+    using ProtoR.Application;
     using ProtoR.Web.Infrastructure;
 
     public class CommonModule : Module

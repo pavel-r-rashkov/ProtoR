@@ -340,5 +340,5 @@ ASALocalRun/
 # Test results
 /TestResults
 
-# Ignite working dir
-src/ProtoR.Web/ignite
+# IdentityServer dev credentials
+src/ProtoR.Web/tempkey.rsa

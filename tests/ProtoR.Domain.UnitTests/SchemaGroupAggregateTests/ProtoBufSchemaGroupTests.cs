@@ -6,6 +6,7 @@ namespace ProtoR.Domain.UnitTests.SchemaGroupAggregateTests
     using AutoFixture;
     using Google.Protobuf.Reflection;
     using Moq;
+    using ProtoR.Domain.CategoryAggregate;
     using ProtoR.Domain.ConfigurationAggregate;
     using ProtoR.Domain.SchemaGroupAggregate;
     using ProtoR.Domain.SchemaGroupAggregate.Rules;
@@ -40,7 +41,7 @@ namespace ProtoR.Domain.UnitTests.SchemaGroupAggregateTests
         public void Name_ShouldReturnSchemaGroupName()
         {
             var name = this.fixture.Create<string>();
-            var schemaGroup = new ProtoBufSchemaGroup(name);
+            var schemaGroup = new ProtoBufSchemaGroup(name, Category.DefaultCategoryId);
 
             Assert.Equal(name, schemaGroup.Name);
         }
@@ -84,7 +85,7 @@ namespace ProtoR.Domain.UnitTests.SchemaGroupAggregateTests
         [Fact]
         public void AddSchema_ToGroupWithoutSchemas_ShouldAddSchemaWithInitialVersion()
         {
-            var schemaGroup = new ProtoBufSchemaGroup(this.fixture.Create<string>());
+            var schemaGroup = new ProtoBufSchemaGroup(this.fixture.Create<string>(), Category.DefaultCategoryId);
 
             schemaGroup.AddSchema(
                 this.validSchema,
@@ -103,6 +104,7 @@ namespace ProtoR.Domain.UnitTests.SchemaGroupAggregateTests
             var schemaGroup = new ProtoBufSchemaGroup(
                 groupId,
                 this.fixture.Create<string>(),
+                Category.DefaultCategoryId,
                 new List<ProtoBufSchema> { firstSchema });
 
             IEnumerable<RuleViolation> ruleViolations = schemaGroup.AddSchema(
@@ -121,6 +123,7 @@ namespace ProtoR.Domain.UnitTests.SchemaGroupAggregateTests
             var schemaGroup = new ProtoBufSchemaGroup(
                 groupId,
                 this.fixture.Create<string>(),
+                Category.DefaultCategoryId,
                 new List<ProtoBufSchema> { firstSchema });
 
             IEnumerable<RuleViolation> ruleViolations = schemaGroup.AddSchema(
@@ -140,6 +143,7 @@ namespace ProtoR.Domain.UnitTests.SchemaGroupAggregateTests
             var schemaGroup = new ProtoBufSchemaGroup(
                 groupId,
                 this.fixture.Create<string>(),
+                Category.DefaultCategoryId,
                 new List<ProtoBufSchema> { firstSchema, previousSchema });
 
             IEnumerable<RuleViolation> ruleViolations = schemaGroup.AddSchema(
@@ -159,6 +163,7 @@ namespace ProtoR.Domain.UnitTests.SchemaGroupAggregateTests
             var schemaGroup = new ProtoBufSchemaGroup(
                 groupId,
                 this.fixture.Create<string>(),
+                Category.DefaultCategoryId,
                 new List<ProtoBufSchema> { firstSchema, previousSchema });
 
             IEnumerable<RuleViolation> ruleViolations = schemaGroup.AddSchema(
@@ -178,6 +183,7 @@ namespace ProtoR.Domain.UnitTests.SchemaGroupAggregateTests
             var schemaGroup = new ProtoBufSchemaGroup(
                 groupId,
                 this.fixture.Create<string>(),
+                Category.DefaultCategoryId,
                 new List<ProtoBufSchema> { firstSchema, previousSchema });
 
             IEnumerable<RuleViolation> ruleViolations = schemaGroup.AddSchema(
@@ -197,6 +203,7 @@ namespace ProtoR.Domain.UnitTests.SchemaGroupAggregateTests
             var schemaGroup = new ProtoBufSchemaGroup(
                 groupId,
                 this.fixture.Create<string>(),
+                Category.DefaultCategoryId,
                 new List<ProtoBufSchema> { firstSchema, previousSchema });
 
             IEnumerable<RuleViolation> ruleViolations = schemaGroup.AddSchema(
@@ -215,6 +222,7 @@ namespace ProtoR.Domain.UnitTests.SchemaGroupAggregateTests
             var schemaGroup = new ProtoBufSchemaGroup(
                 groupId,
                 this.fixture.Create<string>(),
+                Category.DefaultCategoryId,
                 new List<ProtoBufSchema> { firstSchema });
 
             IEnumerable<RuleViolation> ruleViolations = schemaGroup.AddSchema(
@@ -234,6 +242,7 @@ namespace ProtoR.Domain.UnitTests.SchemaGroupAggregateTests
             var schemaGroup = new ProtoBufSchemaGroup(
                 groupId,
                 this.fixture.Create<string>(),
+                Category.DefaultCategoryId,
                 new List<ProtoBufSchema> { firstSchema });
 
             IEnumerable<RuleViolation> ruleViolations = schemaGroup.AddSchema(
@@ -253,6 +262,7 @@ namespace ProtoR.Domain.UnitTests.SchemaGroupAggregateTests
             var schemaGroup = new ProtoBufSchemaGroup(
                 groupId,
                 this.fixture.Create<string>(),
+                Category.DefaultCategoryId,
                 new List<ProtoBufSchema> { firstSchema });
 
             IEnumerable<RuleViolation> ruleViolations = schemaGroup.AddSchema(
@@ -271,6 +281,7 @@ namespace ProtoR.Domain.UnitTests.SchemaGroupAggregateTests
             var schemaGroup = new ProtoBufSchemaGroup(
                 groupId,
                 this.fixture.Create<string>(),
+                Category.DefaultCategoryId,
                 new List<ProtoBufSchema> { firstSchema });
 
             schemaGroup.AddSchema(
@@ -289,6 +300,7 @@ namespace ProtoR.Domain.UnitTests.SchemaGroupAggregateTests
             var schemaGroup = new ProtoBufSchemaGroup(
                 groupId,
                 this.fixture.Create<string>(),
+                Category.DefaultCategoryId,
                 new List<ProtoBufSchema> { firstSchema });
 
             schemaGroup.AddSchema(

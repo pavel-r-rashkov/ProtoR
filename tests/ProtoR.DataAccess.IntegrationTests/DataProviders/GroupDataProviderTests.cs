@@ -55,7 +55,7 @@ namespace ProtoR.DataAccess.IntegrationTests.DataProviders
                 this.groupCache.Put(i, this.fixture.Create<SchemaGroupCacheItem>());
             }
 
-            IEnumerable<GroupDto> result = await this.dataProvider.GetGroups();
+            IEnumerable<GroupDto> result = await this.dataProvider.GetGroups(null);
 
             Assert.NotNull(result);
             Assert.Equal(groupsCount, result.Count());
