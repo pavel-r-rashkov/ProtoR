@@ -46,6 +46,19 @@ namespace ProtoR.ComponentTests
         }
 
         [Fact]
+        public async Task GetConfiguration_WithNonExistingConfiguration_ShouldReturn404NotFound()
+        {
+            var uriBuilder = new UriBuilder(Constants.BaseAddress)
+            {
+                Path = $"api/Configurations/123456",
+            };
+
+            var response = await this.Client.GetAsync(uriBuilder.Uri);
+
+            Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+        }
+
+        [Fact]
         public async Task PutConfiguration_WithValidGlobalConfiguration_ShouldReturn200Ok()
         {
             string id = "global";
@@ -105,6 +118,36 @@ namespace ProtoR.ComponentTests
             var response = await this.Client.PutAsync(uriBuilder.Uri, contents);
 
             Assert.True(response.IsSuccessStatusCode);
+        }
+
+        [Fact]
+        public async Task PutConfiguration_WithNonExistingConfiguration_ShouldReturn404NotFound()
+        {
+            var uriBuilder = new UriBuilder(Constants.BaseAddress)
+            {
+                Path = $"api/Configurations/123456",
+            };
+            var configuration = new ConfigurationWriteModel
+            {
+                Transitive = false,
+                BackwardCompatible = true,
+                ForwardCompatible = false,
+                Inherit = false,
+                RuleConfigurations = new[]
+                {
+                    new RuleConfigurationModel
+                    {
+                        RuleCode = "PB0001",
+                        Severity = 1,
+                        Inherit = false,
+                    },
+                },
+            };
+
+            using var contents = new JsonHttpContent(configuration);
+            var response = await this.Client.PutAsync(uriBuilder.Uri, contents);
+
+            Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
         }
 
         [Fact]

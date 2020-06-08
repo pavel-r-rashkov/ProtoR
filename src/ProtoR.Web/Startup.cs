@@ -54,7 +54,7 @@
             application
                 .UseIgnite()
                 .UseCustomSwagger(this.Environment)
-                .UseCustomExceptionHandler(this.Environment)
+                .UseCustomExceptionHandler()
                 .UseHttpsRedirection()
                 .UseRouting()
                 .UseCors()

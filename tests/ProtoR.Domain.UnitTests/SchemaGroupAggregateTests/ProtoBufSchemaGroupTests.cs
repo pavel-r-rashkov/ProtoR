@@ -8,6 +8,7 @@ namespace ProtoR.Domain.UnitTests.SchemaGroupAggregateTests
     using Moq;
     using ProtoR.Domain.CategoryAggregate;
     using ProtoR.Domain.ConfigurationAggregate;
+    using ProtoR.Domain.Exceptions;
     using ProtoR.Domain.SchemaGroupAggregate;
     using ProtoR.Domain.SchemaGroupAggregate.Rules;
     using ProtoR.Domain.SchemaGroupAggregate.Rules.ProtoBufRules;

@@ -61,7 +61,7 @@ namespace ProtoR.Web.Controllers
         }
 
         [HttpDelete]
-        [Route("{Id}")]
+        [Route("{clientId}")]
         [PermissionClaim(Permission.ClientWrite)]
         public async Task<ActionResult> Delete(long clientId)
         {

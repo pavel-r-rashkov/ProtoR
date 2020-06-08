@@ -1,13 +1,12 @@
 namespace ProtoR.Application.Schema
 {
-    using System;
     using System.Collections.Generic;
-    using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
     using AutoMapper;
     using MediatR;
     using ProtoR.Domain.ConfigurationAggregate;
+    using ProtoR.Domain.Exceptions;
     using ProtoR.Domain.SchemaGroupAggregate;
     using ProtoR.Domain.SchemaGroupAggregate.Rules;
     using ProtoR.Domain.SchemaGroupAggregate.Schemas;
@@ -31,25 +30,21 @@ namespace ProtoR.Application.Schema
         public async Task<SchemaValidationResultDto> Handle(ValidateSchemaCommand request, CancellationToken cancellationToken)
         {
             var group = await this.groupRepository.GetByName(request.GroupName);
+
+            if (group == null)
+            {
+                throw new EntityNotFoundException<ProtoBufSchemaGroup>(request.GroupName);
+            }
+
             var configuration = await this.configurationRepository.GetBySchemaGroupId(group.Id);
             var globalConfiguration = await this.configurationRepository.GetBySchemaGroupId(null);
             IEnumerable<RuleViolation> violations;
             ProtoBufSchema newSchema;
 
-            try
-            {
-                (violations, newSchema) = group.TestSchema(
-                    request.Contents,
-                    this.GetGroupConfiguration(configuration, globalConfiguration),
-                    configuration.MergeRuleConfiguration(globalConfiguration));
-            }
-            catch (InvalidProtoBufSchemaException exception)
-            {
-                return new SchemaValidationResultDto
-                {
-                    SchemaParseErrors = string.Join(Environment.NewLine, exception.Errors.Select(e => e.Message)),
-                };
-            }
+            (violations, newSchema) = group.TestSchema(
+                request.Contents,
+                this.GetGroupConfiguration(configuration, globalConfiguration),
+                configuration.MergeRuleConfiguration(globalConfiguration));
 
             return new SchemaValidationResultDto
             {

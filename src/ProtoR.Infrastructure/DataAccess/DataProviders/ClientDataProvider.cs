@@ -30,12 +30,14 @@ namespace ProtoR.Infrastructure.DataAccess.DataProviders
 
         public async Task<ClientDto> GetById(long id)
         {
-            var clientCacheItem = await this.clientCache.GetAsync(id);
+            var result = await this.clientCache.TryGetAsync(id);
 
-            if (clientCacheItem == null)
+            if (!result.Success)
             {
                 return null;
             }
+
+            var clientCacheItem = result.Value;
 
             var roleIds = this.clientRoleCache
                 .AsCacheQueryable()

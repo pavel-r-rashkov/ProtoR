@@ -5,6 +5,7 @@ namespace ProtoR.Application.Category
     using System.Threading.Tasks;
     using MediatR;
     using ProtoR.Domain.CategoryAggregate;
+    using ProtoR.Domain.Exceptions;
     using ProtoR.Domain.SeedWork;
 
     public class CreateCategoryCommandHandler : IRequestHandler<CreateCategoryCommand, long>
@@ -26,8 +27,9 @@ namespace ProtoR.Application.Category
 
             if (existingCategory != null)
             {
-                // TODO
-                throw new Exception("Category exists");
+                throw new DuplicateCategoryException(
+                    $"Cannot create category with name {command.Name}. Category with that name already exists.",
+                    command.Name);
             }
 
             var category = new Category(command.Name);

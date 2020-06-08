@@ -5,6 +5,8 @@ namespace ProtoR.Application.Schema
     using System.Threading;
     using System.Threading.Tasks;
     using MediatR;
+    using ProtoR.Domain.Exceptions;
+    using ProtoR.Domain.SchemaGroupAggregate.Schemas;
 
     public class GetByVersionQueryHandler : IRequestHandler<GetByVersionQuery, SchemaDto>
     {
@@ -20,6 +22,11 @@ namespace ProtoR.Application.Schema
             SchemaDto schema = request.Version.Equals("latest", StringComparison.InvariantCultureIgnoreCase)
                 ? await this.dataProvider.GetLatestVersion(request.GroupName)
                 : await this.dataProvider.GetByVersion(request.GroupName, Convert.ToInt32(request.Version, CultureInfo.InvariantCulture));
+
+            if (schema == null)
+            {
+                throw new EntityNotFoundException<ProtoBufSchema>(request.Version);
+            }
 
             return schema;
         }

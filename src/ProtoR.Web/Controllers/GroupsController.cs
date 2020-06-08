@@ -110,11 +110,6 @@ namespace ProtoR.Web.Controllers
             var command = this.Mapper.Map<CreateSchemaCommand>(schema);
             var commandResult = await this.Mediator.Send(command);
 
-            if (!string.IsNullOrWhiteSpace(commandResult.SchemaParseErrors))
-            {
-                return this.BadRequest(commandResult.SchemaParseErrors);
-            }
-
             if (commandResult.RuleViolations.Any(v => v.IsFatal))
             {
                 return this.BadRequest(commandResult.RuleViolations);
@@ -137,11 +132,6 @@ namespace ProtoR.Web.Controllers
         {
             var command = this.Mapper.Map<ValidateSchemaCommand>(schema);
             var commandResult = await this.Mediator.Send(command);
-
-            if (!string.IsNullOrWhiteSpace(commandResult.SchemaParseErrors))
-            {
-                return this.BadRequest(commandResult.SchemaParseErrors);
-            }
 
             return this.Ok(commandResult.RuleViolations);
         }

@@ -8,8 +8,8 @@ namespace ProtoR.Application.Configuration
     using System.Threading.Tasks;
     using MediatR;
     using ProtoR.Application.Group;
-    using ProtoR.Domain.CategoryAggregate;
     using ProtoR.Domain.ConfigurationAggregate;
+    using ProtoR.Domain.Exceptions;
     using ProtoR.Domain.SchemaGroupAggregate.Rules;
     using ProtoR.Domain.SeedWork;
 
@@ -40,8 +40,7 @@ namespace ProtoR.Application.Configuration
 
             if (configuration == null)
             {
-                // TODO
-                throw new Exception("Configuration not found");
+                throw new EntityNotFoundException<Configuration>((object)request.ConfigurationId);
             }
 
             var categories = this.userProvider.GetCategoryRestrictions();

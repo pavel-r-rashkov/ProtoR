@@ -7,7 +7,8 @@ namespace ProtoR.Application.Configuration
     using System.Threading.Tasks;
     using MediatR;
     using ProtoR.Application.Group;
-    using ProtoR.Domain.CategoryAggregate;
+    using ProtoR.Domain.ConfigurationAggregate;
+    using ProtoR.Domain.Exceptions;
 
     public class GetByIdQueryHandler : IRequestHandler<GetByIdQuery, ConfigurationDto>
     {
@@ -30,6 +31,11 @@ namespace ProtoR.Application.Configuration
             ConfigurationDto configuration = request.ConfigurationId.Equals("global", StringComparison.InvariantCultureIgnoreCase)
                 ? await this.configurationData.GetGlobalConfig()
                 : await this.configurationData.GetById(Convert.ToInt64(request.ConfigurationId, CultureInfo.InvariantCulture));
+
+            if (configuration == null)
+            {
+                throw new EntityNotFoundException<Configuration>((object)request.ConfigurationId);
+            }
 
             var categories = this.userProvider.GetCategoryRestrictions();
 

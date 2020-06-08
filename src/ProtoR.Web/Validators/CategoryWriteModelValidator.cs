@@ -9,6 +9,7 @@ namespace ProtoR.Web.Validators
         {
             this.RuleFor(config => config.Name)
                 .NotNull()
+                .NotEmpty()
                 .MaximumLength(500);
         }
     }

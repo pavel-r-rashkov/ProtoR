@@ -1,6 +1,7 @@
 namespace ProtoR.ComponentTests
 {
     using System;
+    using System.Collections.Generic;
     using System.Net;
     using System.Threading.Tasks;
     using ProtoR.ComponentTests.Configuration;
@@ -30,6 +31,33 @@ namespace ProtoR.ComponentTests
         }
 
         [Fact]
+        public async Task GetUser_ShouldReturn200Ok()
+        {
+            var id = this.ApplicationFactory.UserId;
+            var uriBuilder = new UriBuilder(Constants.BaseAddress)
+            {
+                Path = $"api/Users/{id}",
+            };
+
+            var response = await this.Client.GetAsync(uriBuilder.Uri);
+
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        }
+
+        [Fact]
+        public async Task GetUser_WithNonExistingUser_ShouldReturn404NotFound()
+        {
+            var uriBuilder = new UriBuilder(Constants.BaseAddress)
+            {
+                Path = $"api/Users/123456",
+            };
+
+            var response = await this.Client.GetAsync(uriBuilder.Uri);
+
+            Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+        }
+
+        [Fact]
         public async Task PostUser_ShouldReturn201Created()
         {
             var uriBuilder = new UriBuilder(Constants.BaseAddress)
@@ -48,17 +76,13 @@ namespace ProtoR.ComponentTests
             Assert.Equal(HttpStatusCode.Created, response.StatusCode);
         }
 
-        [Fact]
-        public async Task PostUser_WithInvalidData_ShouldReturn400BadRequest()
+        [Theory]
+        [MemberData(nameof(InvalidNewUsers))]
+        public async Task PostUser_WithInvalidData_ShouldReturn400BadRequest(UserPostModel user)
         {
             var uriBuilder = new UriBuilder(Constants.BaseAddress)
             {
                 Path = "api/Users",
-            };
-            var user = new UserPostModel
-            {
-                UserName = "TestUser",
-                Password = "A1!",
             };
 
             using var contents = new JsonHttpContent(user);
@@ -99,6 +123,54 @@ namespace ProtoR.ComponentTests
             var response = await this.Client.DeleteAsync(uriBuilder.Uri);
 
             Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
+        }
+
+        public static IEnumerable<object[]> InvalidNewUsers()
+        {
+            yield return new object[]
+            {
+                new UserPostModel
+                {
+                    UserName = null,
+                    Password = "Qwertyuiop1!",
+                },
+            };
+
+            yield return new object[]
+            {
+                new UserPostModel
+                {
+                    UserName = string.Empty,
+                    Password = "Qwertyuiop1!",
+                },
+            };
+
+            yield return new object[]
+            {
+                new UserPostModel
+                {
+                    UserName = "A-*bc",
+                    Password = "Qwertyuiop1!",
+                },
+            };
+
+            yield return new object[]
+            {
+                new UserPostModel
+                {
+                    UserName = "New User",
+                    Password = null,
+                },
+            };
+
+            yield return new object[]
+            {
+                new UserPostModel
+                {
+                    UserName = "New User",
+                    Password = "Abc1!",
+                },
+            };
         }
     }
 }

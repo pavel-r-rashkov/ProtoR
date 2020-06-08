@@ -6,6 +6,7 @@ namespace ProtoR.Application.Group
     using MediatR;
     using ProtoR.Domain.CategoryAggregate;
     using ProtoR.Domain.ConfigurationAggregate;
+    using ProtoR.Domain.Exceptions;
     using ProtoR.Domain.SchemaGroupAggregate;
     using ProtoR.Domain.SeedWork;
 
@@ -34,8 +35,9 @@ namespace ProtoR.Application.Group
 
             if (existingGroup != null)
             {
-                // TODO throw exception
-                return false;
+                throw new DuplicateGroupException(
+                    $"Cannot create group with name {request.GroupName}. Group with that name already exists.",
+                    request.GroupName);
             }
 
             var categoryId = request.CategoryId ?? Category.DefaultCategoryId;

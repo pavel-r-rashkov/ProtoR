@@ -1,9 +1,11 @@
 namespace ProtoR.ComponentTests
 {
     using System;
+    using System.Collections.Generic;
     using System.Net;
     using System.Threading.Tasks;
     using ProtoR.ComponentTests.Configuration;
+    using ProtoR.Domain.CategoryAggregate;
     using ProtoR.Web.Resources.GroupResource;
     using ProtoR.Web.Resources.SchemaResource;
     using Xunit;
@@ -44,6 +46,19 @@ namespace ProtoR.ComponentTests
         }
 
         [Fact]
+        public async Task GetGroup_WithNonExistingGroup_ShouldReturn404NotFound()
+        {
+            var uriBuilder = new UriBuilder(Constants.BaseAddress)
+            {
+                Path = $"api/Groups/SomeNonExistingGroup",
+            };
+
+            var response = await this.Client.GetAsync(uriBuilder.Uri);
+
+            Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+        }
+
+        [Fact]
         public async Task GetGroupSchemas_ShouldReturn200Ok()
         {
             var uriBuilder = new UriBuilder(Constants.BaseAddress)
@@ -69,6 +84,19 @@ namespace ProtoR.ComponentTests
             var response = await this.Client.GetAsync(uriBuilder.Uri);
 
             Assert.True(response.IsSuccessStatusCode);
+        }
+
+        [Fact]
+        public async Task GetGroupSchemaByVersion_WithNonExistingSchema_ShouldReturn404NotFound()
+        {
+            var uriBuilder = new UriBuilder(Constants.BaseAddress)
+            {
+                Path = $"api/Groups/Test Group/Schemas/999",
+            };
+
+            var response = await this.Client.GetAsync(uriBuilder.Uri);
+
+            Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
         }
 
         [Fact]
@@ -104,6 +132,43 @@ namespace ProtoR.ComponentTests
         }
 
         [Fact]
+        public async Task PutGroup_ShouldReturn204NoContent()
+        {
+            var uriBuilder = new UriBuilder(Constants.BaseAddress)
+            {
+                Path = $"api/Groups/Test Group",
+            };
+
+            var group = new GroupPutModel
+            {
+                CategoryId = this.ApplicationFactory.NonDefaultCategoryId,
+            };
+
+            using var contents = new JsonHttpContent(group);
+            var response = await this.Client.PutAsync(uriBuilder.Uri, contents);
+
+            Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
+        }
+
+        [Fact]
+        public async Task PutGroup_WithNonExistingGroup_ShouldReturn404NotFound()
+        {
+            var uriBuilder = new UriBuilder(Constants.BaseAddress)
+            {
+                Path = $"api/Groups/NonExistingGroup",
+            };
+            var group = new GroupPutModel
+            {
+                CategoryId = Category.DefaultCategoryId,
+            };
+
+            using var contents = new JsonHttpContent(group);
+            var response = await this.Client.PutAsync(uriBuilder.Uri, contents);
+
+            Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+        }
+
+        [Fact]
         public async Task CreateGroup_WithDuplicatedGroupName_ShouldReturn400BadRequest()
         {
             var uriBuilder = new UriBuilder(Constants.BaseAddress)
@@ -118,7 +183,22 @@ namespace ProtoR.ComponentTests
             using var contents = new JsonHttpContent(group);
             var response = await this.Client.PostAsync(uriBuilder.Uri, contents);
 
-            Assert.False(response.IsSuccessStatusCode);
+            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        }
+
+        [Theory]
+        [MemberData(nameof(InvalidGroups))]
+        public async Task CreateGroup_WithInvalidData_ShouldReturn400BadRequest(GroupWriteModel group)
+        {
+            var uriBuilder = new UriBuilder(Constants.BaseAddress)
+            {
+                Path = $"api/Groups",
+            };
+
+            using var contents = new JsonHttpContent(group);
+            var response = await this.Client.PostAsync(uriBuilder.Uri, contents);
+
+            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
         }
 
         [Fact]
@@ -137,6 +217,24 @@ namespace ProtoR.ComponentTests
             var response = await this.Client.PostAsync(uriBuilder.Uri, contents);
 
             Assert.True(response.IsSuccessStatusCode);
+        }
+
+        [Fact]
+        public async Task CreateSchema_WithNonExistingGroup_ShouldReturn404NotFound()
+        {
+            var uriBuilder = new UriBuilder(Constants.BaseAddress)
+            {
+                Path = $"api/Groups/NonExistingGroup/Schemas",
+            };
+            var group = new SchemaWriteModel
+            {
+                Contents = "syntax = \"proto3\";",
+            };
+
+            using var contents = new JsonHttpContent(group);
+            var response = await this.Client.PostAsync(uriBuilder.Uri, contents);
+
+            Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
         }
 
         [Fact]
@@ -176,6 +274,24 @@ namespace ProtoR.ComponentTests
         }
 
         [Fact]
+        public async Task SchemaTest_WithNonExistingGroup_ShouldReturn404NotFound()
+        {
+            var uriBuilder = new UriBuilder(Constants.BaseAddress)
+            {
+                Path = $"api/Groups/NonExistingGroup/SchemaTest",
+            };
+            var group = new SchemaWriteModel
+            {
+                Contents = "syntax = \"proto3\";",
+            };
+
+            using var contents = new JsonHttpContent(group);
+            var response = await this.Client.PostAsync(uriBuilder.Uri, contents);
+
+            Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+        }
+
+        [Fact]
         public async Task SchemaTest_WithInvalidSchema_ShouldReturn400BadRequest()
         {
             var uriBuilder = new UriBuilder(Constants.BaseAddress)
@@ -204,6 +320,46 @@ namespace ProtoR.ComponentTests
             var response = await this.Client.DeleteAsync(uriBuilder.Uri);
 
             Assert.True(response.IsSuccessStatusCode);
+        }
+
+        [Fact]
+        public async Task DeleteGroup_WithNonExistingGroup_ShouldReturn404NotFound()
+        {
+            var uriBuilder = new UriBuilder(Constants.BaseAddress)
+            {
+                Path = $"api/Groups/NonExistingGroup",
+            };
+
+            var response = await this.Client.DeleteAsync(uriBuilder.Uri);
+
+            Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+        }
+
+        public static IEnumerable<object[]> InvalidGroups()
+        {
+            yield return new object[]
+            {
+                new GroupWriteModel
+                {
+                    GroupName = null,
+                },
+            };
+
+            yield return new object[]
+            {
+                new GroupWriteModel
+                {
+                    GroupName = string.Empty,
+                },
+            };
+
+            yield return new object[]
+            {
+                new GroupWriteModel
+                {
+                    GroupName = new string('a', 501),
+                },
+            };
         }
     }
 }

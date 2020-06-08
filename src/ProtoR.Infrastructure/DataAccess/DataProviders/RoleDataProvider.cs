@@ -26,7 +26,14 @@ namespace ProtoR.Infrastructure.DataAccess.DataProviders
 
         public async Task<RoleDto> GetById(long id)
         {
-            var roleCacheItem = await this.roleCache.GetAsync(id);
+            var result = await this.roleCache.TryGetAsync(id);
+
+            if (!result.Success)
+            {
+                return null;
+            }
+
+            var roleCacheItem = result.Value;
             var permissionIds = this.rolePermissionCache
                 .AsCacheQueryable()
                 .Where(c => c.Key.RoleId == id)

@@ -1,6 +1,7 @@
 namespace ProtoR.Domain.UnitTests.SchemaGroupAggregateTests.SchemasTests
 {
     using Google.Protobuf.Reflection;
+    using ProtoR.Domain.Exceptions;
     using ProtoR.Domain.SchemaGroupAggregate.Schemas;
     using ProtoR.Domain.UnitTests.SchemaFixtures;
     using Xunit;

@@ -8,6 +8,7 @@ namespace ProtoR.Application.Schema
     using AutoMapper;
     using MediatR;
     using ProtoR.Domain.ConfigurationAggregate;
+    using ProtoR.Domain.Exceptions;
     using ProtoR.Domain.SchemaGroupAggregate;
     using ProtoR.Domain.SchemaGroupAggregate.Rules;
     using ProtoR.Domain.SchemaGroupAggregate.Schemas;
@@ -38,28 +39,17 @@ namespace ProtoR.Application.Schema
 
             if (schemaGroup == null)
             {
-                // TODO
-                throw new Exception("Group Not found");
+                throw new EntityNotFoundException<ProtoBufSchemaGroup>(request.GroupName);
             }
 
             Configuration configuration = await this.configurationRepository.GetBySchemaGroupId(schemaGroup.Id);
             Configuration globalConfiguration = await this.configurationRepository.GetBySchemaGroupId(null);
             IEnumerable<RuleViolation> violations;
 
-            try
-            {
-                violations = schemaGroup.AddSchema(
-                    request.Contents,
-                    this.GetGroupConfiguration(configuration, globalConfiguration),
-                    configuration.MergeRuleConfiguration(globalConfiguration));
-            }
-            catch (InvalidProtoBufSchemaException exception)
-            {
-                return new SchemaValidationResultDto
-                {
-                    SchemaParseErrors = string.Join(Environment.NewLine, exception.Errors.Select(e => e.Message)),
-                };
-            }
+            violations = schemaGroup.AddSchema(
+                request.Contents,
+                this.GetGroupConfiguration(configuration, globalConfiguration),
+                configuration.MergeRuleConfiguration(globalConfiguration));
 
             if (!violations.Any(v => v.Severity.IsFatal))
             {

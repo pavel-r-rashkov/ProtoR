@@ -1,6 +1,6 @@
 namespace ProtoR.Web.Infrastructure
 {
-    using System.IO;
+    using System.Net;
     using Autofac;
     using Autofac.Extensions.DependencyInjection;
     using Microsoft.AspNetCore.Builder;
@@ -9,6 +9,8 @@ namespace ProtoR.Web.Infrastructure
     using Microsoft.AspNetCore.Http;
     using Microsoft.Extensions.Hosting;
     using Microsoft.Extensions.Options;
+    using Newtonsoft.Json.Linq;
+    using ProtoR.Domain.Exceptions;
     using ProtoR.Infrastructure.DataAccess;
     using ProtoR.Web.Infrastructure.Identity;
 
@@ -39,30 +41,47 @@ namespace ProtoR.Web.Infrastructure
             return app;
         }
 
-        public static IApplicationBuilder UseCustomExceptionHandler(this IApplicationBuilder app, IWebHostEnvironment environment)
+        public static IApplicationBuilder UseCustomExceptionHandler(this IApplicationBuilder app)
         {
             app.UseExceptionHandler(options =>
             {
                 options.Run(async context =>
                 {
-                    context.Response.ContentType = "text/html";
+                    context.Response.ContentType = "application/json";
                     var exceptionHandlerPathFeature = context.Features.Get<IExceptionHandlerPathFeature>();
 
-                    // TODO handle domain exceptions
-                    if (exceptionHandlerPathFeature?.Error is FileNotFoundException)
+                    var statusCode = (int)HttpStatusCode.InternalServerError;
+                    var error = "Internal Server Error";
+
+                    if (exceptionHandlerPathFeature.Error != null)
                     {
-                        await context.Response.WriteAsync("Concrete exception");
+                        var exceptionType = exceptionHandlerPathFeature.Error.GetType();
+
+                        switch (exceptionHandlerPathFeature?.Error)
+                        {
+                            case InaccessibleCategoryException exception:
+                                statusCode = (int)HttpStatusCode.Forbidden;
+                                error = exception.PublicMessage;
+                                break;
+                            case DomainException exception when exceptionType.IsGenericType
+                                && exceptionType.GetGenericTypeDefinition() == typeof(EntityNotFoundException<>):
+
+                                statusCode = (int)HttpStatusCode.NotFound;
+                                error = exception.PublicMessage;
+                                break;
+                            case DomainException exception:
+                                statusCode = (int)HttpStatusCode.BadRequest;
+                                error = exception.PublicMessage;
+                                break;
+                        }
                     }
 
-                    context.Response.StatusCode = 500;
-                    await context.Response.WriteAsync("Internal Server Error");
+                    // TODO Log exception
+                    var jsonResponse = JObject.FromObject(new { error });
+                    context.Response.StatusCode = statusCode;
+                    await context.Response.WriteAsync(jsonResponse.ToString());
                 });
             });
-
-            if (environment.IsDevelopment())
-            {
-                app.UseDeveloperExceptionPage();
-            }
 
             return app;
         }

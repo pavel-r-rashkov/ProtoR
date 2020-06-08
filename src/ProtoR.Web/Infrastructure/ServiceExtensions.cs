@@ -3,6 +3,7 @@ namespace ProtoR.Web.Infrastructure
     using System;
     using System.Collections.Generic;
     using System.IO;
+    using System.Net;
     using System.Reflection;
     using System.Security.Cryptography.X509Certificates;
     using System.Threading.Tasks;
@@ -111,7 +112,7 @@ namespace ProtoR.Web.Infrastructure
             {
                 options.Events.OnRedirectToAccessDenied = context =>
                 {
-                    context.Response.StatusCode = 403;
+                    context.Response.StatusCode = (int)HttpStatusCode.Forbidden;
                     return Task.CompletedTask;
                 };
             });

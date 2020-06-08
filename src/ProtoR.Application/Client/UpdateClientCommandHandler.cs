@@ -6,6 +6,7 @@ namespace ProtoR.Application.Client
     using System.Threading.Tasks;
     using MediatR;
     using ProtoR.Domain.ClientAggregate;
+    using ProtoR.Domain.Exceptions;
     using ProtoR.Domain.SeedWork;
 
     public class UpdateClientCommandHandler : AsyncRequestHandler<UpdateClientCommand>
@@ -24,6 +25,11 @@ namespace ProtoR.Application.Client
         protected override async Task Handle(UpdateClientCommand request, CancellationToken cancellationToken)
         {
             var client = await this.clientRepository.GetById(request.Id);
+
+            if (client == null)
+            {
+                throw new EntityNotFoundException<Client>(request.Id);
+            }
 
             client.ClientId = request.ClientId;
             client.ClientName = request.ClientName;

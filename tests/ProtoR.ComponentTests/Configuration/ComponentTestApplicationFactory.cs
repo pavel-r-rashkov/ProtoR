@@ -89,10 +89,11 @@ namespace ProtoR.ComponentTests.Configuration
 
             // Groups and schemas
             var groupRepository = this.Services.GetService(typeof(IProtoBufSchemaGroupRepository)) as IProtoBufSchemaGroupRepository;
+
             var schemas = new[]
             {
-                new ProtoBufSchema(1, Version.Initial, "syntax = \"proto3\";"),
-                new ProtoBufSchema(1, Version.Initial.Next(), "syntax = \"proto3\";"),
+                new ProtoBufSchema(default, Version.Initial, "syntax = \"proto3\";"),
+                new ProtoBufSchema(default, Version.Initial.Next(), "syntax = \"proto3\";"),
             };
             var group = new ProtoBufSchemaGroup(
                 default,

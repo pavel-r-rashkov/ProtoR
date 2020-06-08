@@ -1,7 +1,8 @@
-namespace ProtoR.Domain.SchemaGroupAggregate.Schemas
+namespace ProtoR.Domain.Exceptions
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using ProtoBuf.Reflection;
 
     public class InvalidProtoBufSchemaException : InvalidSchemaException<Error[]>
@@ -24,6 +25,7 @@ namespace ProtoR.Domain.SchemaGroupAggregate.Schemas
             : this("Invalid Protocol Buffer schema")
         {
             this.Errors = errors;
+            this.PublicMessage = string.Join(Environment.NewLine, errors.Select(e => e.Message));
         }
 
         public IEnumerable<Error> Errors { get; }

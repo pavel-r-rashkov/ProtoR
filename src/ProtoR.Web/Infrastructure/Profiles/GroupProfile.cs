@@ -13,6 +13,8 @@ namespace ProtoR.Web.Infrastructure.Profiles
             this.CreateMap<GroupDto, GroupReadModel>();
 
             this.CreateMap<GroupWriteModel, CreateGroupCommand>();
+
+            this.CreateMap<GroupPutModel, UpdateGroupCommand>();
         }
     }
 }

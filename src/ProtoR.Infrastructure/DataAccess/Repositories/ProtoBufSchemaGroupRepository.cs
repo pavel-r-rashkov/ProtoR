@@ -47,20 +47,21 @@ namespace ProtoR.Infrastructure.DataAccess.Repositories
             };
 
             var cache = this.ignite.GetCache<long, SchemaGroupCacheItem>(this.schemaGroupCacheName);
-            IAtomicSequence idGenerator = this.ignite.GetAtomicSequence(
+            var idGenerator = this.ignite.GetAtomicSequence(
                 $"{typeof(SchemaGroupCacheItem).Name.ToUpperInvariant()}{CacheConstants.IdSequenceSufix}",
                 0,
                 true);
             long id = idGenerator.Increment();
             await cache.PutIfAbsentAsync(id, schemaGroupCacheItem);
+            await this.AddNewSchemas(schemaGroup, id);
 
             return id;
         }
 
         public Task<ProtoBufSchemaGroup> GetByName(string name)
         {
-            ICache<long, SchemaGroupCacheItem> schemaGroupCache = this.ignite.GetCache<long, SchemaGroupCacheItem>(this.schemaGroupCacheName);
-            ICacheEntry<long, SchemaGroupCacheItem> schemaGroupCacheItem = schemaGroupCache
+            var schemaGroupCache = this.ignite.GetCache<long, SchemaGroupCacheItem>(this.schemaGroupCacheName);
+            var schemaGroupCacheItem = schemaGroupCache
                 .AsCacheQueryable()
                 .FirstOrDefault(c => c.Value.Name.ToUpper() == name.ToUpper());
 
@@ -69,8 +70,8 @@ namespace ProtoR.Infrastructure.DataAccess.Repositories
                 return Task.FromResult((ProtoBufSchemaGroup)null);
             }
 
-            ICache<long, SchemaCacheItem> schemaCache = this.ignite.GetCache<long, SchemaCacheItem>(this.schemaCacheName);
-            IEnumerable<ProtoBufSchema> schemaCacheItems = schemaCache
+            var schemaCache = this.ignite.GetCache<long, SchemaCacheItem>(this.schemaCacheName);
+            var schemaCacheItems = schemaCache
                 .AsCacheQueryable()
                 .Where(c => c.Value.SchemaGroupId == schemaGroupCacheItem.Key)
                 .ToList()
@@ -89,27 +90,7 @@ namespace ProtoR.Infrastructure.DataAccess.Repositories
             var schemaGroupCacheItem = await schemaGroupCache.GetAsync(schemaGroup.Id);
             schemaGroupCacheItem.CategoryId = schemaGroup.CategoryId;
             await schemaGroupCache.PutAsync(schemaGroup.Id, schemaGroupCacheItem);
-
-            var schemaCache = this.ignite.GetCache<long, SchemaCacheItem>(this.schemaCacheName);
-            IAtomicSequence idGenerator = this.ignite.GetAtomicSequence(
-                $"{typeof(SchemaCacheItem).Name.ToUpperInvariant()}{CacheConstants.IdSequenceSufix}",
-                0,
-                true);
-
-            IEnumerable<KeyValuePair<long, SchemaCacheItem>> newSchemas = schemaGroup.Schemas
-                .Where(s => s.Id == default)
-                .Select(s => new KeyValuePair<long, SchemaCacheItem>(
-                    idGenerator.Increment(),
-                    new SchemaCacheItem
-                    {
-                        SchemaGroupId = schemaGroup.Id,
-                        Version = s.Version.VersionNumber,
-                        Contents = s.Contents,
-                        CreatedBy = this.userProvider.GetCurrentUserName(),
-                        CreatedOn = DateTime.UtcNow,
-                    }));
-
-            await schemaCache.PutAllAsync(newSchemas);
+            await this.AddNewSchemas(schemaGroup, schemaGroup.Id);
         }
 
         public async Task Delete(ProtoBufSchemaGroup schemaGroup)
@@ -136,6 +117,30 @@ namespace ProtoR.Infrastructure.DataAccess.Repositories
                 .ToList();
 
             await ruleConfigurationCache.RemoveAllAsync(ruleConfigurationIds);
+        }
+
+        private async Task AddNewSchemas(ProtoBufSchemaGroup schemaGroup, long groupId)
+        {
+            var schemaCache = this.ignite.GetCache<long, SchemaCacheItem>(this.schemaCacheName);
+            var idGenerator = this.ignite.GetAtomicSequence(
+                $"{typeof(SchemaCacheItem).Name.ToUpperInvariant()}{CacheConstants.IdSequenceSufix}",
+                0,
+                true);
+
+            var newSchemas = schemaGroup.Schemas
+                .Where(s => s.Id == default)
+                .Select(s => new KeyValuePair<long, SchemaCacheItem>(
+                    idGenerator.Increment(),
+                    new SchemaCacheItem
+                    {
+                        SchemaGroupId = groupId,
+                        Version = s.Version.VersionNumber,
+                        Contents = s.Contents,
+                        CreatedBy = this.userProvider.GetCurrentUserName(),
+                        CreatedOn = DateTime.UtcNow,
+                    }));
+
+            await schemaCache.PutAllAsync(newSchemas);
         }
     }
 }

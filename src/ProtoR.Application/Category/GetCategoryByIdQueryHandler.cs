@@ -6,6 +6,7 @@ namespace ProtoR.Application.Category
     using System.Threading.Tasks;
     using MediatR;
     using ProtoR.Domain.CategoryAggregate;
+    using ProtoR.Domain.Exceptions;
 
     public class GetCategoryByIdQueryHandler : IRequestHandler<GetCategoryByIdQuery, CategoryDto>
     {
@@ -22,7 +23,14 @@ namespace ProtoR.Application.Category
                 ? Category.DefaultCategoryId
                 : Convert.ToInt64(request.CategoryId, CultureInfo.InvariantCulture);
 
-            return await this.categoryData.GetById(categoryId);
+            var category = await this.categoryData.GetById(categoryId);
+
+            if (category == null)
+            {
+                throw new EntityNotFoundException<Category>((object)request.CategoryId);
+            }
+
+            return category;
         }
     }
 }

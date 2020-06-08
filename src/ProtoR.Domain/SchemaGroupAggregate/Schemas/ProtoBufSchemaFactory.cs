@@ -3,6 +3,7 @@ namespace ProtoR.Domain.SchemaGroupAggregate.Schemas
     using System.IO;
     using Google.Protobuf.Reflection;
     using ProtoBuf.Reflection;
+    using ProtoR.Domain.Exceptions;
 
     public class ProtoBufSchemaFactory : ISchemaFactory<ProtoBufSchema, FileDescriptorSet>
     {
@@ -19,17 +20,14 @@ namespace ProtoR.Domain.SchemaGroupAggregate.Schemas
         private void Validate(string contents)
         {
             var descriptorSet = new FileDescriptorSet();
+            using var contentsReader = new StringReader(contents);
+            descriptorSet.Add("protobufSchema", true, contentsReader);
+            descriptorSet.Process();
+            Error[] errors = descriptorSet.GetErrors();
 
-            using (var contentsReader = new StringReader(contents))
+            if (errors.Length > 0)
             {
-                descriptorSet.Add("protobufSchema", true, contentsReader);
-                descriptorSet.Process();
-                Error[] errors = descriptorSet.GetErrors();
-
-                if (errors.Length > 0)
-                {
-                    throw new InvalidProtoBufSchemaException(errors);
-                }
+                throw new InvalidProtoBufSchemaException(errors);
             }
         }
     }

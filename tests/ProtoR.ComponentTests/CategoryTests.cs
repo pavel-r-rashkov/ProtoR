@@ -1,6 +1,7 @@
 namespace ProtoR.ComponentTests
 {
     using System;
+    using System.Collections.Generic;
     using System.Net;
     using System.Threading.Tasks;
     using ProtoR.ComponentTests.Configuration;
@@ -58,6 +59,19 @@ namespace ProtoR.ComponentTests
         }
 
         [Fact]
+        public async Task GetCategory_WithNonExistingCategory_ShouldReturn404NotFound()
+        {
+            var uriBuilder = new UriBuilder(Constants.BaseAddress)
+            {
+                Path = $"api/Categories/123456",
+            };
+
+            var response = await this.Client.GetAsync(uriBuilder.Uri);
+
+            Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+        }
+
+        [Fact]
         public async Task PostCategory_ShouldReturn201Created()
         {
             var uriBuilder = new UriBuilder(Constants.BaseAddress)
@@ -75,16 +89,13 @@ namespace ProtoR.ComponentTests
             Assert.True(response.IsSuccessStatusCode);
         }
 
-        [Fact]
-        public async Task PostCategory_WithInvalidData_ShouldReturn400BadRequest()
+        [Theory]
+        [MemberData(nameof(InvalidCategories))]
+        public async Task PostCategory_WithInvalidData_ShouldReturn400BadRequest(CategoryWriteModel category)
         {
             var uriBuilder = new UriBuilder(Constants.BaseAddress)
             {
                 Path = $"api/Categories",
-            };
-            var category = new CategoryWriteModel
-            {
-                Name = new string('a', 600),
             };
 
             using var content = new JsonHttpContent(category);
@@ -95,7 +106,7 @@ namespace ProtoR.ComponentTests
         }
 
         [Fact]
-        public async Task PostCategory_ShouldReturn204NoContent()
+        public async Task DeleteCategory_ShouldReturn204NoContent()
         {
             var id = this.ApplicationFactory.NonDefaultCategoryId;
             var uriBuilder = new UriBuilder(Constants.BaseAddress)
@@ -106,6 +117,19 @@ namespace ProtoR.ComponentTests
             var response = await this.Client.DeleteAsync(uriBuilder.Uri);
 
             Assert.True(response.IsSuccessStatusCode);
+        }
+
+        [Fact]
+        public async Task DeleteCategory_WithNonExistingCategory_ShouldReturn404NotFound()
+        {
+            var uriBuilder = new UriBuilder(Constants.BaseAddress)
+            {
+                Path = $"api/Categories/123456",
+            };
+
+            var response = await this.Client.DeleteAsync(uriBuilder.Uri);
+
+            Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
         }
 
         [Fact]
@@ -128,16 +152,31 @@ namespace ProtoR.ComponentTests
         }
 
         [Fact]
-        public async Task PutCategory_WithInvalidData_ShouldReturn400BadRequest()
+        public async Task PutCategory_WithNonExistingCategory_ShouldReturn404NotFound()
+        {
+            var uriBuilder = new UriBuilder(Constants.BaseAddress)
+            {
+                Path = $"api/Categories/123456",
+            };
+            var category = new CategoryWriteModel
+            {
+                Name = "Updated category",
+            };
+
+            using var content = new JsonHttpContent(category);
+            var response = await this.Client.PutAsync(uriBuilder.Uri, content);
+
+            Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+        }
+
+        [Theory]
+        [MemberData(nameof(InvalidCategories))]
+        public async Task PutCategory_WithInvalidData_ShouldReturn400BadRequest(CategoryWriteModel category)
         {
             var id = this.ApplicationFactory.NonDefaultCategoryId;
             var uriBuilder = new UriBuilder(Constants.BaseAddress)
             {
                 Path = $"api/Categories/{id}",
-            };
-            var category = new CategoryWriteModel
-            {
-                Name = new string('a', 600),
             };
 
             using var content = new JsonHttpContent(category);
@@ -145,6 +184,33 @@ namespace ProtoR.ComponentTests
 
             Assert.False(response.IsSuccessStatusCode);
             Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        }
+
+        public static IEnumerable<object[]> InvalidCategories()
+        {
+            yield return new object[]
+            {
+                new CategoryWriteModel
+                {
+                    Name = string.Empty,
+                },
+            };
+
+            yield return new object[]
+            {
+                new CategoryWriteModel
+                {
+                    Name = null,
+                },
+            };
+
+            yield return new object[]
+            {
+                new CategoryWriteModel
+                {
+                    Name = new string('a', 600),
+                },
+            };
         }
     }
 }

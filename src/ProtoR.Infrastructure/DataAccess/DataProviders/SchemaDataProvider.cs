@@ -26,8 +26,8 @@ namespace ProtoR.Infrastructure.DataAccess.DataProviders
 
         public async Task<SchemaDto> GetByVersion(string groupName, int version)
         {
-            long groupId = await this.GetGroupId(groupName);
-            ICache<long, SchemaCacheItem> schemaCache = this.ignite.GetCache<long, SchemaCacheItem>(this.schemaCacheName);
+            var groupId = await this.GetGroupId(groupName);
+            var schemaCache = this.ignite.GetCache<long, SchemaCacheItem>(this.schemaCacheName);
             var schema = schemaCache
                 .AsCacheQueryable()
                 .Where(c => c.Value.SchemaGroupId == groupId && c.Value.Version == version)

@@ -1,8 +1,8 @@
-namespace ProtoR.Domain.SchemaGroupAggregate.Schemas
+namespace ProtoR.Domain.Exceptions
 {
     using System;
 
-    public abstract class InvalidSchemaException<TSchemaValidationError> : Exception
+    public abstract class InvalidSchemaException<TSchemaValidationError> : DomainException
     {
         public InvalidSchemaException()
         {

@@ -1,6 +1,7 @@
 namespace ProtoR.ComponentTests
 {
     using System;
+    using System.Collections.Generic;
     using System.Net;
     using System.Threading.Tasks;
     using ProtoR.ComponentTests.Configuration;
@@ -31,6 +32,33 @@ namespace ProtoR.ComponentTests
         }
 
         [Fact]
+        public async Task GetRole_ShouldReturn200Ok()
+        {
+            var id = this.ApplicationFactory.RoleId;
+            var uriBuilder = new UriBuilder(Constants.BaseAddress)
+            {
+                Path = $"api/Roles/{id}",
+            };
+
+            var response = await this.Client.GetAsync(uriBuilder.Uri);
+
+            Assert.True(response.IsSuccessStatusCode);
+        }
+
+        [Fact]
+        public async Task GetRole_WithNonExistingRole_ShouldReturn404NotFound()
+        {
+            var uriBuilder = new UriBuilder(Constants.BaseAddress)
+            {
+                Path = $"api/Roles/123456",
+            };
+
+            var response = await this.Client.GetAsync(uriBuilder.Uri);
+
+            Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+        }
+
+        [Fact]
         public async Task PostRole_ShouldReturn201Created()
         {
             var uriBuilder = new UriBuilder(Constants.BaseAddress)
@@ -54,22 +82,13 @@ namespace ProtoR.ComponentTests
             Assert.Equal(HttpStatusCode.Created, response.StatusCode);
         }
 
-        [Fact]
-        public async Task PostRole_WithInvalidData_ShouldReturn400BadRequest()
+        [Theory]
+        [MemberData(nameof(InvalidRoles))]
+        public async Task PostRole_WithInvalidData_ShouldReturn400BadRequest(RoleWriteModel role)
         {
             var uriBuilder = new UriBuilder(Constants.BaseAddress)
             {
                 Path = "api/Roles",
-            };
-            var role = new RoleWriteModel
-            {
-                Name = new string('a', 600),
-                Permissions = new int[]
-                {
-                    (int)Permission.CategoryRead,
-                    (int)Permission.RoleWrite,
-                    (int)Permission.SchemaWrite,
-                },
             };
 
             using var contents = new JsonHttpContent(role);
@@ -102,22 +121,14 @@ namespace ProtoR.ComponentTests
             Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
         }
 
-        [Fact]
-        public async Task PutRole_WithInvalidData_ShouldReturn400BadRequest()
+        [Theory]
+        [MemberData(nameof(InvalidRoles))]
+        public async Task PutRole_WithInvalidData_ShouldReturn400BadRequest(RoleWriteModel role)
         {
             var id = this.ApplicationFactory.RoleId;
             var uriBuilder = new UriBuilder(Constants.BaseAddress)
             {
                 Path = $"api/Roles/{id}",
-            };
-            var role = new RoleWriteModel
-            {
-                Name = new string('a', 600),
-                Permissions = new int[]
-                {
-                    (int)Permission.UserWrite,
-                    (int)Permission.SchemaWrite,
-                },
             };
 
             using var contents = new JsonHttpContent(role);
@@ -138,6 +149,48 @@ namespace ProtoR.ComponentTests
             var response = await this.Client.DeleteAsync(uriBuilder.Uri);
 
             Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
+        }
+
+        public static IEnumerable<object[]> InvalidRoles()
+        {
+            yield return new object[]
+            {
+                new RoleWriteModel
+                {
+                    Name = null,
+                    Permissions = new int[]
+                    {
+                        (int)Permission.UserWrite,
+                        (int)Permission.SchemaWrite,
+                    },
+                },
+            };
+
+            yield return new object[]
+            {
+                new RoleWriteModel
+                {
+                    Name = string.Empty,
+                    Permissions = new int[]
+                    {
+                        (int)Permission.UserWrite,
+                        (int)Permission.SchemaWrite,
+                    },
+                },
+            };
+
+            yield return new object[]
+            {
+                new RoleWriteModel
+                {
+                    Name = new string('a', 501),
+                    Permissions = new int[]
+                    {
+                        (int)Permission.UserWrite,
+                        (int)Permission.SchemaWrite,
+                    },
+                },
+            };
         }
     }
 }

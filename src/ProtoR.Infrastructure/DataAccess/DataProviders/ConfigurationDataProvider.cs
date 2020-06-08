@@ -41,7 +41,12 @@ namespace ProtoR.Infrastructure.DataAccess.DataProviders
                 .AsCacheQueryable()
                 .Where(c => c.Value.Name.ToUpper() == groupName.ToUpper())
                 .Select(c => c.Key)
-                .First();
+                .FirstOrDefault();
+
+            if (groupId == default)
+            {
+                return null;
+            }
 
             return await this.GetByCondition(c => c.Value.SchemaGroupId == groupId);
         }
@@ -70,7 +75,7 @@ namespace ProtoR.Infrastructure.DataAccess.DataProviders
 
             if (configurationProjection == null)
             {
-                return null;
+                return Task.FromResult((ConfigurationDto)null);
             }
 
             var configuration = new ConfigurationDto

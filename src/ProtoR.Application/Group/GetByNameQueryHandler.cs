@@ -4,7 +4,8 @@ namespace ProtoR.Application.Group
     using System.Threading;
     using System.Threading.Tasks;
     using MediatR;
-    using ProtoR.Domain.CategoryAggregate;
+    using ProtoR.Domain.Exceptions;
+    using ProtoR.Domain.SchemaGroupAggregate;
 
     public class GetByNameQueryHandler : IRequestHandler<GetByNameQuery, GroupDto>
     {
@@ -22,6 +23,12 @@ namespace ProtoR.Application.Group
         public async Task<GroupDto> Handle(GetByNameQuery request, CancellationToken cancellationToken)
         {
             var group = await this.dataProvider.GetByName(request.GroupName);
+
+            if (group == null)
+            {
+                throw new EntityNotFoundException<ProtoBufSchemaGroup>((object)request.GroupName);
+            }
+
             var categories = this.userProvider.GetCategoryRestrictions();
 
             if (categories != null && !categories.Contains(group.CategoryId))

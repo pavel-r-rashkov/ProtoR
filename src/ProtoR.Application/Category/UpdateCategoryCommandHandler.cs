@@ -4,6 +4,7 @@ namespace ProtoR.Application.Category
     using System.Threading.Tasks;
     using MediatR;
     using ProtoR.Domain.CategoryAggregate;
+    using ProtoR.Domain.Exceptions;
     using ProtoR.Domain.SeedWork;
 
     public class UpdateCategoryCommandHandler : AsyncRequestHandler<UpdateCategoryCommand>
@@ -22,11 +23,19 @@ namespace ProtoR.Application.Category
         protected override async Task Handle(UpdateCategoryCommand command, CancellationToken cancellationToken)
         {
             var category = await this.categoryRepository.GetById(command.Id);
+
+            if (category == null)
+            {
+                throw new EntityNotFoundException<Category>(command.Id);
+            }
+
             var existingCategory = await this.categoryRepository.GetByName(command.Name);
 
             if (existingCategory != null)
             {
-                // TODO throw exception
+                throw new DuplicateCategoryException(
+                    $"Cannot update name of category {category.Id} to {command.Name}",
+                    command.Name);
             }
 
             category.Name = command.Name;

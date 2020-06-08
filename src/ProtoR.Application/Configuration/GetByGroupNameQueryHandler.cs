@@ -6,6 +6,8 @@ namespace ProtoR.Application.Configuration
     using MediatR;
     using ProtoR.Application.Group;
     using ProtoR.Domain.CategoryAggregate;
+    using ProtoR.Domain.Exceptions;
+    using ProtoR.Domain.SchemaGroupAggregate;
 
     public class GetByGroupNameQueryHandler : IRequestHandler<GetByGroupNameQuery, ConfigurationDto>
     {
@@ -26,6 +28,12 @@ namespace ProtoR.Application.Configuration
         public async Task<ConfigurationDto> Handle(GetByGroupNameQuery request, CancellationToken cancellationToken)
         {
             var configuration = await this.dataProvider.GetConfigByGroupName(request.GroupName);
+
+            if (configuration == null)
+            {
+                throw new EntityNotFoundException<ProtoBufSchemaGroup>((object)request.GroupName);
+            }
+
             var categories = this.userProvider.GetCategoryRestrictions();
 
             if (categories != null && configuration.GroupId != null)
