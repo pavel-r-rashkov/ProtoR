@@ -8,6 +8,8 @@ namespace ProtoR.Web.Resources.SchemaResource
 
         public int Version { get; set; }
 
+        public string Contents { get; set; }
+
         public DateTime CreatedOn { get; set; }
 
         public string CreatedBy { get; set; }

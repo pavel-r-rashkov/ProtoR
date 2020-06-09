@@ -1,6 +1,7 @@
 namespace ProtoR.Infrastructure.DataAccess
 {
     using System;
+    using System.Globalization;
     using System.Threading;
     using System.Threading.Tasks;
     using Apache.Ignite.Core;
@@ -14,7 +15,8 @@ namespace ProtoR.Infrastructure.DataAccess
     [Serializable]
     public class ClusterSingletonService : IService, IClusterSingletonService
     {
-        private static readonly SemaphoreSlim Semaphore = new SemaphoreSlim(1, 1);
+        private const string MutexNameFormat = "PROTOR_ADD_SCHEMA_{0}";
+        private readonly int mutextWaitTimeout = 1000 * 30;
         [InstanceResource]
         private readonly IIgnite ignite = null;
         [NonSerialized]
@@ -35,18 +37,33 @@ namespace ProtoR.Infrastructure.DataAccess
             this.autoFacPlugin = this.ignite.GetPlugin<AutoFacPlugin>(nameof(AutoFacPluginProvider));
         }
 
-        public async Task<SchemaValidationResultDto> AddSchema(CreateSchemaCommand command)
+        public Task<SchemaValidationResultDto> AddSchema(CreateSchemaCommand command)
         {
-            var mediator = this.autoFacPlugin.Scope.Resolve<IMediator>();
-            await Semaphore.WaitAsync();
+            using var childScope = this.autoFacPlugin.Scope.BeginLifetimeScope();
+            var mediator = childScope.Resolve<IMediator>();
+            var mutexName = string.Format(CultureInfo.InvariantCulture, MutexNameFormat, command.GroupName);
+            using var mutex = new Mutex(true, mutexName);
+
+            if (!mutex.WaitOne(this.mutextWaitTimeout))
+            {
+                throw new InvalidOperationException("Add schema mutex cannot be acquired");
+            }
 
             try
             {
-                return await mediator.Send(command);
+                var commandResult = mediator.Send(command);
+                commandResult.Wait();
+
+                return commandResult;
+            }
+            catch (AggregateException ex)
+            {
+                // TODO log
+                throw ex.InnerException;
             }
             finally
             {
-                Semaphore.Release();
+                mutex.ReleaseMutex();
             }
         }
     }

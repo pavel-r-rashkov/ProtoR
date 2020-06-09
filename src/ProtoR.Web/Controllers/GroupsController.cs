@@ -9,6 +9,7 @@ namespace ProtoR.Web.Controllers
     using ProtoR.Application.Configuration;
     using ProtoR.Application.Group;
     using ProtoR.Application.Schema;
+    using ProtoR.Infrastructure.DataAccess;
     using ProtoR.Web.Infrastructure.Identity;
     using ProtoR.Web.Resources.ConfigurationResource;
     using ProtoR.Web.Resources.GroupResource;
@@ -16,11 +17,15 @@ namespace ProtoR.Web.Controllers
 
     public class GroupsController : BaseController
     {
+        private readonly IClusterSingletonService clusterSingletonService;
+
         public GroupsController(
             IMediator mediator,
-            IMapper mapper)
+            IMapper mapper,
+            IClusterSingletonService clusterSingletonService)
             : base(mediator, mapper)
         {
+            this.clusterSingletonService = clusterSingletonService;
         }
 
         [HttpGet]
@@ -108,7 +113,7 @@ namespace ProtoR.Web.Controllers
         public async Task<ActionResult> PostSchema(SchemaWriteModel schema)
         {
             var command = this.Mapper.Map<CreateSchemaCommand>(schema);
-            var commandResult = await this.Mediator.Send(command);
+            var commandResult = await this.clusterSingletonService.AddSchema(command);
 
             if (commandResult.RuleViolations.Any(v => v.IsFatal))
             {

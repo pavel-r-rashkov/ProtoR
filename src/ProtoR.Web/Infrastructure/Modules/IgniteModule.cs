@@ -35,6 +35,17 @@ namespace ProtoR.Web.Infrastructure.Modules
                 .As<IIgniteFactory>()
                 .SingleInstance();
 
+            builder.Register(d =>
+                {
+                    var igniteFactory = d.Resolve<IIgniteFactory>();
+
+                    return igniteFactory
+                        .Instance()
+                        .GetServices()
+                        .GetService<IClusterSingletonService>(nameof(IClusterSingletonService));
+                })
+                .As<IClusterSingletonService>();
+
             builder
                 .RegisterInstance(this.igniteConfiguration)
                 .As<IIgniteConfiguration>()
