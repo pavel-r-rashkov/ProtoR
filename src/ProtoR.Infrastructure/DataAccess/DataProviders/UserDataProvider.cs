@@ -3,15 +3,13 @@ namespace ProtoR.Infrastructure.DataAccess.DataProviders
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
-    using Apache.Ignite.Core;
     using Apache.Ignite.Core.Cache;
     using Apache.Ignite.Linq;
     using ProtoR.Application.User;
     using ProtoR.Infrastructure.DataAccess.CacheItems;
 
-    public class UserDataProvider : IUserDataProvider
+    public class UserDataProvider : BaseDataProvider, IUserDataProvider
     {
-        private readonly IIgnite ignite;
         private readonly ICache<long, UserCacheItem> userCache;
         private readonly ICache<UserRoleKey, EmptyCacheItem> userRoleCache;
         private readonly ICache<UserCategoryKey, EmptyCacheItem> userCategoryCache;
@@ -19,11 +17,11 @@ namespace ProtoR.Infrastructure.DataAccess.DataProviders
         public UserDataProvider(
             IIgniteFactory igniteFactory,
             IIgniteConfiguration configurationProvider)
+            : base(igniteFactory, configurationProvider)
         {
-            this.ignite = igniteFactory.Instance();
-            this.userCache = this.ignite.GetOrCreateCache<long, UserCacheItem>(configurationProvider.UserCacheName);
-            this.userRoleCache = this.ignite.GetOrCreateCache<UserRoleKey, EmptyCacheItem>(configurationProvider.UserRoleCacheName);
-            this.userCategoryCache = this.ignite.GetOrCreateCache<UserCategoryKey, EmptyCacheItem>(configurationProvider.UserCategoryCacheName);
+            this.userCache = this.Ignite.GetOrCreateCache<long, UserCacheItem>(this.ConfigurationProvider.UserCacheName);
+            this.userRoleCache = this.Ignite.GetOrCreateCache<UserRoleKey, EmptyCacheItem>(this.ConfigurationProvider.UserRoleCacheName);
+            this.userCategoryCache = this.Ignite.GetOrCreateCache<UserCategoryKey, EmptyCacheItem>(this.ConfigurationProvider.UserCategoryCacheName);
         }
 
         public async Task<UserDto> GetById(long id)

@@ -14,30 +14,29 @@ namespace ProtoR.Infrastructure.DataAccess.Repositories
     using ProtoR.Domain.RoleAggregate;
     using ProtoR.Infrastructure.DataAccess.CacheItems;
 
-    public class ClientRepository : IClientRepository
+    public class ClientRepository : BaseRepository, IClientRepository
     {
         private const char Separator = ',';
-        private readonly IIgnite ignite;
         private readonly ICache<long, ClientCacheItem> clientCache;
         private readonly ICache<ClientRoleKey, EmptyCacheItem> clientRoleCache;
         private readonly ICache<ClientCategoryKey, EmptyCacheItem> clientCategoryCache;
-        private readonly IUserProvider userProvider;
 
         public ClientRepository(
             IIgniteFactory igniteFactory,
             IIgniteConfiguration configurationProvider,
             IUserProvider userProvider)
+            : base(igniteFactory, configurationProvider, userProvider)
         {
-            this.ignite = igniteFactory.Instance();
-            this.clientCache = this.ignite.GetOrCreateCache<long, ClientCacheItem>(configurationProvider.ClientCacheName);
-            this.clientRoleCache = this.ignite.GetOrCreateCache<ClientRoleKey, EmptyCacheItem>(configurationProvider.ClientRoleCacheName);
-            this.clientCategoryCache = this.ignite.GetOrCreateCache<ClientCategoryKey, EmptyCacheItem>(configurationProvider.ClientCategoryCacheName);
-            this.userProvider = userProvider;
+            this.clientCache = this.Ignite.GetOrCreateCache<long, ClientCacheItem>(configurationProvider.ClientCacheName);
+            this.clientRoleCache = this.Ignite.GetOrCreateCache<ClientRoleKey, EmptyCacheItem>(configurationProvider.ClientRoleCacheName);
+            this.clientCategoryCache = this.Ignite.GetOrCreateCache<ClientCategoryKey, EmptyCacheItem>(configurationProvider.ClientCategoryCacheName);
         }
 
         public async Task<long> Add(Client client)
         {
-            IAtomicSequence clientIdGenerator = this.ignite.GetAtomicSequence(
+            _ = client ?? throw new ArgumentNullException(nameof(client));
+
+            IAtomicSequence clientIdGenerator = this.Ignite.GetAtomicSequence(
                 $"{typeof(ClientCacheItem).Name.ToUpperInvariant()}{CacheConstants.IdSequenceSufix}",
                 0,
                 true);
@@ -123,6 +122,8 @@ namespace ProtoR.Infrastructure.DataAccess.Repositories
 
         public async Task Update(Client client)
         {
+            _ = client ?? throw new ArgumentNullException(nameof(client));
+
             var clientItem = this.MapToCacheItem(client);
 
             var currentRoles = this.clientRoleCache
@@ -212,7 +213,7 @@ namespace ProtoR.Infrastructure.DataAccess.Repositories
                 RedirectUris = string.Join(Separator, client.RedirectUris),
                 PostLogoutRedirectUris = string.Join(Separator, client.PostLogoutRedirectUris),
                 AllowedCorsOrigins = string.Join(Separator, client.AllowedCorsOrigins),
-                CreatedBy = this.userProvider.GetCurrentUserName(),
+                CreatedBy = this.UserProvider.GetCurrentUserName(),
                 CreatedOn = DateTime.UtcNow,
             };
         }

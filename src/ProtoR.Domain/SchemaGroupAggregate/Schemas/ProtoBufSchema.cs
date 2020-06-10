@@ -35,13 +35,11 @@ namespace ProtoR.Domain.SchemaGroupAggregate.Schemas
         protected override FileDescriptorSet ParseContents()
         {
             var descriptorSet = new FileDescriptorSet();
+            using var contentsReader = new StringReader(this.Contents);
+            descriptorSet.Add(this.Id.ToString(CultureInfo.CurrentCulture), true, contentsReader);
+            descriptorSet.Process();
 
-            using (var contentsReader = new StringReader(this.Contents))
-            {
-                descriptorSet.Add(this.Id.ToString(CultureInfo.CurrentCulture), true, contentsReader);
-                descriptorSet.Process();
-                return descriptorSet;
-            }
+            return descriptorSet;
         }
 
         internal class ProtoBufSchemaScope

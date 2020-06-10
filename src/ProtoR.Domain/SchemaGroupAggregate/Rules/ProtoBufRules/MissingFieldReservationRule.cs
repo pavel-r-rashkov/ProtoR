@@ -1,9 +1,9 @@
 namespace ProtoR.Domain.SchemaGroupAggregate.Rules.ProtoBufRules
 {
+    using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Text;
-    using FluentAssertions;
     using Google.Protobuf.Reflection;
     using ProtoR.Domain.SchemaGroupAggregate.Schemas;
     using static ProtoR.Domain.SchemaGroupAggregate.Schemas.ProtoBufSchema;
@@ -17,8 +17,8 @@ namespace ProtoR.Domain.SchemaGroupAggregate.Rules.ProtoBufRules
 
         public override ValidationResult Validate(ProtoBufSchema a, ProtoBufSchema b)
         {
-            a.Should().NotBeNull();
-            b.Should().NotBeNull();
+            _ = a ?? throw new ArgumentNullException(nameof(a));
+            _ = b ?? throw new ArgumentNullException(nameof(b));
 
             IEnumerable<FieldReservation> missingReservations = ProtoBufSchemaScope.ParallelTraverse(
                 a.RootScope(),

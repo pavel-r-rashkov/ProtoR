@@ -1,5 +1,6 @@
 namespace ProtoR.Application.Category
 {
+    using System;
     using System.Threading;
     using System.Threading.Tasks;
     using MediatR;
@@ -22,6 +23,7 @@ namespace ProtoR.Application.Category
 
         protected override async Task Handle(DeleteCategoryCommand request, CancellationToken cancellationToken)
         {
+            _ = request ?? throw new ArgumentNullException(nameof(request));
             var category = await this.categoryRepository.GetById(request.CategoryId);
 
             if (category == null)

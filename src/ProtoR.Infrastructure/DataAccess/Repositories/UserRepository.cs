@@ -14,29 +14,28 @@ namespace ProtoR.Infrastructure.DataAccess.Repositories
     using ProtoR.Domain.UserAggregate;
     using ProtoR.Infrastructure.DataAccess.CacheItems;
 
-    public class UserRepository : IUserRepository
+    public class UserRepository : BaseRepository, IUserRepository
     {
-        private readonly IIgnite ignite;
         private readonly ICache<long, UserCacheItem> userCache;
         private readonly ICache<UserRoleKey, EmptyCacheItem> userRoleCache;
         private readonly ICache<UserCategoryKey, EmptyCacheItem> userCategoryCache;
-        private readonly IUserProvider userProvider;
 
         public UserRepository(
             IIgniteFactory igniteFactory,
             IIgniteConfiguration configurationProvider,
             IUserProvider userProvider)
+            : base(igniteFactory, configurationProvider, userProvider)
         {
-            this.ignite = igniteFactory.Instance();
-            this.userCache = this.ignite.GetOrCreateCache<long, UserCacheItem>(configurationProvider.UserCacheName);
-            this.userRoleCache = this.ignite.GetOrCreateCache<UserRoleKey, EmptyCacheItem>(configurationProvider.UserRoleCacheName);
-            this.userCategoryCache = this.ignite.GetOrCreateCache<UserCategoryKey, EmptyCacheItem>(configurationProvider.UserCategoryCacheName);
-            this.userProvider = userProvider;
+            this.userCache = this.Ignite.GetOrCreateCache<long, UserCacheItem>(this.ConfigurationProvider.UserCacheName);
+            this.userRoleCache = this.Ignite.GetOrCreateCache<UserRoleKey, EmptyCacheItem>(this.ConfigurationProvider.UserRoleCacheName);
+            this.userCategoryCache = this.Ignite.GetOrCreateCache<UserCategoryKey, EmptyCacheItem>(this.ConfigurationProvider.UserCategoryCacheName);
         }
 
         public async Task<long> Add(User user)
         {
-            IAtomicSequence userIdGenerator = this.ignite.GetAtomicSequence(
+            _ = user ?? throw new ArgumentNullException(nameof(user));
+
+            IAtomicSequence userIdGenerator = this.Ignite.GetAtomicSequence(
                 $"{typeof(UserCacheItem).Name.ToUpperInvariant()}{CacheConstants.IdSequenceSufix}",
                 0,
                 true);
@@ -45,7 +44,7 @@ namespace ProtoR.Infrastructure.DataAccess.Repositories
 
             var userItem = new UserCacheItem();
             this.MapToUserCacheItem(user, userItem);
-            userItem.CreatedBy = this.userProvider.GetCurrentUserName();
+            userItem.CreatedBy = this.UserProvider.GetCurrentUserName();
             userItem.CreatedOn = DateTime.UtcNow;
 
             var userRoleItems = user.RoleBindings.Select(r => new KeyValuePair<UserRoleKey, EmptyCacheItem>(
@@ -144,6 +143,8 @@ namespace ProtoR.Infrastructure.DataAccess.Repositories
 
         public async Task Update(User user)
         {
+            _ = user ?? throw new ArgumentNullException(nameof(user));
+
             var userCacheItem = await this.userCache.GetAsync(user.Id);
             this.MapToUserCacheItem(user, userCacheItem);
 

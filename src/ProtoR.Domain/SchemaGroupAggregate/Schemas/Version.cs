@@ -53,6 +53,8 @@ namespace ProtoR.Domain.SchemaGroupAggregate.Schemas
 
         public int CompareTo(Version other)
         {
+            _ = other ?? throw new ArgumentNullException(nameof(other));
+
             return this.VersionNumber.CompareTo(other.VersionNumber);
         }
 

@@ -19,6 +19,7 @@ namespace ProtoR.Application.Category
 
         public async Task<CategoryDto> Handle(GetCategoryByIdQuery request, CancellationToken cancellationToken)
         {
+            _ = request ?? throw new ArgumentNullException(nameof(request));
             var categoryId = request.CategoryId.Equals("default", StringComparison.InvariantCultureIgnoreCase)
                 ? Category.DefaultCategoryId
                 : Convert.ToInt64(request.CategoryId, CultureInfo.InvariantCulture);

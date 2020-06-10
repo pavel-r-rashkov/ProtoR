@@ -67,7 +67,7 @@ namespace ProtoR.Domain.SeedWork
 
         public override bool Equals(object obj)
         {
-            if (!(obj is Enumeration otherValue))
+            if (!(obj is Enumeration otherValue) || obj == null)
             {
                 return false;
             }

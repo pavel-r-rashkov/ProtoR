@@ -1,5 +1,6 @@
 namespace ProtoR.Application.Schema
 {
+    using System;
     using System.Collections.Generic;
     using System.Threading;
     using System.Threading.Tasks;
@@ -29,6 +30,7 @@ namespace ProtoR.Application.Schema
 
         public async Task<SchemaValidationResultDto> Handle(ValidateSchemaCommand request, CancellationToken cancellationToken)
         {
+            _ = request ?? throw new ArgumentNullException(nameof(request));
             var group = await this.groupRepository.GetByName(request.GroupName);
 
             if (group == null)

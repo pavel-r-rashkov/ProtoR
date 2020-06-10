@@ -19,6 +19,7 @@ namespace ProtoR.Application.Schema
 
         public async Task<SchemaDto> Handle(GetByVersionQuery request, CancellationToken cancellationToken)
         {
+            _ = request ?? throw new ArgumentNullException(nameof(request));
             SchemaDto schema = request.Version.Equals("latest", StringComparison.InvariantCultureIgnoreCase)
                 ? await this.dataProvider.GetLatestVersion(request.GroupName)
                 : await this.dataProvider.GetByVersion(request.GroupName, Convert.ToInt32(request.Version, CultureInfo.InvariantCulture));

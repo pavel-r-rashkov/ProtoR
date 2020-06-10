@@ -35,6 +35,7 @@ namespace ProtoR.Application.Schema
 
         public async Task<SchemaValidationResultDto> Handle(CreateSchemaCommand request, CancellationToken cancellationToken)
         {
+            _ = request ?? throw new ArgumentNullException(nameof(request));
             ProtoBufSchemaGroup schemaGroup = await this.schemaGroupRepository.GetByName(request.GroupName);
 
             if (schemaGroup == null)

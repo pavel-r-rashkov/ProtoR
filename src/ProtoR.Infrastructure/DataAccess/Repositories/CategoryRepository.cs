@@ -3,33 +3,30 @@ namespace ProtoR.Infrastructure.DataAccess.Repositories
     using System;
     using System.Linq;
     using System.Threading.Tasks;
-    using Apache.Ignite.Core;
     using Apache.Ignite.Core.Cache;
-    using Apache.Ignite.Core.DataStructures;
     using Apache.Ignite.Linq;
     using ProtoR.Application;
     using ProtoR.Domain.CategoryAggregate;
     using ProtoR.Infrastructure.DataAccess.CacheItems;
 
-    public class CategoryRepository : ICategoryRepository
+    public class CategoryRepository : BaseRepository, ICategoryRepository
     {
-        private readonly IIgnite ignite;
         private readonly ICache<long, CategoryCacheItem> categoryCache;
-        private readonly IUserProvider userProvider;
 
         public CategoryRepository(
             IIgniteFactory igniteFactory,
             IIgniteConfiguration configurationProvider,
             IUserProvider userProvider)
+            : base(igniteFactory, configurationProvider, userProvider)
         {
-            this.ignite = igniteFactory.Instance();
-            this.categoryCache = this.ignite.GetOrCreateCache<long, CategoryCacheItem>(configurationProvider.CategoryCacheName);
-            this.userProvider = userProvider;
+            this.categoryCache = this.Ignite.GetOrCreateCache<long, CategoryCacheItem>(configurationProvider.CategoryCacheName);
         }
 
         public async Task<long> Add(Category category)
         {
-            var categoryIdGenerator = this.ignite.GetAtomicSequence(
+            _ = category ?? throw new ArgumentNullException(nameof(category));
+
+            var categoryIdGenerator = this.Ignite.GetAtomicSequence(
                 $"{typeof(CategoryCacheItem).Name.ToUpperInvariant()}{CacheConstants.IdSequenceSufix}",
                 1,
                 true);
@@ -40,7 +37,7 @@ namespace ProtoR.Infrastructure.DataAccess.Repositories
                 new CategoryCacheItem
                 {
                     Name = category.Name,
-                    CreatedBy = this.userProvider.GetCurrentUserName(),
+                    CreatedBy = this.UserProvider.GetCurrentUserName(),
                     CreatedOn = DateTime.UtcNow,
                 });
 
@@ -83,6 +80,8 @@ namespace ProtoR.Infrastructure.DataAccess.Repositories
 
         public async Task Update(Category category)
         {
+            _ = category ?? throw new ArgumentNullException(nameof(category));
+
             var categoryCacheItem = await this.categoryCache.GetAsync(category.Id);
             categoryCacheItem.Name = category.Name;
 

@@ -21,18 +21,19 @@ namespace ProtoR.Application.Category
             this.unitOfWork = unitOfWork;
         }
 
-        public async Task<long> Handle(CreateCategoryCommand command, CancellationToken cancellationToken)
+        public async Task<long> Handle(CreateCategoryCommand request, CancellationToken cancellationToken)
         {
-            var existingCategory = await this.categoryRepository.GetByName(command.Name);
+            _ = request ?? throw new ArgumentNullException(nameof(request));
+            var existingCategory = await this.categoryRepository.GetByName(request.Name);
 
             if (existingCategory != null)
             {
                 throw new DuplicateCategoryException(
-                    $"Cannot create category with name {command.Name}. Category with that name already exists.",
-                    command.Name);
+                    $"Cannot create category with name {request.Name}. Category with that name already exists.",
+                    request.Name);
             }
 
-            var category = new Category(command.Name);
+            var category = new Category(request.Name);
             var id = await this.categoryRepository.Add(category);
             await this.unitOfWork.SaveChanges();
 

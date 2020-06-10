@@ -4,32 +4,34 @@ namespace ProtoR.Infrastructure.DataAccess.Repositories
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
-    using Apache.Ignite.Core;
     using Apache.Ignite.Core.Cache;
     using Apache.Ignite.Core.DataStructures;
     using Apache.Ignite.Linq;
+    using ProtoR.Application;
     using ProtoR.Domain.ConfigurationAggregate;
     using ProtoR.Domain.SchemaGroupAggregate.Rules;
     using ProtoR.Domain.SeedWork;
     using ProtoR.Infrastructure.DataAccess.CacheItems;
 
-    public class ConfigurationRepository : IConfigurationRepository
+    public class ConfigurationRepository : BaseRepository, IConfigurationRepository
     {
-        private readonly IIgnite ignite;
         private readonly string configurationCacheName;
         private readonly string ruleConfigurationGroupCacheName;
 
         public ConfigurationRepository(
             IIgniteFactory igniteFactory,
-            IIgniteConfiguration configurationProvider)
+            IIgniteConfiguration configurationProvider,
+            IUserProvider userProvider)
+            : base(igniteFactory, configurationProvider, userProvider)
         {
-            this.ignite = igniteFactory.Instance();
             this.configurationCacheName = configurationProvider.ConfigurationCacheName;
             this.ruleConfigurationGroupCacheName = configurationProvider.RuleConfigurationCacheName;
         }
 
         public async Task<long> Add(Configuration configuration)
         {
+            _ = configuration ?? throw new ArgumentNullException(nameof(configuration));
+
             var configurationCacheItem = new ConfigurationCacheItem
             {
                 SchemaGroupId = configuration.SchemaGroupId,
@@ -39,15 +41,15 @@ namespace ProtoR.Infrastructure.DataAccess.Repositories
                 Transitive = configuration.GroupConfiguration.Transitive,
             };
 
-            ICache<long, ConfigurationCacheItem> configurationCache = this.ignite.GetCache<long, ConfigurationCacheItem>(this.configurationCacheName);
-            IAtomicSequence configurationCacheIdGenerator = this.ignite.GetAtomicSequence(
+            ICache<long, ConfigurationCacheItem> configurationCache = this.Ignite.GetCache<long, ConfigurationCacheItem>(this.configurationCacheName);
+            IAtomicSequence configurationCacheIdGenerator = this.Ignite.GetAtomicSequence(
                 $"{typeof(ConfigurationCacheItem).Name.ToUpperInvariant()}{CacheConstants.IdSequenceSufix}",
                 0,
                 true);
             long configurationId = configurationCacheIdGenerator.Increment();
 
-            ICache<long, RuleConfigurationCacheItem> ruleConfigurationCache = this.ignite.GetCache<long, RuleConfigurationCacheItem>(this.ruleConfigurationGroupCacheName);
-            IAtomicSequence ruleConfigurationCacheIdGenerator = this.ignite.GetAtomicSequence(
+            ICache<long, RuleConfigurationCacheItem> ruleConfigurationCache = this.Ignite.GetCache<long, RuleConfigurationCacheItem>(this.ruleConfigurationGroupCacheName);
+            IAtomicSequence ruleConfigurationCacheIdGenerator = this.Ignite.GetAtomicSequence(
                 $"{typeof(RuleConfigurationCacheItem).Name.ToUpperInvariant()}{CacheConstants.IdSequenceSufix}",
                 0,
                 true);
@@ -72,7 +74,7 @@ namespace ProtoR.Infrastructure.DataAccess.Repositories
 
         public async Task<Configuration> GetById(long id)
         {
-            var configurationCache = this.ignite.GetCache<long, ConfigurationCacheItem>(this.configurationCacheName);
+            var configurationCache = this.Ignite.GetCache<long, ConfigurationCacheItem>(this.configurationCacheName);
             var result = await configurationCache.TryGetAsync(id);
 
             if (!result.Success)
@@ -85,7 +87,7 @@ namespace ProtoR.Infrastructure.DataAccess.Repositories
 
         public Task<Configuration> GetBySchemaGroupId(long? groupId)
         {
-            ICache<long, ConfigurationCacheItem> configurationCache = this.ignite.GetCache<long, ConfigurationCacheItem>(this.configurationCacheName);
+            ICache<long, ConfigurationCacheItem> configurationCache = this.Ignite.GetCache<long, ConfigurationCacheItem>(this.configurationCacheName);
             ICacheEntry<long, ConfigurationCacheItem> configurationCacheItem = configurationCache
                 .AsCacheQueryable()
                 .Where(c => c.Value.SchemaGroupId == groupId)
@@ -101,6 +103,8 @@ namespace ProtoR.Infrastructure.DataAccess.Repositories
 
         public async Task Update(Configuration configuration)
         {
+            _ = configuration ?? throw new ArgumentNullException(nameof(configuration));
+
             var configurationCacheItem = new ConfigurationCacheItem
             {
                 SchemaGroupId = configuration.SchemaGroupId,
@@ -110,10 +114,10 @@ namespace ProtoR.Infrastructure.DataAccess.Repositories
                 Transitive = configuration.GroupConfiguration.Transitive,
             };
 
-            ICache<long, ConfigurationCacheItem> configurationCache = this.ignite.GetCache<long, ConfigurationCacheItem>(this.configurationCacheName);
+            ICache<long, ConfigurationCacheItem> configurationCache = this.Ignite.GetCache<long, ConfigurationCacheItem>(this.configurationCacheName);
             await configurationCache.PutAsync(configuration.Id, configurationCacheItem);
 
-            ICache<long, RuleConfigurationCacheItem> ruleConfigurationCache = this.ignite.GetCache<long, RuleConfigurationCacheItem>(this.ruleConfigurationGroupCacheName);
+            ICache<long, RuleConfigurationCacheItem> ruleConfigurationCache = this.Ignite.GetCache<long, RuleConfigurationCacheItem>(this.ruleConfigurationGroupCacheName);
             Dictionary<string, RuleConfiguration> updatedRules = configuration
                 .GetRulesConfiguration()
                 .ToDictionary(r => r.Key.ToString(), r => r.Value);
@@ -142,7 +146,7 @@ namespace ProtoR.Infrastructure.DataAccess.Repositories
                 .GetAll<Severity>()
                 .ToDictionary(s => s.Id);
 
-            ICache<long, RuleConfigurationCacheItem> ruleConfigurationCache = this.ignite.GetCache<long, RuleConfigurationCacheItem>(this.ruleConfigurationGroupCacheName);
+            ICache<long, RuleConfigurationCacheItem> ruleConfigurationCache = this.Ignite.GetCache<long, RuleConfigurationCacheItem>(this.ruleConfigurationGroupCacheName);
             Dictionary<RuleCode, RuleConfiguration> rulesConfiguration = ruleConfigurationCache
                 .AsCacheQueryable()
                 .Where(c => c.Value.ConfigurationId == id)

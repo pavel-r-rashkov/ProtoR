@@ -1,5 +1,6 @@
 namespace ProtoR.Application.Category
 {
+    using System;
     using System.Threading;
     using System.Threading.Tasks;
     using MediatR;
@@ -20,25 +21,26 @@ namespace ProtoR.Application.Category
             this.unitOfWork = unitOfWork;
         }
 
-        protected override async Task Handle(UpdateCategoryCommand command, CancellationToken cancellationToken)
+        protected override async Task Handle(UpdateCategoryCommand request, CancellationToken cancellationToken)
         {
-            var category = await this.categoryRepository.GetById(command.Id);
+            _ = request ?? throw new ArgumentNullException(nameof(request));
+            var category = await this.categoryRepository.GetById(request.Id);
 
             if (category == null)
             {
-                throw new EntityNotFoundException<Category>(command.Id);
+                throw new EntityNotFoundException<Category>(request.Id);
             }
 
-            var existingCategory = await this.categoryRepository.GetByName(command.Name);
+            var existingCategory = await this.categoryRepository.GetByName(request.Name);
 
             if (existingCategory != null)
             {
                 throw new DuplicateCategoryException(
-                    $"Cannot update name of category {category.Id} to {command.Name}",
-                    command.Name);
+                    $"Cannot update name of category {category.Id} to {request.Name}",
+                    request.Name);
             }
 
-            category.Name = command.Name;
+            category.Name = request.Name;
             await this.categoryRepository.Update(category);
             await this.unitOfWork.SaveChanges();
         }

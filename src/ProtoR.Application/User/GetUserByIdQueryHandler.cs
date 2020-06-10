@@ -1,5 +1,6 @@
 namespace ProtoR.Application.User
 {
+    using System;
     using System.Threading;
     using System.Threading.Tasks;
     using MediatR;
@@ -17,6 +18,7 @@ namespace ProtoR.Application.User
 
         public async Task<UserDto> Handle(GetUserByIdQuery request, CancellationToken cancellationToken)
         {
+            _ = request ?? throw new ArgumentNullException(nameof(request));
             var user = await this.userDataProvider.GetById(request.UserId);
 
             if (user == null)

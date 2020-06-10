@@ -4,14 +4,11 @@ namespace ProtoR.Domain.UnitTests.SchemaGroupAggregateTests
     using System.Collections.Generic;
     using System.Linq;
     using AutoFixture;
-    using Google.Protobuf.Reflection;
-    using Moq;
     using ProtoR.Domain.CategoryAggregate;
     using ProtoR.Domain.ConfigurationAggregate;
     using ProtoR.Domain.Exceptions;
     using ProtoR.Domain.SchemaGroupAggregate;
     using ProtoR.Domain.SchemaGroupAggregate.Rules;
-    using ProtoR.Domain.SchemaGroupAggregate.Rules.ProtoBufRules;
     using ProtoR.Domain.SchemaGroupAggregate.Schemas;
     using ProtoR.Domain.UnitTests.SchemaFixtures;
     using Xunit;
@@ -19,8 +16,6 @@ namespace ProtoR.Domain.UnitTests.SchemaGroupAggregateTests
 
     public class ProtoBufSchemaGroupTests
     {
-        private readonly Mock<ISchemaFactory<ProtoBufSchema, FileDescriptorSet>> schemaFactoryMock;
-        private readonly Mock<ProtoBufRule> ruleMock;
         private readonly Fixture fixture;
         private readonly string validSchema;
         private readonly string baseSchema;
@@ -29,8 +24,6 @@ namespace ProtoR.Domain.UnitTests.SchemaGroupAggregateTests
 
         public ProtoBufSchemaGroupTests()
         {
-            this.schemaFactoryMock = new Mock<ISchemaFactory<ProtoBufSchema, FileDescriptorSet>>();
-            this.ruleMock = new Mock<ProtoBufRule>(RuleCode.PB0001);
             this.fixture = new Fixture();
             this.validSchema = SchemaFixtureUtils.GetProtoBuf("ValidSchema");
             this.baseSchema = SchemaFixtureUtils.GetProtoBuf("CompatibilityBaseSchema");

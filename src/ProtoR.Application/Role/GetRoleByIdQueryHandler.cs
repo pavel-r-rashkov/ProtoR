@@ -1,5 +1,6 @@
 namespace ProtoR.Application.Role
 {
+    using System;
     using System.Threading;
     using System.Threading.Tasks;
     using MediatR;
@@ -17,6 +18,7 @@ namespace ProtoR.Application.Role
 
         public async Task<RoleDto> Handle(GetRoleByIdQuery request, CancellationToken cancellationToken)
         {
+            _ = request ?? throw new ArgumentNullException(nameof(request));
             var role = await this.roleData.GetById(request.RoleId);
 
             if (role == null)

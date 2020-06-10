@@ -24,6 +24,7 @@ namespace ProtoR.Application.Client
 
         protected override async Task Handle(UpdateClientCommand request, CancellationToken cancellationToken)
         {
+            _ = request ?? throw new ArgumentNullException(nameof(request));
             var client = await this.clientRepository.GetById(request.Id);
 
             if (client == null)

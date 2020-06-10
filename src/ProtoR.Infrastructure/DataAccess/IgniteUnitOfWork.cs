@@ -11,6 +11,8 @@ namespace ProtoR.Infrastructure.DataAccess
 
         public IgniteUnitOfWork(IIgniteFactory igniteFactory)
         {
+            _ = igniteFactory ?? throw new ArgumentNullException(nameof(igniteFactory));
+
             this.transaction = igniteFactory
                 .Instance()
                 .GetTransactions()

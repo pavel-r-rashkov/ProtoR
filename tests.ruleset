@@ -70,7 +70,7 @@
     <Rule Id="CA2007" Action="Hidden" />
     <Rule Id="CA1710" Action="Info" />
     <Rule Id="CA1013" Action="Info" />
-    <Rule Id="CA1062" Action="Info" />
+    <Rule Id="CA1062" Action="Hidden" />
     <Rule Id="CA1040" Action="Info" />
   </Rules>
   <Rules AnalyzerId="Microsoft.CodeQuality.Analyzers" RuleNamespace="Microsoft.CodeQuality.Analyzers">

@@ -3,23 +3,21 @@ namespace ProtoR.Infrastructure.DataAccess.DataProviders
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
-    using Apache.Ignite.Core;
     using Apache.Ignite.Core.Cache;
     using Apache.Ignite.Linq;
     using ProtoR.Application.Category;
     using ProtoR.Infrastructure.DataAccess.CacheItems;
 
-    public class CategoryDataProvider : ICategoryDataProvider
+    public class CategoryDataProvider : BaseDataProvider, ICategoryDataProvider
     {
-        private readonly IIgnite ignite;
         private readonly ICache<long, CategoryCacheItem> categoryCache;
 
         public CategoryDataProvider(
             IIgniteFactory igniteFactory,
             IIgniteConfiguration configurationProvider)
+            : base(igniteFactory, configurationProvider)
         {
-            this.ignite = igniteFactory.Instance();
-            this.categoryCache = this.ignite.GetOrCreateCache<long, CategoryCacheItem>(configurationProvider.CategoryCacheName);
+            this.categoryCache = this.Ignite.GetOrCreateCache<long, CategoryCacheItem>(this.ConfigurationProvider.CategoryCacheName);
         }
 
         public async Task<CategoryDto> GetById(long id)

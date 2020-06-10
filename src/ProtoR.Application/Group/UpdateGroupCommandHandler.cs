@@ -27,6 +27,7 @@ namespace ProtoR.Application.Group
 
         protected override async Task Handle(UpdateGroupCommand request, CancellationToken cancellationToken)
         {
+            _ = request ?? throw new ArgumentNullException(nameof(request));
             var group = await this.schemaGroupRepository.GetByName(request.GroupName);
 
             if (group == null)

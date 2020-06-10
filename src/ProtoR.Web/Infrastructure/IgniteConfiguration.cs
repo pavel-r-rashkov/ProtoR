@@ -194,12 +194,7 @@ namespace ProtoR.Web.Infrastructure
 
             set
             {
-                if (value == null)
-                {
-                    throw new ArgumentNullException($"{nameof(this.NodeEndpoints)} cannot be null");
-                }
-
-                this.nodeEndpoints = value;
+                this.nodeEndpoints = value ?? throw new ArgumentNullException($"{nameof(this.NodeEndpoints)} cannot be null");
             }
         }
 

@@ -1,5 +1,6 @@
 namespace ProtoR.Application.Group
 {
+    using System;
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
@@ -27,6 +28,7 @@ namespace ProtoR.Application.Group
 
         protected override async Task Handle(DeleteGroupCommand request, CancellationToken cancellationToken)
         {
+            _ = request ?? throw new ArgumentNullException(nameof(request));
             ProtoBufSchemaGroup group = await this.groupRepository.GetByName(request.GroupName);
 
             if (group == null)

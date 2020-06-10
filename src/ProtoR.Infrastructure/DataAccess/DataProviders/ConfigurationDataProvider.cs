@@ -3,15 +3,13 @@ namespace ProtoR.Infrastructure.DataAccess.DataProviders
     using System;
     using System.Linq;
     using System.Threading.Tasks;
-    using Apache.Ignite.Core;
     using Apache.Ignite.Core.Cache;
     using Apache.Ignite.Linq;
     using ProtoR.Application.Configuration;
     using ProtoR.Infrastructure.DataAccess.CacheItems;
 
-    public class ConfigurationDataProvider : IConfigurationDataProvider
+    public class ConfigurationDataProvider : BaseDataProvider, IConfigurationDataProvider
     {
-        private readonly IIgnite ignite;
         private readonly string groupCacheName;
         private readonly string configurationCacheName;
         private readonly string ruleConfigurationCacheName;
@@ -19,11 +17,11 @@ namespace ProtoR.Infrastructure.DataAccess.DataProviders
         public ConfigurationDataProvider(
             IIgniteFactory igniteFactory,
             IIgniteConfiguration configurationProvider)
+            : base(igniteFactory, configurationProvider)
         {
-            this.ignite = igniteFactory.Instance();
-            this.groupCacheName = configurationProvider.SchemaGroupCacheName;
-            this.configurationCacheName = configurationProvider.ConfigurationCacheName;
-            this.ruleConfigurationCacheName = configurationProvider.RuleConfigurationCacheName;
+            this.groupCacheName = this.ConfigurationProvider.SchemaGroupCacheName;
+            this.configurationCacheName = this.ConfigurationProvider.ConfigurationCacheName;
+            this.ruleConfigurationCacheName = this.ConfigurationProvider.RuleConfigurationCacheName;
         }
 
         public async Task<ConfigurationDto> GetById(long id)
@@ -33,7 +31,7 @@ namespace ProtoR.Infrastructure.DataAccess.DataProviders
 
         public async Task<ConfigurationDto> GetConfigByGroupName(string groupName)
         {
-            ICache<long, SchemaGroupCacheItem> groupCache = this.ignite.GetCache<long, SchemaGroupCacheItem>(this.groupCacheName);
+            ICache<long, SchemaGroupCacheItem> groupCache = this.Ignite.GetCache<long, SchemaGroupCacheItem>(this.groupCacheName);
 
             var g = groupCache.AsCacheQueryable().ToList();
 
@@ -58,7 +56,7 @@ namespace ProtoR.Infrastructure.DataAccess.DataProviders
 
         private Task<ConfigurationDto> GetByCondition(Func<ICacheEntry<long, ConfigurationCacheItem>, bool> condition)
         {
-            ICache<long, ConfigurationCacheItem> configurationCache = this.ignite.GetCache<long, ConfigurationCacheItem>(this.configurationCacheName);
+            ICache<long, ConfigurationCacheItem> configurationCache = this.Ignite.GetCache<long, ConfigurationCacheItem>(this.configurationCacheName);
             var configurationProjection = configurationCache
                 .AsCacheQueryable()
                 .Where(condition)
@@ -88,7 +86,7 @@ namespace ProtoR.Infrastructure.DataAccess.DataProviders
                 Inherit = configurationProjection.Inherit,
             };
 
-            ICache<long, RuleConfigurationCacheItem> ruleConfigurationCache = this.ignite.GetCache<long, RuleConfigurationCacheItem>(this.ruleConfigurationCacheName);
+            ICache<long, RuleConfigurationCacheItem> ruleConfigurationCache = this.Ignite.GetCache<long, RuleConfigurationCacheItem>(this.ruleConfigurationCacheName);
             configuration.RuleConfigurations = ruleConfigurationCache
                 .AsCacheQueryable()
                 .Where(c => c.Value.ConfigurationId == configuration.Id)

@@ -12,31 +12,30 @@ namespace ProtoR.Infrastructure.DataAccess.Repositories
     using ProtoR.Domain.RoleAggregate;
     using ProtoR.Infrastructure.DataAccess.CacheItems;
 
-    public class RoleRepository : IRoleRepository
+    public class RoleRepository : BaseRepository, IRoleRepository
     {
-        private readonly IIgnite ignite;
         private readonly ICache<long, RoleCacheItem> roleCache;
         private readonly ICache<RolePermissionKey, EmptyCacheItem> rolePermissionCache;
         private readonly ICache<UserRoleKey, EmptyCacheItem> userRoleCache;
         private readonly ICache<ClientRoleKey, EmptyCacheItem> clientRoleCache;
-        private readonly IUserProvider userProvider;
 
         public RoleRepository(
             IIgniteFactory igniteFactory,
             IIgniteConfiguration configurationProvider,
             IUserProvider userProvider)
+            : base(igniteFactory, configurationProvider, userProvider)
         {
-            this.ignite = igniteFactory.Instance();
-            this.roleCache = this.ignite.GetOrCreateCache<long, RoleCacheItem>(configurationProvider.RoleCacheName);
-            this.rolePermissionCache = this.ignite.GetOrCreateCache<RolePermissionKey, EmptyCacheItem>(configurationProvider.RolePermissionCacheName);
-            this.userRoleCache = this.ignite.GetOrCreateCache<UserRoleKey, EmptyCacheItem>(configurationProvider.UserRoleCacheName);
-            this.clientRoleCache = this.ignite.GetOrCreateCache<ClientRoleKey, EmptyCacheItem>(configurationProvider.ClientRoleCacheName);
-            this.userProvider = userProvider;
+            this.roleCache = this.Ignite.GetOrCreateCache<long, RoleCacheItem>(this.ConfigurationProvider.RoleCacheName);
+            this.rolePermissionCache = this.Ignite.GetOrCreateCache<RolePermissionKey, EmptyCacheItem>(this.ConfigurationProvider.RolePermissionCacheName);
+            this.userRoleCache = this.Ignite.GetOrCreateCache<UserRoleKey, EmptyCacheItem>(this.ConfigurationProvider.UserRoleCacheName);
+            this.clientRoleCache = this.Ignite.GetOrCreateCache<ClientRoleKey, EmptyCacheItem>(this.ConfigurationProvider.ClientRoleCacheName);
         }
 
         public async Task<long> Add(Role role)
         {
-            IAtomicSequence roleIdGenerator = this.ignite.GetAtomicSequence(
+            _ = role ?? throw new ArgumentNullException(nameof(role));
+
+            IAtomicSequence roleIdGenerator = this.Ignite.GetAtomicSequence(
                 $"{typeof(RoleCacheItem).Name.ToUpperInvariant()}{CacheConstants.IdSequenceSufix}",
                 0,
                 true);
@@ -48,7 +47,7 @@ namespace ProtoR.Infrastructure.DataAccess.Repositories
                 {
                     Name = role.Name,
                     NormalizedName = role.NormalizedName,
-                    CreatedBy = this.userProvider.GetCurrentUserName(),
+                    CreatedBy = this.UserProvider.GetCurrentUserName(),
                     CreatedOn = DateTime.UtcNow,
                 });
 
@@ -144,6 +143,8 @@ namespace ProtoR.Infrastructure.DataAccess.Repositories
 
         public async Task Update(Role role)
         {
+            _ = role ?? throw new ArgumentNullException(nameof(role));
+
             var roleCacheItem = await this.roleCache.GetAsync(role.Id);
             roleCacheItem.Name = role.Name;
             roleCacheItem.NormalizedName = role.NormalizedName;

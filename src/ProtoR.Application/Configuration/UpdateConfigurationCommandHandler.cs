@@ -34,6 +34,7 @@ namespace ProtoR.Application.Configuration
 
         protected override async Task Handle(UpdateConfigurationCommand request, CancellationToken cancellationToken)
         {
+            _ = request ?? throw new ArgumentNullException(nameof(request));
             Configuration configuration = request.ConfigurationId.Equals("global", StringComparison.InvariantCultureIgnoreCase)
                 ? await this.configurationRepository.GetBySchemaGroupId(null)
                 : await this.configurationRepository.GetById(Convert.ToInt64(request.ConfigurationId, CultureInfo.InvariantCulture));

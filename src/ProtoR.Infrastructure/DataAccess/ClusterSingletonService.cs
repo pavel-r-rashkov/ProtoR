@@ -39,6 +39,7 @@ namespace ProtoR.Infrastructure.DataAccess
 
         public Task<SchemaValidationResultDto> AddSchema(CreateSchemaCommand command)
         {
+            _ = command ?? throw new ArgumentNullException(nameof(command));
             using var childScope = this.autoFacPlugin.Scope.BeginLifetimeScope();
             var mediator = childScope.Resolve<IMediator>();
             var mutexName = string.Format(CultureInfo.InvariantCulture, MutexNameFormat, command.GroupName);

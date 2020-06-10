@@ -3,25 +3,23 @@ namespace ProtoR.Infrastructure.DataAccess.DataProviders
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
-    using Apache.Ignite.Core;
     using Apache.Ignite.Core.Cache;
     using Apache.Ignite.Linq;
     using ProtoR.Application.Role;
     using ProtoR.Infrastructure.DataAccess.CacheItems;
 
-    public class RoleDataProvider : IRoleDataProvider
+    public class RoleDataProvider : BaseDataProvider, IRoleDataProvider
     {
-        private readonly IIgnite ignite;
         private readonly ICache<long, RoleCacheItem> roleCache;
         private readonly ICache<RolePermissionKey, EmptyCacheItem> rolePermissionCache;
 
         public RoleDataProvider(
             IIgniteFactory igniteFactory,
             IIgniteConfiguration configurationProvider)
+            : base(igniteFactory, configurationProvider)
         {
-            this.ignite = igniteFactory.Instance();
-            this.roleCache = this.ignite.GetOrCreateCache<long, RoleCacheItem>(configurationProvider.RoleCacheName);
-            this.rolePermissionCache = this.ignite.GetOrCreateCache<RolePermissionKey, EmptyCacheItem>(configurationProvider.RolePermissionCacheName);
+            this.roleCache = this.Ignite.GetOrCreateCache<long, RoleCacheItem>(configurationProvider.RoleCacheName);
+            this.rolePermissionCache = this.Ignite.GetOrCreateCache<RolePermissionKey, EmptyCacheItem>(configurationProvider.RolePermissionCacheName);
         }
 
         public async Task<RoleDto> GetById(long id)

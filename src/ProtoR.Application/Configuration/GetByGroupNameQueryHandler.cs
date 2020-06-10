@@ -1,5 +1,6 @@
 namespace ProtoR.Application.Configuration
 {
+    using System;
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
@@ -27,6 +28,7 @@ namespace ProtoR.Application.Configuration
 
         public async Task<ConfigurationDto> Handle(GetByGroupNameQuery request, CancellationToken cancellationToken)
         {
+            _ = request ?? throw new ArgumentNullException(nameof(request));
             var configuration = await this.dataProvider.GetConfigByGroupName(request.GroupName);
 
             if (configuration == null)

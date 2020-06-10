@@ -28,6 +28,7 @@ namespace ProtoR.Application.Configuration
 
         public async Task<ConfigurationDto> Handle(GetByIdQuery request, CancellationToken cancellationToken)
         {
+            _ = request ?? throw new ArgumentNullException(nameof(request));
             ConfigurationDto configuration = request.ConfigurationId.Equals("global", StringComparison.InvariantCultureIgnoreCase)
                 ? await this.configurationData.GetGlobalConfig()
                 : await this.configurationData.GetById(Convert.ToInt64(request.ConfigurationId, CultureInfo.InvariantCulture));

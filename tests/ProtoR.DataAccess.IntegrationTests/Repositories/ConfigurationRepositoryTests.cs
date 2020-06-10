@@ -24,7 +24,11 @@ namespace ProtoR.DataAccess.IntegrationTests.Repositories
         public ConfigurationRepositoryTests(IgniteFixture igniteFixture)
         {
             this.igniteFixture = igniteFixture;
-            this.repository = new ConfigurationRepository(this.igniteFixture.IgniteFactory, this.igniteFixture.Configuration);
+            this.repository = new ConfigurationRepository(
+                this.igniteFixture.IgniteFactory,
+                this.igniteFixture.Configuration,
+                new UserProviderStub());
+
             this.configurationCache = this.igniteFixture.IgniteFactory.Instance().GetCache<long, ConfigurationCacheItem>(this.igniteFixture.Configuration.ConfigurationCacheName);
             this.ruleConfigurationCache = this.igniteFixture.IgniteFactory.Instance().GetCache<long, RuleConfigurationCacheItem>(this.igniteFixture.Configuration.RuleConfigurationCacheName);
         }

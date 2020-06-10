@@ -3,25 +3,21 @@ namespace ProtoR.Infrastructure.DataAccess.DataProviders
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
-    using Apache.Ignite.Core;
     using Apache.Ignite.Core.Cache;
     using Apache.Ignite.Linq;
-    using ProtoR.Application;
     using ProtoR.Application.Group;
-    using ProtoR.Domain.CategoryAggregate;
     using ProtoR.Infrastructure.DataAccess.CacheItems;
 
-    public class GroupDataProvider : IGroupDataProvider
+    public class GroupDataProvider : BaseDataProvider, IGroupDataProvider
     {
-        private readonly IIgnite ignite;
         private readonly ICache<long, SchemaGroupCacheItem> groupCache;
 
         public GroupDataProvider(
             IIgniteFactory igniteFactory,
             IIgniteConfiguration configurationProvider)
+            : base(igniteFactory, configurationProvider)
         {
-            this.ignite = igniteFactory.Instance();
-            this.groupCache = this.ignite.GetCache<long, SchemaGroupCacheItem>(configurationProvider.SchemaGroupCacheName);
+            this.groupCache = this.Ignite.GetCache<long, SchemaGroupCacheItem>(configurationProvider.SchemaGroupCacheName);
         }
 
         public Task<GroupDto> GetByName(string groupName)

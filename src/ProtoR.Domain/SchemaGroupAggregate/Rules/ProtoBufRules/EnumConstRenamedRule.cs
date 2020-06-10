@@ -17,8 +17,8 @@ namespace ProtoR.Domain.SchemaGroupAggregate.Rules.ProtoBufRules
 
         public override ValidationResult Validate(ProtoBufSchema a, ProtoBufSchema b)
         {
-            a.Should().NotBeNull();
-            b.Should().NotBeNull();
+            _ = a ?? throw new ArgumentNullException(nameof(a));
+            _ = b ?? throw new ArgumentNullException(nameof(b));
 
             IEnumerable<EnumConstant> renamedEnumConstants = ProtoBufSchemaScope.ParallelTraverse(
                 a.RootScope(),

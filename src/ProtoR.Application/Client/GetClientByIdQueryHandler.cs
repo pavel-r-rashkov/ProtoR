@@ -1,5 +1,6 @@
 namespace ProtoR.Application.Client
 {
+    using System;
     using System.Threading;
     using System.Threading.Tasks;
     using MediatR;
@@ -17,6 +18,7 @@ namespace ProtoR.Application.Client
 
         public async Task<ClientDto> Handle(GetClientByIdQuery request, CancellationToken cancellationToken)
         {
+            _ = request ?? throw new ArgumentNullException(nameof(request));
             var client = await this.clientData.GetById(request.ClientId);
 
             if (client == null)

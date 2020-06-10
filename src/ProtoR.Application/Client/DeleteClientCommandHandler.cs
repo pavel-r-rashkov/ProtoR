@@ -1,5 +1,6 @@
 namespace ProtoR.Application.Client
 {
+    using System;
     using System.Threading;
     using System.Threading.Tasks;
     using MediatR;
@@ -22,6 +23,7 @@ namespace ProtoR.Application.Client
 
         protected override async Task Handle(DeleteClientCommand request, CancellationToken cancellationToken)
         {
+            _ = request ?? throw new ArgumentNullException(nameof(request));
             var client = await this.clientRepository.GetById(request.ClientId);
 
             if (client == null)

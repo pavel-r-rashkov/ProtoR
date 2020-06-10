@@ -4,9 +4,6 @@ namespace ProtoR.Infrastructure.DataAccess.Repositories
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
-    using Apache.Ignite.Core;
-    using Apache.Ignite.Core.Cache;
-    using Apache.Ignite.Core.DataStructures;
     using Apache.Ignite.Linq;
     using ProtoR.Application;
     using ProtoR.Domain.SchemaGroupAggregate;
@@ -14,10 +11,8 @@ namespace ProtoR.Infrastructure.DataAccess.Repositories
     using ProtoR.Infrastructure.DataAccess.CacheItems;
     using Version = ProtoR.Domain.SchemaGroupAggregate.Schemas.Version;
 
-    public class ProtoBufSchemaGroupRepository : IProtoBufSchemaGroupRepository
+    public class ProtoBufSchemaGroupRepository : BaseRepository, IProtoBufSchemaGroupRepository
     {
-        private readonly IIgnite ignite;
-        private readonly IUserProvider userProvider;
         private readonly string schemaCacheName;
         private readonly string schemaGroupCacheName;
         private readonly string configurationCacheName;
@@ -26,28 +21,29 @@ namespace ProtoR.Infrastructure.DataAccess.Repositories
         public ProtoBufSchemaGroupRepository(
             IIgniteFactory igniteFactory,
             IUserProvider userProvider,
-            IIgniteConfiguration configuration)
+            IIgniteConfiguration configurationProvider)
+            : base(igniteFactory, configurationProvider, userProvider)
         {
-            this.ignite = igniteFactory.Instance();
-            this.userProvider = userProvider;
-            this.schemaCacheName = configuration.SchemaCacheName;
-            this.schemaGroupCacheName = configuration.SchemaGroupCacheName;
-            this.configurationCacheName = configuration.ConfigurationCacheName;
-            this.ruleConfigurationCacheName = configuration.RuleConfigurationCacheName;
+            this.schemaCacheName = this.ConfigurationProvider.SchemaCacheName;
+            this.schemaGroupCacheName = this.ConfigurationProvider.SchemaGroupCacheName;
+            this.configurationCacheName = this.ConfigurationProvider.ConfigurationCacheName;
+            this.ruleConfigurationCacheName = this.ConfigurationProvider.RuleConfigurationCacheName;
         }
 
         public async Task<long> Add(ProtoBufSchemaGroup schemaGroup)
         {
+            _ = schemaGroup ?? throw new ArgumentNullException(nameof(schemaGroup));
+
             var schemaGroupCacheItem = new SchemaGroupCacheItem
             {
                 Name = schemaGroup.Name,
                 CategoryId = schemaGroup.CategoryId,
-                CreatedBy = this.userProvider.GetCurrentUserName(),
+                CreatedBy = this.UserProvider.GetCurrentUserName(),
                 CreatedOn = DateTime.UtcNow,
             };
 
-            var cache = this.ignite.GetCache<long, SchemaGroupCacheItem>(this.schemaGroupCacheName);
-            var idGenerator = this.ignite.GetAtomicSequence(
+            var cache = this.Ignite.GetCache<long, SchemaGroupCacheItem>(this.schemaGroupCacheName);
+            var idGenerator = this.Ignite.GetAtomicSequence(
                 $"{typeof(SchemaGroupCacheItem).Name.ToUpperInvariant()}{CacheConstants.IdSequenceSufix}",
                 0,
                 true);
@@ -60,7 +56,7 @@ namespace ProtoR.Infrastructure.DataAccess.Repositories
 
         public Task<ProtoBufSchemaGroup> GetByName(string name)
         {
-            var schemaGroupCache = this.ignite.GetCache<long, SchemaGroupCacheItem>(this.schemaGroupCacheName);
+            var schemaGroupCache = this.Ignite.GetCache<long, SchemaGroupCacheItem>(this.schemaGroupCacheName);
             var schemaGroupCacheItem = schemaGroupCache
                 .AsCacheQueryable()
                 .FirstOrDefault(c => c.Value.Name.ToUpper() == name.ToUpper());
@@ -70,7 +66,7 @@ namespace ProtoR.Infrastructure.DataAccess.Repositories
                 return Task.FromResult((ProtoBufSchemaGroup)null);
             }
 
-            var schemaCache = this.ignite.GetCache<long, SchemaCacheItem>(this.schemaCacheName);
+            var schemaCache = this.Ignite.GetCache<long, SchemaCacheItem>(this.schemaCacheName);
             var schemaCacheItems = schemaCache
                 .AsCacheQueryable()
                 .Where(c => c.Value.SchemaGroupId == schemaGroupCacheItem.Key)
@@ -86,7 +82,9 @@ namespace ProtoR.Infrastructure.DataAccess.Repositories
 
         public async Task Update(ProtoBufSchemaGroup schemaGroup)
         {
-            var schemaGroupCache = this.ignite.GetCache<long, SchemaGroupCacheItem>(this.schemaGroupCacheName);
+            _ = schemaGroup ?? throw new ArgumentNullException(nameof(schemaGroup));
+
+            var schemaGroupCache = this.Ignite.GetCache<long, SchemaGroupCacheItem>(this.schemaGroupCacheName);
             var schemaGroupCacheItem = await schemaGroupCache.GetAsync(schemaGroup.Id);
             schemaGroupCacheItem.CategoryId = schemaGroup.CategoryId;
             await schemaGroupCache.PutAsync(schemaGroup.Id, schemaGroupCacheItem);
@@ -95,13 +93,15 @@ namespace ProtoR.Infrastructure.DataAccess.Repositories
 
         public async Task Delete(ProtoBufSchemaGroup schemaGroup)
         {
-            var cache = this.ignite.GetCache<long, SchemaGroupCacheItem>(this.schemaGroupCacheName);
+            _ = schemaGroup ?? throw new ArgumentNullException(nameof(schemaGroup));
+
+            var cache = this.Ignite.GetCache<long, SchemaGroupCacheItem>(this.schemaGroupCacheName);
             await cache.RemoveAsync(schemaGroup.Id);
 
-            var schemaCache = this.ignite.GetCache<long, SchemaCacheItem>(this.schemaCacheName);
+            var schemaCache = this.Ignite.GetCache<long, SchemaCacheItem>(this.schemaCacheName);
             await schemaCache.RemoveAllAsync(schemaGroup.Schemas.Select(s => s.Id));
 
-            var configurationCache = this.ignite.GetCache<long, ConfigurationCacheItem>(this.configurationCacheName);
+            var configurationCache = this.Ignite.GetCache<long, ConfigurationCacheItem>(this.configurationCacheName);
             var configurationId = configurationCache
                 .AsCacheQueryable()
                 .First(c => c.Value.SchemaGroupId == schemaGroup.Id)
@@ -109,7 +109,7 @@ namespace ProtoR.Infrastructure.DataAccess.Repositories
 
             await configurationCache.RemoveAsync(configurationId);
 
-            var ruleConfigurationCache = this.ignite.GetCache<long, RuleConfigurationCacheItem>(this.ruleConfigurationCacheName);
+            var ruleConfigurationCache = this.Ignite.GetCache<long, RuleConfigurationCacheItem>(this.ruleConfigurationCacheName);
             var ruleConfigurationIds = ruleConfigurationCache
                 .AsCacheQueryable()
                 .Where(r => r.Value.ConfigurationId == configurationId)
@@ -121,8 +121,8 @@ namespace ProtoR.Infrastructure.DataAccess.Repositories
 
         private async Task AddNewSchemas(ProtoBufSchemaGroup schemaGroup, long groupId)
         {
-            var schemaCache = this.ignite.GetCache<long, SchemaCacheItem>(this.schemaCacheName);
-            var idGenerator = this.ignite.GetAtomicSequence(
+            var schemaCache = this.Ignite.GetCache<long, SchemaCacheItem>(this.schemaCacheName);
+            var idGenerator = this.Ignite.GetAtomicSequence(
                 $"{typeof(SchemaCacheItem).Name.ToUpperInvariant()}{CacheConstants.IdSequenceSufix}",
                 0,
                 true);
@@ -136,7 +136,7 @@ namespace ProtoR.Infrastructure.DataAccess.Repositories
                         SchemaGroupId = groupId,
                         Version = s.Version.VersionNumber,
                         Contents = s.Contents,
-                        CreatedBy = this.userProvider.GetCurrentUserName(),
+                        CreatedBy = this.UserProvider.GetCurrentUserName(),
                         CreatedOn = DateTime.UtcNow,
                     }));
 

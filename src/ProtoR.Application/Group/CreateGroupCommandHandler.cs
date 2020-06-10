@@ -1,5 +1,6 @@
 namespace ProtoR.Application.Group
 {
+    using System;
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
@@ -31,6 +32,7 @@ namespace ProtoR.Application.Group
 
         public async Task<bool> Handle(CreateGroupCommand request, CancellationToken cancellationToken)
         {
+            _ = request ?? throw new ArgumentNullException(nameof(request));
             var existingGroup = await this.schemaGroupRepository.GetByName(request.GroupName);
 
             if (existingGroup != null)

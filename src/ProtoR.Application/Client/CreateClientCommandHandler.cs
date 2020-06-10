@@ -25,6 +25,8 @@ namespace ProtoR.Application.Client
 
         public async Task<long> Handle(CreateClientCommand request, CancellationToken cancellationToken)
         {
+            _ = request ?? throw new ArgumentNullException(nameof(request));
+
             var client = new Client(
                 default,
                 request.ClientId,

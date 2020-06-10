@@ -10,10 +10,9 @@ namespace ProtoR.Infrastructure.DataAccess.DataProviders
     using ProtoR.Application.Client;
     using ProtoR.Infrastructure.DataAccess.CacheItems;
 
-    public class ClientDataProvider : IClientDataProvider
+    public class ClientDataProvider : BaseDataProvider, IClientDataProvider
     {
         private const char Separator = ',';
-        private readonly IIgnite ignite;
         private readonly ICache<long, ClientCacheItem> clientCache;
         private readonly ICache<ClientRoleKey, EmptyCacheItem> clientRoleCache;
         private readonly ICache<ClientCategoryKey, EmptyCacheItem> clientCategoryCache;
@@ -21,11 +20,11 @@ namespace ProtoR.Infrastructure.DataAccess.DataProviders
         public ClientDataProvider(
             IIgniteFactory igniteFactory,
             IIgniteConfiguration configurationProvider)
+            : base(igniteFactory, configurationProvider)
         {
-            this.ignite = igniteFactory.Instance();
-            this.clientCache = this.ignite.GetOrCreateCache<long, ClientCacheItem>(configurationProvider.ClientCacheName);
-            this.clientRoleCache = this.ignite.GetOrCreateCache<ClientRoleKey, EmptyCacheItem>(configurationProvider.ClientRoleCacheName);
-            this.clientCategoryCache = this.ignite.GetOrCreateCache<ClientCategoryKey, EmptyCacheItem>(configurationProvider.ClientCategoryCacheName);
+            this.clientCache = this.Ignite.GetOrCreateCache<long, ClientCacheItem>(this.ConfigurationProvider.ClientCacheName);
+            this.clientRoleCache = this.Ignite.GetOrCreateCache<ClientRoleKey, EmptyCacheItem>(this.ConfigurationProvider.ClientRoleCacheName);
+            this.clientCategoryCache = this.Ignite.GetOrCreateCache<ClientCategoryKey, EmptyCacheItem>(this.ConfigurationProvider.ClientCategoryCacheName);
         }
 
         public async Task<ClientDto> GetById(long id)

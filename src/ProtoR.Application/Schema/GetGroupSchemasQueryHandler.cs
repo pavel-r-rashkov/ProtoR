@@ -1,5 +1,6 @@
 namespace ProtoR.Application.Schema
 {
+    using System;
     using System.Collections.Generic;
     using System.Threading;
     using System.Threading.Tasks;
@@ -16,6 +17,8 @@ namespace ProtoR.Application.Schema
 
         public async Task<IEnumerable<SchemaDto>> Handle(GetGroupSchemasQuery request, CancellationToken cancellationToken)
         {
+            _ = request ?? throw new ArgumentNullException(nameof(request));
+
             return await this.dataProvider.GetGroupSchemas(request.GroupName);
         }
     }
