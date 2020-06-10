@@ -13,7 +13,7 @@ namespace ProtoR.Web.Infrastructure
             builder.RegisterModule(new MediatorModule());
             builder.RegisterModule(new CommonModule());
             builder.RegisterModule(new AutoMapperModule(typeof(Startup).Assembly, typeof(ApplicationProfile).Assembly));
-            var igniteConfiguration = configuration.Get(typeof(IgniteConfiguration)) as IIgniteConfiguration;
+            var igniteConfiguration = configuration.Get<IgniteExternalConfiguration>();
             builder.RegisterModule(new IgniteModule(igniteConfiguration));
         }
     }

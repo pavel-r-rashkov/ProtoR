@@ -26,7 +26,9 @@ namespace ProtoR.DataAccess.IntegrationTests.Repositories
                 this.igniteFixture.Configuration,
                 userProvider);
 
-            this.categoryCache = this.igniteFixture.IgniteFactory.Instance().GetCache<long, CategoryCacheItem>(this.igniteFixture.Configuration.CategoryCacheName);
+            this.categoryCache = this.igniteFixture.IgniteFactory
+                .Instance()
+                .GetCache<long, CategoryCacheItem>(this.igniteFixture.Configuration.Value.CategoryCacheName);
         }
 
         public void Dispose()

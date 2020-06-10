@@ -25,8 +25,15 @@ namespace ProtoR.DataAccess.IntegrationTests.DataProviders
         {
             this.igniteFixture = igniteFixture;
             this.dataProvider = new SchemaDataProvider(this.igniteFixture.IgniteFactory, this.igniteFixture.Configuration);
-            this.schemaCache = this.igniteFixture.IgniteFactory.Instance().GetCache<long, SchemaCacheItem>(this.igniteFixture.Configuration.SchemaCacheName);
-            this.groupCache = this.igniteFixture.IgniteFactory.Instance().GetCache<long, SchemaGroupCacheItem>(this.igniteFixture.Configuration.SchemaGroupCacheName);
+
+            this.schemaCache = this.igniteFixture.IgniteFactory
+                .Instance()
+                .GetCache<long, SchemaCacheItem>(this.igniteFixture.Configuration.Value.SchemaCacheName);
+
+            this.groupCache = this.igniteFixture.IgniteFactory
+                .Instance()
+                .GetCache<long, SchemaGroupCacheItem>(this.igniteFixture.Configuration.Value.SchemaGroupCacheName);
+
             this.fixture.Customizations.Add(new UtcRandomDateTimeSequenceGenerator());
         }
 

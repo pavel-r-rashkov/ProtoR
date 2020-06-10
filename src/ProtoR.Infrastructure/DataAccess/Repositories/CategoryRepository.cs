@@ -5,6 +5,7 @@ namespace ProtoR.Infrastructure.DataAccess.Repositories
     using System.Threading.Tasks;
     using Apache.Ignite.Core.Cache;
     using Apache.Ignite.Linq;
+    using Microsoft.Extensions.Options;
     using ProtoR.Application;
     using ProtoR.Domain.CategoryAggregate;
     using ProtoR.Infrastructure.DataAccess.CacheItems;
@@ -15,11 +16,11 @@ namespace ProtoR.Infrastructure.DataAccess.Repositories
 
         public CategoryRepository(
             IIgniteFactory igniteFactory,
-            IIgniteConfiguration configurationProvider,
+            IOptions<IgniteExternalConfiguration> configurationProvider,
             IUserProvider userProvider)
             : base(igniteFactory, configurationProvider, userProvider)
         {
-            this.categoryCache = this.Ignite.GetOrCreateCache<long, CategoryCacheItem>(configurationProvider.CategoryCacheName);
+            this.categoryCache = this.Ignite.GetOrCreateCache<long, CategoryCacheItem>(this.ConfigurationProvider.CategoryCacheName);
         }
 
         public async Task<long> Add(Category category)

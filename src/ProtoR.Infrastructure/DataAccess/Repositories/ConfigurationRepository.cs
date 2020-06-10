@@ -7,6 +7,7 @@ namespace ProtoR.Infrastructure.DataAccess.Repositories
     using Apache.Ignite.Core.Cache;
     using Apache.Ignite.Core.DataStructures;
     using Apache.Ignite.Linq;
+    using Microsoft.Extensions.Options;
     using ProtoR.Application;
     using ProtoR.Domain.ConfigurationAggregate;
     using ProtoR.Domain.SchemaGroupAggregate.Rules;
@@ -20,12 +21,12 @@ namespace ProtoR.Infrastructure.DataAccess.Repositories
 
         public ConfigurationRepository(
             IIgniteFactory igniteFactory,
-            IIgniteConfiguration configurationProvider,
+            IOptions<IgniteExternalConfiguration> configurationProvider,
             IUserProvider userProvider)
             : base(igniteFactory, configurationProvider, userProvider)
         {
-            this.configurationCacheName = configurationProvider.ConfigurationCacheName;
-            this.ruleConfigurationGroupCacheName = configurationProvider.RuleConfigurationCacheName;
+            this.configurationCacheName = this.ConfigurationProvider.ConfigurationCacheName;
+            this.ruleConfigurationGroupCacheName = this.ConfigurationProvider.RuleConfigurationCacheName;
         }
 
         public async Task<long> Add(Configuration configuration)

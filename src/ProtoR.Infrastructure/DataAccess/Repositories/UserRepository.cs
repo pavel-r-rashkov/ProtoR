@@ -4,10 +4,10 @@ namespace ProtoR.Infrastructure.DataAccess.Repositories
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
-    using Apache.Ignite.Core;
     using Apache.Ignite.Core.Cache;
     using Apache.Ignite.Core.DataStructures;
     using Apache.Ignite.Linq;
+    using Microsoft.Extensions.Options;
     using ProtoR.Application;
     using ProtoR.Domain.CategoryAggregate;
     using ProtoR.Domain.RoleAggregate;
@@ -22,7 +22,7 @@ namespace ProtoR.Infrastructure.DataAccess.Repositories
 
         public UserRepository(
             IIgniteFactory igniteFactory,
-            IIgniteConfiguration configurationProvider,
+            IOptions<IgniteExternalConfiguration> configurationProvider,
             IUserProvider userProvider)
             : base(igniteFactory, configurationProvider, userProvider)
         {

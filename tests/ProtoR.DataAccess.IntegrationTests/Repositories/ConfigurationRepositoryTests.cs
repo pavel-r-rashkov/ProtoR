@@ -29,8 +29,13 @@ namespace ProtoR.DataAccess.IntegrationTests.Repositories
                 this.igniteFixture.Configuration,
                 new UserProviderStub());
 
-            this.configurationCache = this.igniteFixture.IgniteFactory.Instance().GetCache<long, ConfigurationCacheItem>(this.igniteFixture.Configuration.ConfigurationCacheName);
-            this.ruleConfigurationCache = this.igniteFixture.IgniteFactory.Instance().GetCache<long, RuleConfigurationCacheItem>(this.igniteFixture.Configuration.RuleConfigurationCacheName);
+            this.configurationCache = this.igniteFixture.IgniteFactory
+                .Instance()
+                .GetCache<long, ConfigurationCacheItem>(this.igniteFixture.Configuration.Value.ConfigurationCacheName);
+
+            this.ruleConfigurationCache = this.igniteFixture.IgniteFactory
+                .Instance()
+                .GetCache<long, RuleConfigurationCacheItem>(this.igniteFixture.Configuration.Value.RuleConfigurationCacheName);
         }
 
         public void Dispose()

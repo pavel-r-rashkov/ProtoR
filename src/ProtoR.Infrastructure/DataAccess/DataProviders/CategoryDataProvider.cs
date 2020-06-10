@@ -5,6 +5,7 @@ namespace ProtoR.Infrastructure.DataAccess.DataProviders
     using System.Threading.Tasks;
     using Apache.Ignite.Core.Cache;
     using Apache.Ignite.Linq;
+    using Microsoft.Extensions.Options;
     using ProtoR.Application.Category;
     using ProtoR.Infrastructure.DataAccess.CacheItems;
 
@@ -14,7 +15,7 @@ namespace ProtoR.Infrastructure.DataAccess.DataProviders
 
         public CategoryDataProvider(
             IIgniteFactory igniteFactory,
-            IIgniteConfiguration configurationProvider)
+            IOptions<IgniteExternalConfiguration> configurationProvider)
             : base(igniteFactory, configurationProvider)
         {
             this.categoryCache = this.Ignite.GetOrCreateCache<long, CategoryCacheItem>(this.ConfigurationProvider.CategoryCacheName);

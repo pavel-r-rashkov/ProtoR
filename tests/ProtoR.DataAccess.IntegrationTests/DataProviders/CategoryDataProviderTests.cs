@@ -22,7 +22,10 @@ namespace ProtoR.DataAccess.IntegrationTests.DataProviders
         {
             this.igniteFixture = igniteFixture;
             this.dataProvider = new CategoryDataProvider(this.igniteFixture.IgniteFactory, this.igniteFixture.Configuration);
-            this.categoryCache = this.igniteFixture.IgniteFactory.Instance().GetCache<long, CategoryCacheItem>(this.igniteFixture.Configuration.CategoryCacheName);
+            this.categoryCache = this.igniteFixture.IgniteFactory
+                .Instance()
+                .GetCache<long, CategoryCacheItem>(this.igniteFixture.Configuration.Value.CategoryCacheName);
+
             this.fixture = new Fixture();
             this.fixture.Customizations.Add(new UtcRandomDateTimeSequenceGenerator());
         }

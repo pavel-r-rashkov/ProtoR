@@ -23,9 +23,19 @@ namespace ProtoR.DataAccess.IntegrationTests.DataProviders
         {
             this.igniteFixture = igniteFixture;
             this.dataProvider = new UserDataProvider(this.igniteFixture.IgniteFactory, this.igniteFixture.Configuration);
-            this.userCache = this.igniteFixture.IgniteFactory.Instance().GetCache<long, UserCacheItem>(this.igniteFixture.Configuration.UserCacheName);
-            this.userRoleCache = this.igniteFixture.IgniteFactory.Instance().GetCache<UserRoleKey, EmptyCacheItem>(this.igniteFixture.Configuration.UserRoleCacheName);
-            this.userCategoryCache = this.igniteFixture.IgniteFactory.Instance().GetCache<UserCategoryKey, EmptyCacheItem>(this.igniteFixture.Configuration.UserCategoryCacheName);
+
+            this.userCache = this.igniteFixture.IgniteFactory
+                .Instance()
+                .GetCache<long, UserCacheItem>(this.igniteFixture.Configuration.Value.UserCacheName);
+
+            this.userRoleCache = this.igniteFixture.IgniteFactory
+                .Instance()
+                .GetCache<UserRoleKey, EmptyCacheItem>(this.igniteFixture.Configuration.Value.UserRoleCacheName);
+
+            this.userCategoryCache = this.igniteFixture.IgniteFactory
+                .Instance()
+                .GetCache<UserCategoryKey, EmptyCacheItem>(this.igniteFixture.Configuration.Value.UserCategoryCacheName);
+
             this.fixture = new Fixture();
             this.fixture.Customizations.Add(new UtcRandomDateTimeSequenceGenerator());
         }

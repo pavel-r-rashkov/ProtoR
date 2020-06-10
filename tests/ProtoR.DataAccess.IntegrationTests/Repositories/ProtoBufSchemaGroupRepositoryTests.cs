@@ -46,19 +46,19 @@ namespace ProtoR.DataAccess.IntegrationTests.Repositories
 
             this.schemaCache = this.igniteFixture.IgniteFactory
                 .Instance()
-                .GetCache<long, SchemaCacheItem>(this.igniteFixture.Configuration.SchemaCacheName);
+                .GetCache<long, SchemaCacheItem>(this.igniteFixture.Configuration.Value.SchemaCacheName);
 
             this.schemaGroupCache = this.igniteFixture.IgniteFactory
                 .Instance()
-                .GetCache<long, SchemaGroupCacheItem>(this.igniteFixture.Configuration.SchemaGroupCacheName);
+                .GetCache<long, SchemaGroupCacheItem>(this.igniteFixture.Configuration.Value.SchemaGroupCacheName);
 
             this.configurationCache = this.igniteFixture.IgniteFactory
                 .Instance()
-                .GetCache<long, ConfigurationCacheItem>(this.igniteFixture.Configuration.ConfigurationCacheName);
+                .GetCache<long, ConfigurationCacheItem>(this.igniteFixture.Configuration.Value.ConfigurationCacheName);
 
             this.ruleConfigurationCache = this.igniteFixture.IgniteFactory
                 .Instance()
-                .GetCache<long, RuleConfigurationCacheItem>(this.igniteFixture.Configuration.RuleConfigurationCacheName);
+                .GetCache<long, RuleConfigurationCacheItem>(this.igniteFixture.Configuration.Value.RuleConfigurationCacheName);
         }
 
         public void Dispose()

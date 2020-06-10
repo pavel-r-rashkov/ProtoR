@@ -5,6 +5,7 @@ namespace ProtoR.Infrastructure.DataAccess.Repositories
     using System.Linq;
     using System.Threading.Tasks;
     using Apache.Ignite.Linq;
+    using Microsoft.Extensions.Options;
     using ProtoR.Application;
     using ProtoR.Domain.SchemaGroupAggregate;
     using ProtoR.Domain.SchemaGroupAggregate.Schemas;
@@ -21,7 +22,7 @@ namespace ProtoR.Infrastructure.DataAccess.Repositories
         public ProtoBufSchemaGroupRepository(
             IIgniteFactory igniteFactory,
             IUserProvider userProvider,
-            IIgniteConfiguration configurationProvider)
+            IOptions<IgniteExternalConfiguration> configurationProvider)
             : base(igniteFactory, configurationProvider, userProvider)
         {
             this.schemaCacheName = this.ConfigurationProvider.SchemaCacheName;

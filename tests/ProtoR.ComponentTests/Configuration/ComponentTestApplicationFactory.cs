@@ -44,10 +44,6 @@ namespace ProtoR.ComponentTests.Configuration
 
         public async Task Seed()
         {
-            var igniteFactory = this.Services.GetService(typeof(IIgniteFactory)) as IIgniteFactory;
-            var igniteConfiguration = this.Services.GetService(typeof(IIgniteConfiguration)) as IIgniteConfiguration;
-            var ignite = igniteFactory.Instance();
-
             // Roles
             var roleRepository = this.Services.GetService(typeof(IRoleRepository)) as IRoleRepository;
             var adminRoleId = await roleRepository.Add(new Role(default, "Admin", "ADMIN", Enumeration.GetAll<Permission>()));
@@ -143,24 +139,24 @@ namespace ProtoR.ComponentTests.Configuration
                 {
                     configuration.AddInMemoryCollection(new[]
                     {
-                        new KeyValuePair<string, string>(nameof(IgniteConfiguration.SchemaCacheName), "SchemaCacheName_ComponentTest"),
-                        new KeyValuePair<string, string>(nameof(IgniteConfiguration.SchemaGroupCacheName), "SchemaGroupCacheName_ComponentTest"),
-                        new KeyValuePair<string, string>(nameof(IgniteConfiguration.ConfigurationCacheName), "ConfigurationCacheName_ComponentTest"),
-                        new KeyValuePair<string, string>(nameof(IgniteConfiguration.RuleConfigurationCacheName), "RuleConfigurationCacheName_ComponentTest"),
-                        new KeyValuePair<string, string>(nameof(IgniteConfiguration.UserCacheName), "UserCacheName_ComponentTest"),
-                        new KeyValuePair<string, string>(nameof(IgniteConfiguration.UserRoleCacheName), "UserRoleCacheName_ComponentTest"),
-                        new KeyValuePair<string, string>(nameof(IgniteConfiguration.UserCategoryCacheName), "UserCategoryCacheName_ComponentTest"),
-                        new KeyValuePair<string, string>(nameof(IgniteConfiguration.RoleCacheName), "RoleCacheName_ComponentTest"),
-                        new KeyValuePair<string, string>(nameof(IgniteConfiguration.RolePermissionCacheName), "RolePermissionCacheName_ComponentTest"),
-                        new KeyValuePair<string, string>(nameof(IgniteConfiguration.CategoryCacheName), "CategoryCacheName_ComponentTest"),
-                        new KeyValuePair<string, string>(nameof(IgniteConfiguration.ClientCacheName), "ClientCacheName_ComponentTest"),
-                        new KeyValuePair<string, string>(nameof(IgniteConfiguration.ClientRoleCacheName), "ClientRoleCacheName_ComponentTest"),
-                        new KeyValuePair<string, string>(nameof(IgniteConfiguration.ClientCategoryCacheName), "ClientCategoryCacheName_ComponentTest"),
-                        new KeyValuePair<string, string>(nameof(IgniteConfiguration.DiscoveryPort), "8000"),
-                        new KeyValuePair<string, string>(nameof(IgniteConfiguration.CommunicationPort), "9000"),
-                        new KeyValuePair<string, string>(nameof(IgniteConfiguration.NodeEndpoints), "127.0.0.1:8000"),
-                        new KeyValuePair<string, string>(nameof(IgniteConfiguration.StoragePath), "/tmp/component-tests"),
-                        new KeyValuePair<string, string>(nameof(IgniteConfiguration.EnablePersistence), "false"),
+                        new KeyValuePair<string, string>(nameof(IgniteExternalConfiguration.SchemaCacheName), "SchemaCacheName_ComponentTest"),
+                        new KeyValuePair<string, string>(nameof(IgniteExternalConfiguration.SchemaGroupCacheName), "SchemaGroupCacheName_ComponentTest"),
+                        new KeyValuePair<string, string>(nameof(IgniteExternalConfiguration.ConfigurationCacheName), "ConfigurationCacheName_ComponentTest"),
+                        new KeyValuePair<string, string>(nameof(IgniteExternalConfiguration.RuleConfigurationCacheName), "RuleConfigurationCacheName_ComponentTest"),
+                        new KeyValuePair<string, string>(nameof(IgniteExternalConfiguration.UserCacheName), "UserCacheName_ComponentTest"),
+                        new KeyValuePair<string, string>(nameof(IgniteExternalConfiguration.UserRoleCacheName), "UserRoleCacheName_ComponentTest"),
+                        new KeyValuePair<string, string>(nameof(IgniteExternalConfiguration.UserCategoryCacheName), "UserCategoryCacheName_ComponentTest"),
+                        new KeyValuePair<string, string>(nameof(IgniteExternalConfiguration.RoleCacheName), "RoleCacheName_ComponentTest"),
+                        new KeyValuePair<string, string>(nameof(IgniteExternalConfiguration.RolePermissionCacheName), "RolePermissionCacheName_ComponentTest"),
+                        new KeyValuePair<string, string>(nameof(IgniteExternalConfiguration.CategoryCacheName), "CategoryCacheName_ComponentTest"),
+                        new KeyValuePair<string, string>(nameof(IgniteExternalConfiguration.ClientCacheName), "ClientCacheName_ComponentTest"),
+                        new KeyValuePair<string, string>(nameof(IgniteExternalConfiguration.ClientRoleCacheName), "ClientRoleCacheName_ComponentTest"),
+                        new KeyValuePair<string, string>(nameof(IgniteExternalConfiguration.ClientCategoryCacheName), "ClientCategoryCacheName_ComponentTest"),
+                        new KeyValuePair<string, string>(nameof(IgniteExternalConfiguration.DiscoveryPort), "8000"),
+                        new KeyValuePair<string, string>(nameof(IgniteExternalConfiguration.CommunicationPort), "9000"),
+                        new KeyValuePair<string, string>(nameof(IgniteExternalConfiguration.NodeEndpoints), "127.0.0.1:8000"),
+                        new KeyValuePair<string, string>(nameof(IgniteExternalConfiguration.StoragePath), "/tmp/component-tests"),
+                        new KeyValuePair<string, string>(nameof(IgniteExternalConfiguration.EnablePersistence), "false"),
                         new KeyValuePair<string, string>(nameof(AuthenticationConfiguration.AuthenticationEnabled), "true"),
                     });
                 })

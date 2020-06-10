@@ -4,10 +4,10 @@ namespace ProtoR.Infrastructure.DataAccess.Repositories
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
-    using Apache.Ignite.Core;
     using Apache.Ignite.Core.Cache;
     using Apache.Ignite.Core.DataStructures;
     using Apache.Ignite.Linq;
+    using Microsoft.Extensions.Options;
     using ProtoR.Application;
     using ProtoR.Domain.CategoryAggregate;
     using ProtoR.Domain.ClientAggregate;
@@ -23,13 +23,13 @@ namespace ProtoR.Infrastructure.DataAccess.Repositories
 
         public ClientRepository(
             IIgniteFactory igniteFactory,
-            IIgniteConfiguration configurationProvider,
+            IOptions<IgniteExternalConfiguration> configurationProvider,
             IUserProvider userProvider)
             : base(igniteFactory, configurationProvider, userProvider)
         {
-            this.clientCache = this.Ignite.GetOrCreateCache<long, ClientCacheItem>(configurationProvider.ClientCacheName);
-            this.clientRoleCache = this.Ignite.GetOrCreateCache<ClientRoleKey, EmptyCacheItem>(configurationProvider.ClientRoleCacheName);
-            this.clientCategoryCache = this.Ignite.GetOrCreateCache<ClientCategoryKey, EmptyCacheItem>(configurationProvider.ClientCategoryCacheName);
+            this.clientCache = this.Ignite.GetOrCreateCache<long, ClientCacheItem>(this.ConfigurationProvider.ClientCacheName);
+            this.clientRoleCache = this.Ignite.GetOrCreateCache<ClientRoleKey, EmptyCacheItem>(this.ConfigurationProvider.ClientRoleCacheName);
+            this.clientCategoryCache = this.Ignite.GetOrCreateCache<ClientCategoryKey, EmptyCacheItem>(this.ConfigurationProvider.ClientCategoryCacheName);
         }
 
         public async Task<long> Add(Client client)

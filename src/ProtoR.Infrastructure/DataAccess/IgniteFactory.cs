@@ -15,21 +15,22 @@ namespace ProtoR.Infrastructure.DataAccess
     using Apache.Ignite.Core.Failure;
     using Autofac;
     using MediatR;
+    using Microsoft.Extensions.Options;
     using ProtoR.Application.Registry;
     using ProtoR.Infrastructure.DataAccess.CacheItems;
     using ProtoR.Infrastructure.DataAccess.DependencyInjection;
 
     public class IgniteFactory : IIgniteFactory
     {
-        private readonly IIgniteConfiguration externalConfiguration;
+        private readonly IgniteExternalConfiguration externalConfiguration;
         private readonly IMediator mediator;
         private IIgnite ignite;
 
         public IgniteFactory(
-            IIgniteConfiguration externalConfiguration,
+            IOptions<IgniteExternalConfiguration> externalConfiguration,
             IMediator mediator)
         {
-            this.externalConfiguration = externalConfiguration;
+            this.externalConfiguration = externalConfiguration.Value;
             this.mediator = mediator;
         }
 
@@ -115,7 +116,7 @@ namespace ProtoR.Infrastructure.DataAccess
                 true);
         }
 
-        private IgniteConfiguration CreateIgniteConfig(IIgniteConfiguration externalConfiguration)
+        private IgniteConfiguration CreateIgniteConfig(IgniteExternalConfiguration externalConfiguration)
         {
             string storagePath = externalConfiguration.StoragePath;
 
@@ -147,9 +148,6 @@ namespace ProtoR.Infrastructure.DataAccess
                 },
                 DataStorageConfiguration = new DataStorageConfiguration
                 {
-                    // StoragePath = Path.Combine(storagePath, "storage"),
-                    // WalPath = Path.Combine(storagePath, "wal"),
-                    // WalArchivePath = Path.Combine(storagePath, "wal-archive"),
                     DefaultDataRegionConfiguration = new DataRegionConfiguration
                     {
                         Name = "defaultRegion",

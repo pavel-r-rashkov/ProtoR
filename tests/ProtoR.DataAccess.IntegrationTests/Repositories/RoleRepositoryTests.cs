@@ -31,10 +31,21 @@ namespace ProtoR.DataAccess.IntegrationTests.Repositories
                 this.igniteFixture.Configuration,
                 userProvider);
 
-            this.roleCache = this.igniteFixture.IgniteFactory.Instance().GetCache<long, RoleCacheItem>(this.igniteFixture.Configuration.RoleCacheName);
-            this.rolePermissionCache = this.igniteFixture.IgniteFactory.Instance().GetCache<RolePermissionKey, EmptyCacheItem>(this.igniteFixture.Configuration.RolePermissionCacheName);
-            this.userRoleCache = this.igniteFixture.IgniteFactory.Instance().GetCache<UserRoleKey, EmptyCacheItem>(this.igniteFixture.Configuration.UserRoleCacheName);
-            this.clientRoleCache = this.igniteFixture.IgniteFactory.Instance().GetCache<ClientRoleKey, EmptyCacheItem>(this.igniteFixture.Configuration.ClientRoleCacheName);
+            this.roleCache = this.igniteFixture.IgniteFactory
+                .Instance()
+                .GetCache<long, RoleCacheItem>(this.igniteFixture.Configuration.Value.RoleCacheName);
+
+            this.rolePermissionCache = this.igniteFixture.IgniteFactory
+                .Instance()
+                .GetCache<RolePermissionKey, EmptyCacheItem>(this.igniteFixture.Configuration.Value.RolePermissionCacheName);
+
+            this.userRoleCache = this.igniteFixture.IgniteFactory
+                .Instance()
+                .GetCache<UserRoleKey, EmptyCacheItem>(this.igniteFixture.Configuration.Value.UserRoleCacheName);
+
+            this.clientRoleCache = this.igniteFixture.IgniteFactory
+                .Instance()
+                .GetCache<ClientRoleKey, EmptyCacheItem>(this.igniteFixture.Configuration.Value.ClientRoleCacheName);
         }
 
         public void Dispose()

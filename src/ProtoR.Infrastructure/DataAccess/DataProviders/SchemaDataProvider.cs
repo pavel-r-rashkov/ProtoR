@@ -5,6 +5,7 @@ namespace ProtoR.Infrastructure.DataAccess.DataProviders
     using System.Threading.Tasks;
     using Apache.Ignite.Core.Cache;
     using Apache.Ignite.Linq;
+    using Microsoft.Extensions.Options;
     using ProtoR.Application.Schema;
     using ProtoR.Infrastructure.DataAccess.CacheItems;
 
@@ -15,7 +16,7 @@ namespace ProtoR.Infrastructure.DataAccess.DataProviders
 
         public SchemaDataProvider(
             IIgniteFactory igniteFactory,
-            IIgniteConfiguration configurationProvider)
+            IOptions<IgniteExternalConfiguration> configurationProvider)
             : base(igniteFactory, configurationProvider)
         {
             this.groupCacheName = this.ConfigurationProvider.SchemaGroupCacheName;

@@ -1,6 +1,7 @@
 namespace ProtoR.Web.Infrastructure.Modules
 {
     using Autofac;
+    using Microsoft.Extensions.Options;
     using ProtoR.Application.Category;
     using ProtoR.Application.Client;
     using ProtoR.Application.Configuration;
@@ -21,9 +22,9 @@ namespace ProtoR.Web.Infrastructure.Modules
 
     public class IgniteModule : Module
     {
-        private readonly IIgniteConfiguration igniteConfiguration;
+        private readonly IgniteExternalConfiguration igniteConfiguration;
 
-        public IgniteModule(IIgniteConfiguration igniteConfiguration)
+        public IgniteModule(IgniteExternalConfiguration igniteConfiguration)
         {
             this.igniteConfiguration = igniteConfiguration;
         }
@@ -45,11 +46,6 @@ namespace ProtoR.Web.Infrastructure.Modules
                         .GetService<IClusterSingletonService>(nameof(IClusterSingletonService));
                 })
                 .As<IClusterSingletonService>();
-
-            builder
-                .RegisterInstance(this.igniteConfiguration)
-                .As<IIgniteConfiguration>()
-                .SingleInstance();
 
             builder
                 .RegisterType<IgniteUnitOfWork>()

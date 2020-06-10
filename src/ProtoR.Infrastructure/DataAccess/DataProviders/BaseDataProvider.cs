@@ -2,22 +2,23 @@ namespace ProtoR.Infrastructure.DataAccess.DataProviders
 {
     using System;
     using Apache.Ignite.Core;
+    using Microsoft.Extensions.Options;
 
     public class BaseDataProvider
     {
         public BaseDataProvider(
             IIgniteFactory igniteFactory,
-            IIgniteConfiguration configurationProvider)
+            IOptions<IgniteExternalConfiguration> configurationProvider)
         {
             _ = igniteFactory ?? throw new ArgumentNullException(nameof(igniteFactory));
             _ = configurationProvider ?? throw new ArgumentNullException(nameof(configurationProvider));
 
             this.Ignite = igniteFactory.Instance();
-            this.ConfigurationProvider = configurationProvider;
+            this.ConfigurationProvider = configurationProvider.Value;
         }
 
         protected IIgnite Ignite { get; }
 
-        protected IIgniteConfiguration ConfigurationProvider { get; }
+        protected IgniteExternalConfiguration ConfigurationProvider { get; }
     }
 }

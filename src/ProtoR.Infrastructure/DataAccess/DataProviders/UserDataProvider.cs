@@ -5,6 +5,7 @@ namespace ProtoR.Infrastructure.DataAccess.DataProviders
     using System.Threading.Tasks;
     using Apache.Ignite.Core.Cache;
     using Apache.Ignite.Linq;
+    using Microsoft.Extensions.Options;
     using ProtoR.Application.User;
     using ProtoR.Infrastructure.DataAccess.CacheItems;
 
@@ -16,7 +17,7 @@ namespace ProtoR.Infrastructure.DataAccess.DataProviders
 
         public UserDataProvider(
             IIgniteFactory igniteFactory,
-            IIgniteConfiguration configurationProvider)
+            IOptions<IgniteExternalConfiguration> configurationProvider)
             : base(igniteFactory, configurationProvider)
         {
             this.userCache = this.Ignite.GetOrCreateCache<long, UserCacheItem>(this.ConfigurationProvider.UserCacheName);

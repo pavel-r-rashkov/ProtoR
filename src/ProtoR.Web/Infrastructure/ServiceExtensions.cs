@@ -17,6 +17,7 @@ namespace ProtoR.Web.Infrastructure
     using Microsoft.OpenApi.Models;
     using ProtoR.Domain.RoleAggregate;
     using ProtoR.Domain.UserAggregate;
+    using ProtoR.Infrastructure.DataAccess;
     using ProtoR.Web.Infrastructure.Identity;
     using ProtoR.Web.Infrastructure.Swagger;
     using Swashbuckle.AspNetCore.Swagger;
@@ -133,7 +134,7 @@ namespace ProtoR.Web.Infrastructure
 
         public static IServiceCollection AddConfiguration(this IServiceCollection services, IConfiguration configuration)
         {
-            services.Configure<IgniteConfiguration>(configuration);
+            services.Configure<IgniteExternalConfiguration>(configuration);
             services.Configure<AuthenticationConfiguration>(configuration);
 
             return services;
