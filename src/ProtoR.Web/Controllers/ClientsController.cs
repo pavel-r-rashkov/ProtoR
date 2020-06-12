@@ -4,9 +4,11 @@ namespace ProtoR.Web.Controllers
     using System.Threading.Tasks;
     using AutoMapper;
     using MediatR;
+    using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Mvc;
     using ProtoR.Application.Client;
     using ProtoR.Web.Infrastructure.Identity;
+    using ProtoR.Web.Resources;
     using ProtoR.Web.Resources.ClientResource;
 
     public class ClientsController : BaseController
@@ -18,27 +20,61 @@ namespace ProtoR.Web.Controllers
         {
         }
 
+        /// <summary>
+        /// Get all clients.
+        /// </summary>
+        /// <returns>Clients.</returns>
+        /// <response code="200">Client list.</response>
+        /// <response code="401">User or client is not authenticated.</response>
+        /// <response code="403">"ClientRead" permission is missing.</response>
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ErrorModel), StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(typeof(ErrorModel), StatusCodes.Status403Forbidden)]
         [HttpGet]
         [PermissionClaim(Permission.ClientRead)]
-        public async Task<ActionResult<IEnumerable<ClientReadModel>>> Get([FromRoute]GetClientsQuery query)
+        public async Task<ActionResult<ResponseModel<IEnumerable<ClientReadModel>>>> Get([FromRoute]GetClientsQuery query)
         {
             var clients = await this.Mediator.Send(query);
             var clientResources = this.Mapper.Map<IEnumerable<ClientReadModel>>(clients);
 
-            return this.Ok(clientResources);
+            return this.Ok(new ResponseModel<IEnumerable<ClientReadModel>>(clientResources));
         }
 
+        /// <summary>
+        /// Get client by ID.
+        /// </summary>
+        /// <returns>Client.</returns>
+        /// <response code="200">Client with requested ID.</response>
+        /// <response code="401">User or client is not authenticated.</response>
+        /// <response code="403">"ClientRead" permission is missing.</response>
+        /// <response code="404">Client with the specified ID doesn't exist.</response>
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ErrorModel), StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(typeof(ErrorModel), StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(typeof(ErrorModel), StatusCodes.Status404NotFound)]
         [HttpGet]
         [Route("{ClientId}")]
         [PermissionClaim(Permission.ClientRead)]
-        public async Task<ActionResult<ClientReadModel>> Get([FromRoute]GetClientByIdQuery query)
+        public async Task<ActionResult<ResponseModel<ClientReadModel>>> Get([FromRoute]GetClientByIdQuery query)
         {
             var clients = await this.Mediator.Send(query);
             var clientResource = this.Mapper.Map<ClientReadModel>(clients);
 
-            return this.Ok(clientResource);
+            return this.Ok(new ResponseModel<ClientReadModel>(clientResource));
         }
 
+        /// <summary>
+        /// Create a new client.
+        /// </summary>
+        /// <returns>No content.</returns>
+        /// <response code="201">Client created successfully.</response>
+        /// <response code="400">Client data is invalid.</response>
+        /// <response code="401">User or client is not authenticated.</response>
+        /// <response code="403">"ClientWrite" permission is missing.</response>
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(ErrorModel), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ErrorModel), StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(typeof(ErrorModel), StatusCodes.Status403Forbidden)]
         [HttpPost]
         [PermissionClaim(Permission.ClientWrite)]
         public async Task<ActionResult> Post(ClientWriteModel client)
@@ -49,6 +85,20 @@ namespace ProtoR.Web.Controllers
             return this.CreatedAtAction(nameof(this.Get), new { ClientId = clientId }, null);
         }
 
+        /// <summary>
+        /// Update existing client.
+        /// </summary>
+        /// <returns>No content.</returns>
+        /// <response code="204">Client updated successfully.</response>
+        /// <response code="400">Client data is invalid.</response>
+        /// <response code="401">User or client is not authenticated.</response>
+        /// <response code="403">"ClientWrite" permission is missing.</response>
+        /// <response code="404">Client with the specified ID doesn't exist.</response>
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(typeof(ErrorModel), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ErrorModel), StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(typeof(ErrorModel), StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(typeof(ErrorModel), StatusCodes.Status404NotFound)]
         [HttpPut]
         [Route("{Id}")]
         [PermissionClaim(Permission.ClientWrite)]
@@ -60,6 +110,18 @@ namespace ProtoR.Web.Controllers
             return this.NoContent();
         }
 
+        /// <summary>
+        /// Delete a client.
+        /// </summary>
+        /// <returns>No conent.</returns>
+        /// <response code="204">Client deleted successfully.</response>
+        /// <response code="401">User or client is not authenticated.</response>
+        /// <response code="403">"ClientWrite" permission is missing.</response>
+        /// <response code="404">Client with the specified ID doesn't exist.</response>
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(typeof(ErrorModel), StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(typeof(ErrorModel), StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(typeof(ErrorModel), StatusCodes.Status404NotFound)]
         [HttpDelete]
         [Route("{clientId}")]
         [PermissionClaim(Permission.ClientWrite)]

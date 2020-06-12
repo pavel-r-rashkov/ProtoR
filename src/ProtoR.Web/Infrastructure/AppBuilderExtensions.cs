@@ -9,10 +9,12 @@ namespace ProtoR.Web.Infrastructure
     using Microsoft.AspNetCore.Http;
     using Microsoft.Extensions.Hosting;
     using Microsoft.Extensions.Options;
-    using Newtonsoft.Json.Linq;
+    using Newtonsoft.Json;
+    using Newtonsoft.Json.Serialization;
     using ProtoR.Domain.Exceptions;
     using ProtoR.Infrastructure.DataAccess;
     using ProtoR.Web.Infrastructure.Identity;
+    using ProtoR.Web.Resources;
 
     public static class AppBuilderExtensions
     {
@@ -77,9 +79,18 @@ namespace ProtoR.Web.Infrastructure
                     }
 
                     // TODO Log exception
-                    var jsonResponse = JObject.FromObject(new { error });
+                    var serializerSettings = new JsonSerializerSettings
+                    {
+                        ContractResolver = new DefaultContractResolver
+                        {
+                            NamingStrategy = new CamelCaseNamingStrategy(),
+                        },
+                        NullValueHandling = NullValueHandling.Ignore,
+                    };
+                    var jsonResponse = JsonConvert.SerializeObject(new ErrorModel { Message = error }, serializerSettings);
+
                     context.Response.StatusCode = statusCode;
-                    await context.Response.WriteAsync(jsonResponse.ToString());
+                    await context.Response.WriteAsync(jsonResponse);
                 });
             });
 

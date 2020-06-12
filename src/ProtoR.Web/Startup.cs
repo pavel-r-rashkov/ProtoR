@@ -34,6 +34,7 @@
             services.AddControllersWithViews();
             services
                 .AddControllers()
+                .ConfigureCustomApiBehaviorOptions()
                 .AddHybridModelBinder()
                 .AddFluentValidation(config => config.RegisterValidatorsFromAssemblyContaining<Startup>());
 

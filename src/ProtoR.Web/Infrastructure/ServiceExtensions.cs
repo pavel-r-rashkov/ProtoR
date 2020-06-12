@@ -3,6 +3,7 @@ namespace ProtoR.Web.Infrastructure
     using System;
     using System.Collections.Generic;
     using System.IO;
+    using System.Linq;
     using System.Net;
     using System.Reflection;
     using System.Security.Cryptography.X509Certificates;
@@ -12,6 +13,7 @@ namespace ProtoR.Web.Infrastructure
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Cors.Infrastructure;
     using Microsoft.AspNetCore.Identity;
+    using Microsoft.AspNetCore.Mvc;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.OpenApi.Models;
@@ -20,6 +22,7 @@ namespace ProtoR.Web.Infrastructure
     using ProtoR.Infrastructure.DataAccess;
     using ProtoR.Web.Infrastructure.Identity;
     using ProtoR.Web.Infrastructure.Swagger;
+    using ProtoR.Web.Resources;
     using Swashbuckle.AspNetCore.Swagger;
 
     public static class ServiceExtensions
@@ -35,6 +38,7 @@ namespace ProtoR.Web.Infrastructure
                 });
 
                 config.SchemaFilter<SwaggerExcludeFilter>();
+                config.OperationFilter<HybridOperationFilter>();
 
                 var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
                 var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
@@ -138,6 +142,28 @@ namespace ProtoR.Web.Infrastructure
             services.Configure<AuthenticationConfiguration>(configuration);
 
             return services;
+        }
+
+        public static IMvcBuilder ConfigureCustomApiBehaviorOptions(this IMvcBuilder builder)
+        {
+            return builder.ConfigureApiBehaviorOptions(options =>
+            {
+                options.InvalidModelStateResponseFactory = context =>
+                {
+                    var errors = context.ModelState.Keys
+                        .Select(errorKey => new FieldErrorModel
+                        {
+                            Field = errorKey.ToCamelCase(),
+                            ErrorMessages = context.ModelState[errorKey].Errors.Select(error => error.ErrorMessage),
+                        });
+
+                    return new BadRequestObjectResult(new ErrorModel
+                    {
+                        Errors = errors,
+                        Message = "Invalid request data.",
+                    });
+                };
+            });
         }
     }
 }

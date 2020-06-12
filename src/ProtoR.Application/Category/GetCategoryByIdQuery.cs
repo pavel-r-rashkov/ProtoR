@@ -4,6 +4,9 @@ namespace ProtoR.Application.Category
 
     public class GetCategoryByIdQuery : IRequest<CategoryDto>
     {
+        /// <summary>
+        /// Category ID.
+        /// </summary>
         public string CategoryId { get; set; }
     }
 }

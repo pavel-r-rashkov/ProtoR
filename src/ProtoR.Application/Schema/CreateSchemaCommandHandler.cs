@@ -11,7 +11,6 @@ namespace ProtoR.Application.Schema
     using ProtoR.Domain.Exceptions;
     using ProtoR.Domain.SchemaGroupAggregate;
     using ProtoR.Domain.SchemaGroupAggregate.Rules;
-    using ProtoR.Domain.SchemaGroupAggregate.Schemas;
     using ProtoR.Domain.SeedWork;
 
     public class CreateSchemaCommandHandler : IRequestHandler<CreateSchemaCommand, SchemaValidationResultDto>

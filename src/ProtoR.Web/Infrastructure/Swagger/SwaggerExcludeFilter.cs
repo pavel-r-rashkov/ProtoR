@@ -21,14 +21,7 @@ namespace ProtoR.Web.Infrastructure.Swagger
 
             foreach (PropertyInfo excludedProperty in excludedProperties)
             {
-                string excludedPropertyWithoutLeadingChar = excludedProperty.Name.Length > 1
-                    ? excludedProperty.Name.Substring(1)
-                    : string.Empty;
-
-                var excludedPropertyName = excludedProperty.Name[0]
-                    .ToString(CultureInfo.CurrentCulture)
-                    .ToLower(CultureInfo.CurrentCulture)
-                    + excludedPropertyWithoutLeadingChar;
+                var excludedPropertyName = excludedProperty.Name.ToCamelCase();
 
                 if (schema.Properties.ContainsKey(excludedPropertyName))
                 {

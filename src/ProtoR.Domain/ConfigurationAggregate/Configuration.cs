@@ -42,7 +42,6 @@ namespace ProtoR.Domain.ConfigurationAggregate
 
         public static Configuration DefaultGlobalConfiguration()
         {
-            // TODO default global rules configuration
             var rulesConfiguration = RuleFactory.GetProtoBufRules().ToDictionary(
                 r => r.Code,
                 r => new RuleConfiguration(false, Severity.Hidden));

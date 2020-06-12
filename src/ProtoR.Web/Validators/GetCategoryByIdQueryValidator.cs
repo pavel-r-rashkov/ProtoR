@@ -9,6 +9,8 @@ namespace ProtoR.Web.Validators
         public GetCategoryByIdQueryValidator()
         {
             this.RuleFor(m => m.CategoryId)
+                .NotNull()
+                .NotEmpty()
                 .Matches(@"^(\d+|default)$", RegexOptions.IgnoreCase)
                 .WithMessage("Category must be a number or \"default\"");
         }

@@ -11,7 +11,7 @@ namespace ProtoR.Application.Group
     using ProtoR.Domain.SchemaGroupAggregate;
     using ProtoR.Domain.SeedWork;
 
-    public class CreateGroupCommandHandler : IRequestHandler<CreateGroupCommand, bool>
+    public class CreateGroupCommandHandler : AsyncRequestHandler<CreateGroupCommand>
     {
         private readonly IProtoBufSchemaGroupRepository schemaGroupRepository;
         private readonly IConfigurationRepository configurationRepository;
@@ -30,7 +30,7 @@ namespace ProtoR.Application.Group
             this.userProvider = userProvider;
         }
 
-        public async Task<bool> Handle(CreateGroupCommand request, CancellationToken cancellationToken)
+        protected override async Task Handle(CreateGroupCommand request, CancellationToken cancellationToken)
         {
             _ = request ?? throw new ArgumentNullException(nameof(request));
             var existingGroup = await this.schemaGroupRepository.GetByName(request.GroupName);
@@ -59,8 +59,6 @@ namespace ProtoR.Application.Group
             await this.configurationRepository.Add(defaultConfiguration);
 
             await this.unitOfWork.SaveChanges();
-
-            return true;
         }
     }
 }
