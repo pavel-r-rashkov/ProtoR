@@ -38,7 +38,7 @@ namespace ProtoR.Web.Infrastructure
             if (string.IsNullOrEmpty(userName))
             {
                 var clientClaim = this.httpContextAccessor.HttpContext.User.Claims
-                    .FirstOrDefault(c => c.Type == "client_id");
+                    .FirstOrDefault(c => c.Type == CustomClaim.ClientNameClaimType);
 
                 userName = clientClaim?.Value ?? userName;
             }

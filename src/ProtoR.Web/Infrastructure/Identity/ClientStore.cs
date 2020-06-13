@@ -1,16 +1,12 @@
 namespace ProtoR.Web.Infrastructure.Identity
 {
-    using System;
-    using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
     using IdentityServer4;
     using IdentityServer4.Models;
     using IdentityServer4.Stores;
-    using ProtoR.Domain.CategoryAggregate;
     using ProtoR.Domain.ClientAggregate;
     using ProtoR.Domain.RoleAggregate;
-    using ProtoR.Domain.SeedWork;
     using Client = IdentityServer4.Models.Client;
 
     public class ClientStore : IClientStore
@@ -77,6 +73,8 @@ namespace ProtoR.Web.Infrastructure.Identity
             {
                 client.Claims.Add(claim);
             }
+
+            client.Claims.Add(CustomClaim.ForClientName(dbClient.ClientName));
         }
     }
 }

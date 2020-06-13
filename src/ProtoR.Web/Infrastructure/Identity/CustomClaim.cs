@@ -10,6 +10,7 @@ namespace ProtoR.Web.Infrastructure.Identity
         public static readonly string PermissionClaimType = $"{ClaimsPrefix}permission";
         public static readonly string CategoryClaimType = $"{ClaimsPrefix}category";
         public static readonly string UserNameClaimType = $"{ClaimsPrefix}username";
+        public static readonly string ClientNameClaimType = $"{ClaimsPrefix}client_name";
         private const string ClaimsPrefix = "protor_";
 
         public static IEnumerable<Claim> ForPermissions(IEnumerable<int> permissions)
@@ -25,6 +26,11 @@ namespace ProtoR.Web.Infrastructure.Identity
         public static Claim ForUserName(string userName)
         {
             return new Claim(UserNameClaimType, userName);
+        }
+
+        public static Claim ForClientName(string clientName)
+        {
+            return new Claim(ClientNameClaimType, clientName);
         }
     }
 }
