@@ -55,8 +55,8 @@ namespace ProtoR.Web.Resources.ClientResource
         public IEnumerable<long> RoleBindings { get; set; }
 
         /// <summary>
-        /// Category IDs associated with this client.
+        /// Group restriction patterns associated with this client.
         /// </summary>
-        public IEnumerable<long> CategoryBindings { get; set; }
+        public IEnumerable<string> GroupRestrictions { get; set; }
     }
 }

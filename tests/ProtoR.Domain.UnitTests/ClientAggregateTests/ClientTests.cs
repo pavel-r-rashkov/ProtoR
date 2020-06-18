@@ -2,9 +2,9 @@ namespace ProtoR.Domain.UnitTests.ClientAggregateTests
 {
     using System;
     using System.Linq;
-    using ProtoR.Domain.CategoryAggregate;
     using ProtoR.Domain.ClientAggregate;
     using ProtoR.Domain.RoleAggregate;
+    using ProtoR.Domain.SchemaGroupAggregate;
     using Xunit;
 
     public class ClientTests
@@ -28,21 +28,36 @@ namespace ProtoR.Domain.UnitTests.ClientAggregateTests
         }
 
         [Fact]
-        public void SetCategories_ShouldSetCategoryBindings()
+        public void SetGroupRestrictions_ShouldSetGroupRestrictions()
         {
             var client = this.CreateClient();
-            var categories = new long[] { 1, 2, 3 };
+            var restrictions = new GroupRestriction[]
+            {
+                new GroupRestriction("A*"),
+                new GroupRestriction("B*"),
+            };
 
-            client.SetCategories(categories);
+            client.GroupRestrictions = restrictions;
 
-            Assert.Equal(categories.Length, client.CategoryBindings.Count());
-            Assert.All(
-                client.CategoryBindings,
-                categoryBinding =>
-                {
-                    Assert.Contains(categoryBinding.CategoryId, categories);
-                    Assert.Equal(client.Id, categoryBinding.ClientId);
-                });
+            Assert.Equal(restrictions.Length, client.GroupRestrictions.Count());
+        }
+
+        [Fact]
+        public void SetGroupRestrictions_WithNullGroupRestrictions_ShouldThrow()
+        {
+            var client = this.CreateClient();
+            GroupRestriction[] restrictions = null;
+
+            Assert.Throws<ArgumentNullException>(() => client.GroupRestrictions = restrictions);
+        }
+
+        [Fact]
+        public void SetGroupRestrictions_WithEmptyGroupRestrictions_ShouldThrow()
+        {
+            var client = this.CreateClient();
+            GroupRestriction[] restrictions = Array.Empty<GroupRestriction>();
+
+            Assert.Throws<ArgumentException>(() => client.GroupRestrictions = restrictions);
         }
 
         [Fact]
@@ -58,7 +73,7 @@ namespace ProtoR.Domain.UnitTests.ClientAggregateTests
             Assert.NotNull(client.PostLogoutRedirectUris);
             Assert.NotNull(client.AllowedCorsOrigins);
             Assert.NotNull(client.RoleBindings);
-            Assert.NotNull(client.CategoryBindings);
+            Assert.NotNull(client.GroupRestrictions);
         }
 
         private Client CreateClient()
@@ -72,8 +87,8 @@ namespace ProtoR.Domain.UnitTests.ClientAggregateTests
                 Array.Empty<Uri>(),
                 Array.Empty<Uri>(),
                 Array.Empty<string>(),
-                Array.Empty<RoleBinding>(),
-                Array.Empty<CategoryBinding>());
+                new GroupRestriction[] { new GroupRestriction("*") },
+                Array.Empty<RoleBinding>());
 
             return client;
         }

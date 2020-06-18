@@ -5,7 +5,5 @@ namespace ProtoR.Application.Group
     public class CreateGroupCommand : IRequest
     {
         public string GroupName { get; set; }
-
-        public long? CategoryId { get; set; }
     }
 }

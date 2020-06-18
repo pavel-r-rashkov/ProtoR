@@ -1,5 +1,6 @@
 namespace ProtoR.Infrastructure.DataAccess.DataProviders
 {
+    using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
@@ -11,9 +12,9 @@ namespace ProtoR.Infrastructure.DataAccess.DataProviders
 
     public class UserDataProvider : BaseDataProvider, IUserDataProvider
     {
+        private const char Separator = ',';
         private readonly ICache<long, UserCacheItem> userCache;
         private readonly ICache<UserRoleKey, EmptyCacheItem> userRoleCache;
-        private readonly ICache<UserCategoryKey, EmptyCacheItem> userCategoryCache;
 
         public UserDataProvider(
             IIgniteFactory igniteFactory,
@@ -22,7 +23,6 @@ namespace ProtoR.Infrastructure.DataAccess.DataProviders
         {
             this.userCache = this.Ignite.GetOrCreateCache<long, UserCacheItem>(this.ConfigurationProvider.UserCacheName);
             this.userRoleCache = this.Ignite.GetOrCreateCache<UserRoleKey, EmptyCacheItem>(this.ConfigurationProvider.UserRoleCacheName);
-            this.userCategoryCache = this.Ignite.GetOrCreateCache<UserCategoryKey, EmptyCacheItem>(this.ConfigurationProvider.UserCategoryCacheName);
         }
 
         public async Task<UserDto> GetById(long id)
@@ -42,28 +42,14 @@ namespace ProtoR.Infrastructure.DataAccess.DataProviders
                 .Select(cr => cr.Key.RoleId)
                 .ToList();
 
-            var categoryIds = this.userCategoryCache
-                .AsCacheQueryable()
-                .Where(cr => cr.Key.UserId == id)
-                .Select(cr => cr.Key.CategoryId)
-                .ToList();
-
             var user = this.MapFromCacheItem(id, userCacheItem);
             user.RoleBindings = roleIds;
-            user.CategoryBindings = categoryIds;
 
             return user;
         }
 
         public Task<IEnumerable<UserDto>> GetUsers()
         {
-            var categoryGroups = this.userCategoryCache
-                .AsCacheQueryable()
-                .Select(c => c.Key)
-                .ToList()
-                .GroupBy(c => c.UserId)
-                .ToDictionary(g => g.Key, g => g.Select(c => c.CategoryId));
-
             var roleGroups = this.userRoleCache
                 .AsCacheQueryable()
                 .Select(c => c.Key)
@@ -77,11 +63,6 @@ namespace ProtoR.Infrastructure.DataAccess.DataProviders
                 .Select(c =>
                 {
                     var user = this.MapFromCacheItem(c.Key, c.Value);
-
-                    if (categoryGroups.TryGetValue(c.Key, out var categories))
-                    {
-                        user.CategoryBindings = categories;
-                    }
 
                     if (roleGroups.TryGetValue(c.Key, out var roles))
                     {
@@ -100,6 +81,8 @@ namespace ProtoR.Infrastructure.DataAccess.DataProviders
             {
                 Id = id,
                 UserName = userCacheItem.UserName,
+                GroupRestrictions = userCacheItem.GroupRestrictions
+                    .Split(Separator, StringSplitOptions.RemoveEmptyEntries),
                 CreatedBy = userCacheItem.CreatedBy,
                 CreatedOn = userCacheItem.CreatedOn,
             };

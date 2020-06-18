@@ -62,14 +62,14 @@ namespace ProtoR.Web.Infrastructure.Identity
         {
             var roles = await this.roleRepository.GetRoles(dbClient.RoleBindings.Select(r => r.RoleId));
             var permissions = roles.SelectMany(r => r.Permissions).Select(p => p.Id).Distinct();
-            var categories = dbClient.CategoryBindings.Select(c => c.CategoryId);
+            var groupRestrictions = dbClient.GroupRestrictions.Select(gr => gr.Pattern);
 
             foreach (var claim in CustomClaim.ForPermissions(permissions))
             {
                 client.Claims.Add(claim);
             }
 
-            foreach (var claim in CustomClaim.ForCategories(categories))
+            foreach (var claim in CustomClaim.ForGroupRestrictions(groupRestrictions))
             {
                 client.Claims.Add(claim);
             }

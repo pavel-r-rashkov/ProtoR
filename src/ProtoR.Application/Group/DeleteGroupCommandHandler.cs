@@ -1,11 +1,12 @@
 namespace ProtoR.Application.Group
 {
     using System;
-    using System.Linq;
+    using System.Text.RegularExpressions;
     using System.Threading;
     using System.Threading.Tasks;
     using MediatR;
     using ProtoR.Application;
+    using ProtoR.Application.Common;
     using ProtoR.Domain.Exceptions;
     using ProtoR.Domain.SchemaGroupAggregate;
     using ProtoR.Domain.SeedWork;
@@ -36,13 +37,19 @@ namespace ProtoR.Application.Group
                 throw new EntityNotFoundException<ProtoBufSchemaGroup>((object)request.GroupName);
             }
 
-            var categories = this.userProvider.GetCategoryRestrictions();
+            var groupRestrictions = this.userProvider.GetGroupRestrictions();
 
-            if (categories != null && !categories.Contains(group.CategoryId))
+            if (groupRestrictions != null)
             {
-                throw new InaccessibleCategoryException(
-                    group.CategoryId,
-                    this.userProvider.GetCurrentUserName());
+                var regex = FilterGenerator.CreateFromPatterns(groupRestrictions);
+                var hasAccessToGroup = Regex.IsMatch(request.GroupName, regex, RegexOptions.IgnoreCase);
+
+                if (!hasAccessToGroup)
+                {
+                    throw new InaccessibleGroupException(
+                        request.GroupName,
+                        this.userProvider.GetCurrentUserName());
+                }
             }
 
             await this.groupRepository.Delete(group);

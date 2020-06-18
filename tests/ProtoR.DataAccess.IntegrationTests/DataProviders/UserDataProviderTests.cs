@@ -16,7 +16,6 @@ namespace ProtoR.DataAccess.IntegrationTests.DataProviders
         private readonly UserDataProvider dataProvider;
         private readonly ICache<long, UserCacheItem> userCache;
         private readonly ICache<UserRoleKey, EmptyCacheItem> userRoleCache;
-        private readonly ICache<UserCategoryKey, EmptyCacheItem> userCategoryCache;
         private readonly Fixture fixture;
 
         public UserDataProviderTests(IgniteFixture igniteFixture)
@@ -31,10 +30,6 @@ namespace ProtoR.DataAccess.IntegrationTests.DataProviders
             this.userRoleCache = this.igniteFixture.IgniteFactory
                 .Instance()
                 .GetCache<UserRoleKey, EmptyCacheItem>(this.igniteFixture.Configuration.Value.UserRoleCacheName);
-
-            this.userCategoryCache = this.igniteFixture.IgniteFactory
-                .Instance()
-                .GetCache<UserCategoryKey, EmptyCacheItem>(this.igniteFixture.Configuration.Value.UserCategoryCacheName);
 
             this.fixture = new Fixture();
             this.fixture.Customizations.Add(new UtcRandomDateTimeSequenceGenerator());
@@ -74,14 +69,11 @@ namespace ProtoR.DataAccess.IntegrationTests.DataProviders
         private async Task InsertUser(long id)
         {
             var user = this.fixture.Create<UserCacheItem>();
+            user.GroupRestrictions = "Abc*, B*";
             await this.userCache.PutAsync(id, user);
 
             await this.userRoleCache.PutAsync(
                 new UserRoleKey { UserId = id, RoleId = 1 },
-                new EmptyCacheItem());
-
-            await this.userCategoryCache.PutAsync(
-                new UserCategoryKey { UserId = id, CategoryId = 1 },
                 new EmptyCacheItem());
         }
     }

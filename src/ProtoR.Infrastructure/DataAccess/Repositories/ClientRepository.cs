@@ -9,9 +9,9 @@ namespace ProtoR.Infrastructure.DataAccess.Repositories
     using Apache.Ignite.Linq;
     using Microsoft.Extensions.Options;
     using ProtoR.Application;
-    using ProtoR.Domain.CategoryAggregate;
     using ProtoR.Domain.ClientAggregate;
     using ProtoR.Domain.RoleAggregate;
+    using ProtoR.Domain.SchemaGroupAggregate;
     using ProtoR.Infrastructure.DataAccess.CacheItems;
 
     public class ClientRepository : BaseRepository, IClientRepository
@@ -19,7 +19,6 @@ namespace ProtoR.Infrastructure.DataAccess.Repositories
         private const char Separator = ',';
         private readonly ICache<long, ClientCacheItem> clientCache;
         private readonly ICache<ClientRoleKey, EmptyCacheItem> clientRoleCache;
-        private readonly ICache<ClientCategoryKey, EmptyCacheItem> clientCategoryCache;
 
         public ClientRepository(
             IIgniteFactory igniteFactory,
@@ -29,7 +28,6 @@ namespace ProtoR.Infrastructure.DataAccess.Repositories
         {
             this.clientCache = this.Ignite.GetOrCreateCache<long, ClientCacheItem>(this.ConfigurationProvider.ClientCacheName);
             this.clientRoleCache = this.Ignite.GetOrCreateCache<ClientRoleKey, EmptyCacheItem>(this.ConfigurationProvider.ClientRoleCacheName);
-            this.clientCategoryCache = this.Ignite.GetOrCreateCache<ClientCategoryKey, EmptyCacheItem>(this.ConfigurationProvider.ClientCategoryCacheName);
         }
 
         public async Task<long> Add(Client client)
@@ -52,17 +50,8 @@ namespace ProtoR.Infrastructure.DataAccess.Repositories
                 },
                 new EmptyCacheItem()));
 
-            var clientCategoryItems = client.CategoryBindings.Select(c => new KeyValuePair<ClientCategoryKey, EmptyCacheItem>(
-                new ClientCategoryKey
-                {
-                    ClientId = id,
-                    CategoryId = c.CategoryId,
-                },
-                new EmptyCacheItem()));
-
             await this.clientCache.PutIfAbsentAsync(id, clientItem);
             await this.clientRoleCache.PutAllAsync(clientRoleItems);
-            await this.clientCategoryCache.PutAllAsync(clientCategoryItems);
 
             return id;
         }
@@ -78,14 +67,6 @@ namespace ProtoR.Infrastructure.DataAccess.Repositories
                 .ToList();
 
             await this.clientRoleCache.RemoveAllAsync(clientRoles);
-
-            var clientCategories = this.clientCategoryCache
-                .AsCacheQueryable()
-                .Where(cr => cr.Key.ClientId == id)
-                .Select(cr => cr.Key)
-                .ToList();
-
-            await this.clientCategoryCache.RemoveAllAsync(clientCategories);
         }
 
         public Task<Client> GetByClientId(string clientId)
@@ -100,7 +81,7 @@ namespace ProtoR.Infrastructure.DataAccess.Repositories
                 return Task.FromResult((Client)null);
             }
 
-            var client = this.PopulateRolesAndCategories(clientCacheItem.Key, clientCacheItem.Value);
+            var client = this.PopulateRoles(clientCacheItem.Key, clientCacheItem.Value);
 
             return Task.FromResult(client);
         }
@@ -115,7 +96,7 @@ namespace ProtoR.Infrastructure.DataAccess.Repositories
             }
 
             var clientCacheItem = result.Value;
-            var client = this.PopulateRolesAndCategories(id, clientCacheItem);
+            var client = this.PopulateRoles(id, clientCacheItem);
 
             return client;
         }
@@ -146,40 +127,16 @@ namespace ProtoR.Infrastructure.DataAccess.Repositories
                     new ClientRoleKey { ClientId = client.Id, RoleId = rb.RoleId },
                     new EmptyCacheItem()));
 
-            var currentCategories = this.clientCategoryCache
-                .AsCacheQueryable()
-                .Where(cr => cr.Key.ClientId == client.Id)
-                .Select(cr => cr.Key)
-                .ToList();
-
-            var categoriesToDelete = currentCategories.Where(c => !client.CategoryBindings
-                .ToList()
-                .Select(cb => cb.CategoryId)
-                .Contains(c.CategoryId));
-
-            var categoriesToAdd = client.CategoryBindings
-                .ToList()
-                .Where(cb => !currentCategories
-                    .Select(cr => cr.CategoryId)
-                    .Contains(cb.CategoryId))
-                .Select(cb => new KeyValuePair<ClientCategoryKey, EmptyCacheItem>(
-                    new ClientCategoryKey { ClientId = client.Id, CategoryId = cb.CategoryId },
-                    new EmptyCacheItem()));
-
             await this.clientCache.PutAsync(client.Id, clientItem);
 
             await this.clientRoleCache.PutAllAsync(rolesToAdd);
             await this.clientRoleCache.RemoveAllAsync(rolesToDelete);
-
-            await this.clientCategoryCache.PutAllAsync(categoriesToAdd);
-            await this.clientCategoryCache.RemoveAllAsync(categoriesToDelete);
         }
 
         private static Client MapToClient(
             long id,
             ClientCacheItem cacheItem,
-            IReadOnlyCollection<RoleBinding> roles,
-            IReadOnlyCollection<CategoryBinding> categories)
+            IReadOnlyCollection<RoleBinding> roles)
         {
             return new Client(
                 id,
@@ -198,8 +155,11 @@ namespace ProtoR.Infrastructure.DataAccess.Repositories
                 cacheItem.AllowedCorsOrigins
                     .Split(Separator, StringSplitOptions.RemoveEmptyEntries)
                     .ToList(),
-                roles,
-                categories);
+                cacheItem.GroupRestrictions
+                    .Split(Separator, StringSplitOptions.RemoveEmptyEntries)
+                    .Select(t => new GroupRestriction(t))
+                    .ToList(),
+                roles);
         }
 
         private ClientCacheItem MapToCacheItem(Client client)
@@ -213,12 +173,13 @@ namespace ProtoR.Infrastructure.DataAccess.Repositories
                 RedirectUris = string.Join(Separator, client.RedirectUris),
                 PostLogoutRedirectUris = string.Join(Separator, client.PostLogoutRedirectUris),
                 AllowedCorsOrigins = string.Join(Separator, client.AllowedCorsOrigins),
+                GroupRestrictions = string.Join(Separator, client.GroupRestrictions.Select(g => g.Pattern)),
                 CreatedBy = this.UserProvider.GetCurrentUserName(),
                 CreatedOn = DateTime.UtcNow,
             };
         }
 
-        private Client PopulateRolesAndCategories(long id, ClientCacheItem clientCacheItem)
+        private Client PopulateRoles(long id, ClientCacheItem clientCacheItem)
         {
             var roles = this.clientRoleCache
                 .AsCacheQueryable()
@@ -228,19 +189,10 @@ namespace ProtoR.Infrastructure.DataAccess.Repositories
                 .Select(roleId => new RoleBinding(roleId, null, id))
                 .ToList();
 
-            var categories = this.clientCategoryCache
-                .AsCacheQueryable()
-                .Where(cr => cr.Key.ClientId == id)
-                .Select(cr => cr.Key.CategoryId)
-                .ToList()
-                .Select(categoryId => new CategoryBinding(categoryId, null, id))
-                .ToList();
-
             return MapToClient(
                 id,
                 clientCacheItem,
-                roles,
-                categories);
+                roles);
         }
     }
 }

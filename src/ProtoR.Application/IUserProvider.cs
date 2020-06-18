@@ -6,6 +6,6 @@ namespace ProtoR.Application
     {
         string GetCurrentUserName();
 
-        IEnumerable<long> GetCategoryRestrictions();
+        IEnumerable<string> GetGroupRestrictions();
     }
 }

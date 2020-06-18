@@ -6,8 +6,6 @@ namespace ProtoR.Infrastructure.DataAccess.CacheItems
     {
         public string Name { get; set; }
 
-        public long CategoryId { get; set; }
-
         public string CreatedBy { get; set; }
 
         public DateTime CreatedOn { get; set; }

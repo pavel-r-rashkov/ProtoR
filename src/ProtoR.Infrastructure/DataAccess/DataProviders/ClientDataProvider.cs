@@ -15,7 +15,6 @@ namespace ProtoR.Infrastructure.DataAccess.DataProviders
         private const char Separator = ',';
         private readonly ICache<long, ClientCacheItem> clientCache;
         private readonly ICache<ClientRoleKey, EmptyCacheItem> clientRoleCache;
-        private readonly ICache<ClientCategoryKey, EmptyCacheItem> clientCategoryCache;
 
         public ClientDataProvider(
             IIgniteFactory igniteFactory,
@@ -24,7 +23,6 @@ namespace ProtoR.Infrastructure.DataAccess.DataProviders
         {
             this.clientCache = this.Ignite.GetOrCreateCache<long, ClientCacheItem>(this.ConfigurationProvider.ClientCacheName);
             this.clientRoleCache = this.Ignite.GetOrCreateCache<ClientRoleKey, EmptyCacheItem>(this.ConfigurationProvider.ClientRoleCacheName);
-            this.clientCategoryCache = this.Ignite.GetOrCreateCache<ClientCategoryKey, EmptyCacheItem>(this.ConfigurationProvider.ClientCategoryCacheName);
         }
 
         public async Task<ClientDto> GetById(long id)
@@ -44,28 +42,14 @@ namespace ProtoR.Infrastructure.DataAccess.DataProviders
                 .Select(cr => cr.Key.RoleId)
                 .ToList();
 
-            var categoryIds = this.clientCategoryCache
-                .AsCacheQueryable()
-                .Where(cr => cr.Key.ClientId == id)
-                .Select(cr => cr.Key.CategoryId)
-                .ToList();
-
             var client = this.MapFromCacheItem(id, clientCacheItem);
             client.RoleBindings = roleIds;
-            client.CategoryBindings = categoryIds;
 
             return client;
         }
 
         public Task<IEnumerable<ClientDto>> GetClients()
         {
-            var categoryGroups = this.clientCategoryCache
-                .AsCacheQueryable()
-                .Select(c => c.Key)
-                .ToList()
-                .GroupBy(c => c.ClientId)
-                .ToDictionary(g => g.Key, g => g.Select(c => c.CategoryId));
-
             var roleGroups = this.clientRoleCache
                 .AsCacheQueryable()
                 .Select(c => c.Key)
@@ -79,11 +63,6 @@ namespace ProtoR.Infrastructure.DataAccess.DataProviders
                 .Select(c =>
                 {
                     var client = this.MapFromCacheItem(c.Key, c.Value);
-
-                    if (categoryGroups.TryGetValue(c.Key, out var categories))
-                    {
-                        client.CategoryBindings = categories;
-                    }
 
                     if (roleGroups.TryGetValue(c.Key, out var roles))
                     {
@@ -118,6 +97,7 @@ namespace ProtoR.Infrastructure.DataAccess.DataProviders
                 RedirectUris = clientCacheItem.RedirectUris.Split(Separator, StringSplitOptions.RemoveEmptyEntries),
                 PostLogoutRedirectUris = clientCacheItem.PostLogoutRedirectUris.Split(Separator, StringSplitOptions.RemoveEmptyEntries),
                 AllowedCorsOrigins = clientCacheItem.AllowedCorsOrigins.Split(Separator, StringSplitOptions.RemoveEmptyEntries),
+                GroupRestrictions = clientCacheItem.GroupRestrictions.Split(Separator, StringSplitOptions.RemoveEmptyEntries),
                 CreatedBy = clientCacheItem.CreatedBy,
                 CreatedOn = clientCacheItem.CreatedOn,
             };

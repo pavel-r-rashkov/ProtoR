@@ -5,7 +5,6 @@ namespace ProtoR.ComponentTests
     using System.Net;
     using System.Threading.Tasks;
     using ProtoR.ComponentTests.Configuration;
-    using ProtoR.Domain.CategoryAggregate;
     using ProtoR.Web.Resources.GroupResource;
     using ProtoR.Web.Resources.SchemaResource;
     using Xunit;
@@ -122,50 +121,12 @@ namespace ProtoR.ComponentTests
             var group = new GroupWriteModel
             {
                 GroupName = "New group name",
-                CategoryId = this.ApplicationFactory.NonDefaultCategoryId,
             };
 
             using var contents = new JsonHttpContent(group);
             var response = await this.Client.PostAsync(uriBuilder.Uri, contents);
 
             Assert.True(response.IsSuccessStatusCode);
-        }
-
-        [Fact]
-        public async Task PutGroup_ShouldReturn204NoContent()
-        {
-            var uriBuilder = new UriBuilder(Constants.BaseAddress)
-            {
-                Path = $"api/Groups/Test Group",
-            };
-
-            var group = new GroupPutModel
-            {
-                CategoryId = this.ApplicationFactory.NonDefaultCategoryId,
-            };
-
-            using var contents = new JsonHttpContent(group);
-            var response = await this.Client.PutAsync(uriBuilder.Uri, contents);
-
-            Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
-        }
-
-        [Fact]
-        public async Task PutGroup_WithNonExistingGroup_ShouldReturn404NotFound()
-        {
-            var uriBuilder = new UriBuilder(Constants.BaseAddress)
-            {
-                Path = $"api/Groups/NonExistingGroup",
-            };
-            var group = new GroupPutModel
-            {
-                CategoryId = Category.DefaultCategoryId,
-            };
-
-            using var contents = new JsonHttpContent(group);
-            var response = await this.Client.PutAsync(uriBuilder.Uri, contents);
-
-            Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
         }
 
         [Fact]

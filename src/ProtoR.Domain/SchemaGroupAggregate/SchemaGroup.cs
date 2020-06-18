@@ -18,13 +18,11 @@ namespace ProtoR.Domain.SchemaGroupAggregate
 
         public SchemaGroup(
             string name,
-            long categoryId,
             IEnumerable<Rule<TSchema, TSchemaContents>> rules,
             ISchemaFactory<TSchema, TSchemaContents> schemaFactory)
             : this(
                 default,
                 name,
-                categoryId,
                 new List<TSchema>(),
                 rules,
                 schemaFactory)
@@ -34,22 +32,18 @@ namespace ProtoR.Domain.SchemaGroupAggregate
         public SchemaGroup(
             long id,
             string name,
-            long categoryId,
             IEnumerable<TSchema> schemas,
             IEnumerable<Rule<TSchema, TSchemaContents>> rules,
             ISchemaFactory<TSchema, TSchemaContents> schemaFactory)
             : base(id)
         {
             this.Name = name;
-            this.CategoryId = categoryId;
             this.schemas = new SortedSet<TSchema>(schemas, new SchemaVersionComparer<TSchemaContents>());
             this.rules = rules;
             this.schemaFactory = schemaFactory;
         }
 
         public string Name { get; }
-
-        public long CategoryId { get; set; }
 
         public IReadOnlyList<Schema<TSchemaContents>> Schemas
         {

@@ -1,9 +1,13 @@
 namespace ProtoR.Application.Group
 {
+    using System;
     using System.Collections.Generic;
+    using System.Linq.Expressions;
+    using System.Text.RegularExpressions;
     using System.Threading;
     using System.Threading.Tasks;
     using MediatR;
+    using ProtoR.Application.Common;
 
     public class GetGroupsQueryHandler : IRequestHandler<GetGroupsQuery, IEnumerable<GroupDto>>
     {
@@ -20,9 +24,17 @@ namespace ProtoR.Application.Group
 
         public async Task<IEnumerable<GroupDto>> Handle(GetGroupsQuery request, CancellationToken cancellationToken)
         {
-            var categories = this.userProvider.GetCategoryRestrictions();
+            var groupRestrictions = this.userProvider.GetGroupRestrictions();
+            groupRestrictions = new string[] { "*" }; // TODO
+            Expression<Func<GroupDto, bool>> filter = null;
 
-            return await this.dataProvider.GetGroups(categories);
+            if (groupRestrictions != null)
+            {
+                var regex = FilterGenerator.CreateFromPatterns(groupRestrictions);
+                filter = f => Regex.IsMatch(f.Name, regex, RegexOptions.IgnoreCase);
+            }
+
+            return await this.dataProvider.GetGroups(filter);
         }
     }
 }

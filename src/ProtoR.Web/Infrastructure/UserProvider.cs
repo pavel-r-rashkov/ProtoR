@@ -46,7 +46,7 @@ namespace ProtoR.Web.Infrastructure
             return userName;
         }
 
-        public IEnumerable<long> GetCategoryRestrictions()
+        public IEnumerable<string> GetGroupRestrictions()
         {
             if (!this.authenticationConfiguration.Value.AuthenticationEnabled)
             {
@@ -54,8 +54,8 @@ namespace ProtoR.Web.Infrastructure
             }
 
             return this.httpContextAccessor.HttpContext.User.Claims
-                .Where(c => c.Type == CustomClaim.CategoryClaimType)
-                .Select(c => long.Parse(c.Value, CultureInfo.InvariantCulture));
+                .Where(c => c.Type == CustomClaim.GroupRestrictionClaimType)
+                .Select(c => c.Value);
         }
     }
 }

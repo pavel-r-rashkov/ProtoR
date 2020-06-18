@@ -7,6 +7,7 @@ namespace ProtoR.Application.Client
     using MediatR;
     using ProtoR.Domain.ClientAggregate;
     using ProtoR.Domain.Exceptions;
+    using ProtoR.Domain.SchemaGroupAggregate;
     using ProtoR.Domain.SeedWork;
 
     public class UpdateClientCommandHandler : AsyncRequestHandler<UpdateClientCommand>
@@ -45,7 +46,7 @@ namespace ProtoR.Application.Client
             client.PostLogoutRedirectUris = request.PostLogoutRedirectUris.Select(u => new Uri(u)).ToList();
             client.AllowedCorsOrigins = request.AllowedCorsOrigins.ToList();
             client.SetRoles(request.RoleBindings);
-            client.SetCategories(request.CategoryBindings);
+            client.GroupRestrictions = request.GroupRestrictions.Select(gr => new GroupRestriction(gr)).ToList();
 
             await this.clientRepository.Update(client);
             await this.unitOfWork.SaveChanges();

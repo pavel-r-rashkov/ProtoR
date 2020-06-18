@@ -27,7 +27,7 @@ namespace ProtoR.Web.Controllers
         /// <response code="400">Configuration ID is invalid.</response>
         /// <response code="401">User or client is not authenticated.</response>
         /// <response code="403">
-        /// "ConfigurationRead" permission is missing or user/client doesn't have access to the category associated with this configuration.
+        /// "ConfigurationRead" permission is missing or user/client doesn't have access to the group associated with this configuration.
         /// </response>
         /// <response code="404">Configuration with the specified ID doesn't exist.</response>
         [ProducesResponseType(StatusCodes.Status200OK)]
@@ -54,7 +54,7 @@ namespace ProtoR.Web.Controllers
         /// <response code="400">Configuration data is invalid.</response>
         /// <response code="401">User or client is not authenticated.</response>
         /// <response code="403">
-        /// "ConfigurationWrite" permission is missing or user/client doesn't have access to the category associated with this configuration.
+        /// "ConfigurationWrite" permission is missing or user/client doesn't have access to the group associated with this configuration.
         /// </response>
         /// <response code="404">Configuration with the specified ID doesn't exist.</response>
         [ProducesResponseType(StatusCodes.Status204NoContent)]

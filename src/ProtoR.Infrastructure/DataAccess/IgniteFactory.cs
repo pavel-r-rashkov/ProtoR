@@ -90,13 +90,10 @@ namespace ProtoR.Infrastructure.DataAccess
             this.ignite.GetOrCreateCache<long, SchemaGroupCacheItem>(this.externalConfiguration.SchemaGroupCacheName);
             this.ignite.GetOrCreateCache<long, UserCacheItem>(this.externalConfiguration.UserCacheName);
             this.ignite.GetOrCreateCache<UserRoleKey, EmptyCacheItem>(this.externalConfiguration.UserRoleCacheName);
-            this.ignite.GetOrCreateCache<UserCategoryKey, EmptyCacheItem>(this.externalConfiguration.UserCategoryCacheName);
             this.ignite.GetOrCreateCache<long, RoleCacheItem>(this.externalConfiguration.RoleCacheName);
             this.ignite.GetOrCreateCache<RolePermissionKey, EmptyCacheItem>(this.externalConfiguration.RolePermissionCacheName);
-            this.ignite.GetOrCreateCache<long, CategoryCacheItem>(this.externalConfiguration.CategoryCacheName);
             this.ignite.GetOrCreateCache<long, ClientCacheItem>(this.externalConfiguration.ClientCacheName);
             this.ignite.GetOrCreateCache<ClientRoleKey, EmptyCacheItem>(this.externalConfiguration.ClientRoleCacheName);
-            this.ignite.GetOrCreateCache<ClientCategoryKey, EmptyCacheItem>(this.externalConfiguration.ClientCategoryCacheName);
 
             this.CreateSequence<ConfigurationCacheItem>();
             this.CreateSequence<RuleConfigurationCacheItem>();
@@ -104,7 +101,6 @@ namespace ProtoR.Infrastructure.DataAccess
             this.CreateSequence<SchemaGroupCacheItem>();
             this.CreateSequence<UserCacheItem>();
             this.CreateSequence<RoleCacheItem>();
-            this.CreateSequence<CategoryCacheItem>(1);
             this.CreateSequence<ClientCacheItem>();
         }
 
@@ -195,7 +191,6 @@ namespace ProtoR.Infrastructure.DataAccess
                             {
                                 new QueryField("ID", typeof(long)) { IsKeyField = true },
                                 new QueryField("Name", typeof(string)) { NotNull = true },
-                                new QueryField("CategoryId", typeof(long)) { NotNull = true },
                                 new QueryField("CreatedBy", typeof(string)),
                                 new QueryField("CreatedOn", typeof(DateTime)) { NotNull = true },
                             },
@@ -258,24 +253,9 @@ namespace ProtoR.Infrastructure.DataAccess
                                 new QueryField("UserName", typeof(string)) { NotNull = true },
                                 new QueryField("NormalizedUserName", typeof(string)) { NotNull = true },
                                 new QueryField("PasswordHash", typeof(string)) { NotNull = true },
+                                new QueryField("GroupRestrictions", typeof(string)) { NotNull = true },
                                 new QueryField("CreatedBy", typeof(string)),
                                 new QueryField("CreatedOn", typeof(DateTime)) { NotNull = true },
-                            },
-                        })
-                    {
-                        AtomicityMode = CacheAtomicityMode.Transactional,
-                        WriteSynchronizationMode = CacheWriteSynchronizationMode.FullSync,
-                    },
-                    new CacheConfiguration(
-                        externalConfiguration.UserCategoryCacheName,
-                        new QueryEntity
-                        {
-                            KeyType = typeof(UserCategoryKey),
-                            ValueType = typeof(EmptyCacheItem),
-                            Fields = new[]
-                            {
-                                new QueryField("UserId", typeof(long)) { IsKeyField = true },
-                                new QueryField("CategoryId", typeof(long)) { IsKeyField = true },
                             },
                         })
                     {
@@ -335,25 +315,6 @@ namespace ProtoR.Infrastructure.DataAccess
                         WriteSynchronizationMode = CacheWriteSynchronizationMode.FullSync,
                     },
                     new CacheConfiguration(
-                        externalConfiguration.CategoryCacheName,
-                        new QueryEntity
-                        {
-                            KeyType = typeof(long),
-                            KeyFieldName = "ID",
-                            ValueType = typeof(CategoryCacheItem),
-                            Fields = new[]
-                            {
-                                new QueryField("ID", typeof(long)) { IsKeyField = true },
-                                new QueryField("Name", typeof(string)) { NotNull = true },
-                                new QueryField("CreatedBy", typeof(string)),
-                                new QueryField("CreatedOn", typeof(DateTime)) { NotNull = true },
-                            },
-                        })
-                    {
-                        AtomicityMode = CacheAtomicityMode.Transactional,
-                        WriteSynchronizationMode = CacheWriteSynchronizationMode.FullSync,
-                    },
-                    new CacheConfiguration(
                         externalConfiguration.ClientCacheName,
                         new QueryEntity
                         {
@@ -370,24 +331,9 @@ namespace ProtoR.Infrastructure.DataAccess
                                 new QueryField("RedirectUris", typeof(string)) { NotNull = true },
                                 new QueryField("PostLogoutRedirectUris", typeof(string)) { NotNull = true },
                                 new QueryField("AllowedCorsOrigins", typeof(string)) { NotNull = true },
+                                new QueryField("GroupRestrictions", typeof(string)) { NotNull = true },
                                 new QueryField("CreatedBy", typeof(string)),
                                 new QueryField("CreatedOn", typeof(DateTime)) { NotNull = true },
-                            },
-                        })
-                    {
-                        AtomicityMode = CacheAtomicityMode.Transactional,
-                        WriteSynchronizationMode = CacheWriteSynchronizationMode.FullSync,
-                    },
-                    new CacheConfiguration(
-                        externalConfiguration.ClientCategoryCacheName,
-                        new QueryEntity
-                        {
-                            KeyType = typeof(ClientCategoryKey),
-                            ValueType = typeof(EmptyCacheItem),
-                            Fields = new[]
-                            {
-                                new QueryField("ClientId", typeof(long)) { IsKeyField = true },
-                                new QueryField("CategoryId", typeof(long)) { IsKeyField = true },
                             },
                         })
                     {

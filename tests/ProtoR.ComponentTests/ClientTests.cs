@@ -71,7 +71,7 @@ namespace ProtoR.ComponentTests
                 Secret = "Qwertyuiopasdf1!",
                 GrantTypes = new string[] { "client_credentials" },
                 RoleBindings = new long[] { this.ApplicationFactory.RoleId },
-                CategoryBindings = new long[] { this.ApplicationFactory.NonDefaultCategoryId },
+                GroupRestrictions = new string[] { "A*", "B*" },
             };
 
             using var contents = new JsonHttpContent(authClient);
@@ -110,7 +110,7 @@ namespace ProtoR.ComponentTests
                 Secret = "Qwertyuiopasdf1!",
                 GrantTypes = new string[] { "client_credentials" },
                 RoleBindings = new long[] { this.ApplicationFactory.RoleId },
-                CategoryBindings = new long[] { this.ApplicationFactory.NonDefaultCategoryId },
+                GroupRestrictions = new string[] { "B*", "C*" },
             };
 
             using var contents = new JsonHttpContent(authClient);
@@ -133,7 +133,7 @@ namespace ProtoR.ComponentTests
                 Secret = "Qwertyuiopasdf1!",
                 GrantTypes = new string[] { "client_credentials" },
                 RoleBindings = new long[] { this.ApplicationFactory.RoleId },
-                CategoryBindings = new long[] { this.ApplicationFactory.NonDefaultCategoryId },
+                GroupRestrictions = new string[] { "B*", "C*" },
             };
 
             using var contents = new JsonHttpContent(authClient);

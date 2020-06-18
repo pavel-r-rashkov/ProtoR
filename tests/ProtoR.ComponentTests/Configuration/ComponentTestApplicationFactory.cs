@@ -6,13 +6,10 @@ namespace ProtoR.ComponentTests.Configuration
     using System.Threading.Tasks;
     using Autofac;
     using IdentityServer4.Models;
-    using MediatR;
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.Mvc.Testing;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.Hosting;
-    using ProtoR.Application.Configuration;
-    using ProtoR.Domain.CategoryAggregate;
     using ProtoR.Domain.ClientAggregate;
     using ProtoR.Domain.ConfigurationAggregate;
     using ProtoR.Domain.RoleAggregate;
@@ -23,7 +20,6 @@ namespace ProtoR.ComponentTests.Configuration
     using ProtoR.Domain.UserAggregate;
     using ProtoR.Infrastructure.DataAccess;
     using ProtoR.Web;
-    using ProtoR.Web.Infrastructure;
     using ProtoR.Web.Infrastructure.Identity;
     using Serilog;
     using Client = ProtoR.Domain.ClientAggregate.Client;
@@ -49,14 +45,6 @@ namespace ProtoR.ComponentTests.Configuration
             var adminRoleId = await roleRepository.Add(new Role(default, "Admin", "ADMIN", Enumeration.GetAll<Permission>()));
             this.RoleId = await roleRepository.Add(new Role(default, "Developer", "DEVELOPER", new Permission[] { Permission.GroupRead, Permission.SchemaRead }));
 
-            // Categories
-            var categoryRepository = this.Services.GetService(typeof(ICategoryRepository)) as ICategoryRepository;
-
-            await categoryRepository.Add(Category.CreateDefault());
-
-            await categoryRepository.Add(new Category("First Category"));
-            this.NonDefaultCategoryId = await categoryRepository.Add(new Category("Second Category"));
-
             // Users
             var userRepository = this.Services.GetService(typeof(IUserRepository)) as IUserRepository;
             var user = new User(
@@ -64,8 +52,8 @@ namespace ProtoR.ComponentTests.Configuration
                 "TestUser",
                 "TESTUSER",
                 "abc123",
-                new List<RoleBinding> { new RoleBinding(adminRoleId, default(int), null) },
-                new List<CategoryBinding> { new CategoryBinding(this.NonDefaultCategoryId, default(int), null) });
+                new List<GroupRestriction> { new GroupRestriction("*") },
+                new List<RoleBinding> { new RoleBinding(adminRoleId, default(int), null) });
             this.UserId = await userRepository.Add(user);
 
             // Clients
@@ -79,8 +67,8 @@ namespace ProtoR.ComponentTests.Configuration
                 new List<Uri>(),
                 new List<Uri>(),
                 new List<string>(),
-                new List<RoleBinding> { new RoleBinding(adminRoleId, null, default(int)) },
-                new List<CategoryBinding> { new CategoryBinding(this.NonDefaultCategoryId, null, default(int)) });
+                new List<GroupRestriction> { new GroupRestriction("*") },
+                new List<RoleBinding> { new RoleBinding(adminRoleId, null, default(int)) });
             this.ClientId = await clientRepository.Add(client);
 
             // Groups and schemas
@@ -94,7 +82,6 @@ namespace ProtoR.ComponentTests.Configuration
             var group = new ProtoBufSchemaGroup(
                 default,
                 "Test Group",
-                this.NonDefaultCategoryId,
                 schemas);
             var groupId = await groupRepository.Add(group);
 

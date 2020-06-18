@@ -26,10 +26,10 @@ namespace ProtoR.Web.Infrastructure.Identity
             var user = await this.userManager.GetUserAsync(context.Subject);
             var roles = await this.roleRepository.GetRoles(user.RoleBindings.Select(r => r.RoleId));
             var permissions = roles.SelectMany(r => r.Permissions).Select(p => p.Id).Distinct();
-            var categories = user.CategoryBindings.Select(c => c.CategoryId);
+            var groupRestrictions = user.GroupRestrictions.Select(gr => gr.Pattern);
 
             context.IssuedClaims.AddRange(CustomClaim.ForPermissions(permissions));
-            context.IssuedClaims.AddRange(CustomClaim.ForCategories(categories));
+            context.IssuedClaims.AddRange(CustomClaim.ForGroupRestrictions(groupRestrictions));
             context.IssuedClaims.Add(CustomClaim.ForUserName(user.UserName));
         }
 

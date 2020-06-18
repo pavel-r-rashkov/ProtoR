@@ -102,7 +102,7 @@ namespace ProtoR.ComponentTests
             var user = new UserPutModel
             {
                 Roles = new long[] { this.ApplicationFactory.RoleId },
-                Categories = new long[] { this.ApplicationFactory.NonDefaultCategoryId },
+                GroupRestrictions = new string[] { "B*", "A*" },
             };
 
             using var contents = new JsonHttpContent(user);

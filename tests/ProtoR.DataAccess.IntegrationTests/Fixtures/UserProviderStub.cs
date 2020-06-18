@@ -5,7 +5,7 @@ namespace ProtoR.DataAccess.IntegrationTests.Fixtures
 
     public class UserProviderStub : IUserProvider
     {
-        public IEnumerable<long> GetCategoryRestrictions()
+        public IEnumerable<string> GetGroupRestrictions()
         {
             return null;
         }

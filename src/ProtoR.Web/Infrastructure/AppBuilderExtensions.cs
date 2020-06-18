@@ -61,7 +61,7 @@ namespace ProtoR.Web.Infrastructure
 
                         switch (exceptionHandlerPathFeature?.Error)
                         {
-                            case InaccessibleCategoryException exception:
+                            case InaccessibleGroupException exception:
                                 statusCode = (int)HttpStatusCode.Forbidden;
                                 error = exception.PublicMessage;
                                 break;

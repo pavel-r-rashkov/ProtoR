@@ -7,9 +7,9 @@ namespace ProtoR.DataAccess.IntegrationTests.Repositories
     using Apache.Ignite.Core.Cache;
     using Apache.Ignite.Linq;
     using ProtoR.DataAccess.IntegrationTests.Fixtures;
-    using ProtoR.Domain.CategoryAggregate;
     using ProtoR.Domain.ClientAggregate;
     using ProtoR.Domain.RoleAggregate;
+    using ProtoR.Domain.SchemaGroupAggregate;
     using ProtoR.Infrastructure.DataAccess.CacheItems;
     using ProtoR.Infrastructure.DataAccess.Repositories;
     using Xunit;
@@ -21,7 +21,6 @@ namespace ProtoR.DataAccess.IntegrationTests.Repositories
         private readonly ClientRepository repository;
         private readonly ICache<long, ClientCacheItem> clientCache;
         private readonly ICache<ClientRoleKey, EmptyCacheItem> clientRoleCache;
-        private readonly ICache<ClientCategoryKey, EmptyCacheItem> clientCategoryCache;
 
         public ClientRepositoryTests(IgniteFixture igniteFixture)
         {
@@ -40,10 +39,6 @@ namespace ProtoR.DataAccess.IntegrationTests.Repositories
             this.clientRoleCache = this.igniteFixture.IgniteFactory
                 .Instance()
                 .GetCache<ClientRoleKey, EmptyCacheItem>(this.igniteFixture.Configuration.Value.ClientRoleCacheName);
-
-            this.clientCategoryCache = this.igniteFixture.IgniteFactory
-                .Instance()
-                .GetCache<ClientCategoryKey, EmptyCacheItem>(this.igniteFixture.Configuration.Value.ClientCategoryCacheName);
         }
 
         public void Dispose()
@@ -66,8 +61,8 @@ namespace ProtoR.DataAccess.IntegrationTests.Repositories
             var allowedCorsOrigins = new List<string> { testOrigin };
             var roleId = 1;
             var roleBindings = new List<RoleBinding> { new RoleBinding(roleId, null, defaultId) };
-            var categoryId = 1;
-            var categoryBindings = new List<CategoryBinding> { new CategoryBinding(categoryId, null, defaultId) };
+            var pattern = "Abc*";
+            var groupRestrictions = new List<GroupRestriction> { new GroupRestriction(pattern) };
 
             var client = new Client(
                 defaultId,
@@ -78,8 +73,8 @@ namespace ProtoR.DataAccess.IntegrationTests.Repositories
                 redirectUris,
                 postLogoutRedirectUris,
                 allowedCorsOrigins,
-                roleBindings,
-                categoryBindings);
+                groupRestrictions,
+                roleBindings);
 
             var id = await this.repository.Add(client);
 
@@ -91,6 +86,7 @@ namespace ProtoR.DataAccess.IntegrationTests.Repositories
             Assert.Contains(testUri, clientCacheItem.RedirectUris, StringComparison.InvariantCultureIgnoreCase);
             Assert.Contains(testUri, clientCacheItem.PostLogoutRedirectUris, StringComparison.InvariantCultureIgnoreCase);
             Assert.Contains(testOrigin, clientCacheItem.AllowedCorsOrigins, StringComparison.InvariantCultureIgnoreCase);
+            Assert.Contains(pattern, clientCacheItem.GroupRestrictions, StringComparison.InvariantCultureIgnoreCase);
 
             var roleBinding = this.clientRoleCache
                 .AsCacheQueryable()
@@ -101,16 +97,6 @@ namespace ProtoR.DataAccess.IntegrationTests.Repositories
             Assert.NotNull(roleBinding);
             Assert.Equal(roleId, roleBinding.RoleId);
             Assert.Equal(id, roleBinding.ClientId);
-
-            var categoryBinding = this.clientCategoryCache
-                .AsCacheQueryable()
-                .Where(r => r.Key.ClientId == id)
-                .Select(r => r.Key)
-                .FirstOrDefault();
-
-            Assert.NotNull(categoryBinding);
-            Assert.Equal(categoryId, categoryBinding.CategoryId);
-            Assert.Equal(id, categoryBinding.ClientId);
         }
 
         [Fact]
@@ -121,22 +107,11 @@ namespace ProtoR.DataAccess.IntegrationTests.Repositories
             await this.repository.Delete(client.Id);
 
             var clientCacheItem = await this.clientCache.TryGetAsync(client.Id);
-
             var roleBindings = this.clientRoleCache
                 .AsCacheQueryable()
                 .Where(r => r.Key.ClientId == client.Id)
                 .Select(r => r.Key)
                 .ToList();
-
-            var categoryBindings = this.clientCategoryCache
-                .AsCacheQueryable()
-                .Where(r => r.Key.ClientId == client.Id)
-                .Select(r => r.Key)
-                .ToList();
-
-            Assert.False(clientCacheItem.Success);
-            Assert.Empty(roleBindings);
-            Assert.Empty(categoryBindings);
         }
 
         [Fact]
@@ -154,7 +129,7 @@ namespace ProtoR.DataAccess.IntegrationTests.Repositories
             Assert.NotEmpty(client.PostLogoutRedirectUris);
             Assert.NotEmpty(client.AllowedCorsOrigins);
             Assert.NotEmpty(client.RoleBindings);
-            Assert.NotEmpty(client.CategoryBindings);
+            Assert.NotEmpty(client.GroupRestrictions);
         }
 
         [Fact]
@@ -172,7 +147,7 @@ namespace ProtoR.DataAccess.IntegrationTests.Repositories
             Assert.NotEmpty(client.PostLogoutRedirectUris);
             Assert.NotEmpty(client.AllowedCorsOrigins);
             Assert.NotEmpty(client.RoleBindings);
-            Assert.NotEmpty(client.CategoryBindings);
+            Assert.NotEmpty(client.GroupRestrictions);
         }
 
         [Fact]
@@ -180,7 +155,6 @@ namespace ProtoR.DataAccess.IntegrationTests.Repositories
         {
             var client = await this.InsertClient();
             var newRoleId = 1;
-            var newCategoryId = 1;
             var newClientId = "updated client id";
             var newClientName = "updated client name";
             var newSecret = "updated secret";
@@ -188,6 +162,7 @@ namespace ProtoR.DataAccess.IntegrationTests.Repositories
             var newRedirectUri = "https://updatedredirect.com/";
             var newPostLogoutUri = "https://updatedpostlogout.com/";
             var newOrigin = "https://updated.com";
+            var newGroupRestriction = "Abc*";
 
             client.ClientId = newClientId;
             client.ClientName = newClientName;
@@ -196,20 +171,14 @@ namespace ProtoR.DataAccess.IntegrationTests.Repositories
             client.RedirectUris = new List<Uri> { new Uri(newRedirectUri) };
             client.PostLogoutRedirectUris = new List<Uri> { new Uri(newPostLogoutUri) };
             client.AllowedCorsOrigins = new List<string> { newOrigin };
+            client.GroupRestrictions = new GroupRestriction[] { new GroupRestriction(newGroupRestriction) };
             client.SetRoles(new long[] { newRoleId });
-            client.SetCategories(new long[] { newCategoryId });
 
             await this.repository.Update(client);
 
             var clientCacheItem = await this.clientCache.GetAsync(client.Id);
 
             var roleBindings = this.clientRoleCache
-                .AsCacheQueryable()
-                .Where(r => r.Key.ClientId == client.Id)
-                .Select(r => r.Key)
-                .ToList();
-
-            var categoryBindings = this.clientCategoryCache
                 .AsCacheQueryable()
                 .Where(r => r.Key.ClientId == client.Id)
                 .Select(r => r.Key)
@@ -222,12 +191,10 @@ namespace ProtoR.DataAccess.IntegrationTests.Repositories
             Assert.Equal(newRedirectUri, clientCacheItem.RedirectUris);
             Assert.Equal(newPostLogoutUri, clientCacheItem.PostLogoutRedirectUris);
             Assert.Equal(newOrigin, clientCacheItem.AllowedCorsOrigins);
+            Assert.Equal(newGroupRestriction, clientCacheItem.GroupRestrictions);
 
             Assert.Single(roleBindings);
             Assert.Equal(newRoleId, roleBindings.First().RoleId);
-
-            Assert.Single(categoryBindings);
-            Assert.Equal(newCategoryId, categoryBindings.First().CategoryId);
         }
 
         private async Task<Client> InsertClient()
@@ -244,8 +211,7 @@ namespace ProtoR.DataAccess.IntegrationTests.Repositories
             var allowedCorsOrigins = new List<string> { testOrigin };
             var roleId = 1;
             var roleBindings = new List<RoleBinding> { new RoleBinding(roleId, null, id) };
-            var categoryId = 1;
-            var categoryBindings = new List<CategoryBinding> { new CategoryBinding(categoryId, null, id) };
+            var groupRestrictions = new GroupRestriction[] { new GroupRestriction("*") };
 
             var client = new Client(
                 id,
@@ -256,8 +222,8 @@ namespace ProtoR.DataAccess.IntegrationTests.Repositories
                 redirectUris,
                 postLogoutRedirectUris,
                 allowedCorsOrigins,
-                roleBindings,
-                categoryBindings);
+                groupRestrictions,
+                roleBindings);
 
             await this.clientCache.PutAsync(id, new ClientCacheItem
             {
@@ -268,16 +234,13 @@ namespace ProtoR.DataAccess.IntegrationTests.Repositories
                 RedirectUris = testUri,
                 PostLogoutRedirectUris = testUri,
                 AllowedCorsOrigins = testOrigin,
+                GroupRestrictions = groupRestrictions.First().Pattern,
                 CreatedBy = "test user",
                 CreatedOn = DateTime.UtcNow,
             });
 
             await this.clientRoleCache.PutAsync(
                 new ClientRoleKey { ClientId = id, RoleId = roleId },
-                new EmptyCacheItem());
-
-            await this.clientCategoryCache.PutAsync(
-                new ClientCategoryKey { ClientId = id, CategoryId = categoryId },
                 new EmptyCacheItem());
 
             return client;

@@ -8,7 +8,7 @@ namespace ProtoR.Web.Infrastructure.Identity
     public static class CustomClaim
     {
         public static readonly string PermissionClaimType = $"{ClaimsPrefix}permission";
-        public static readonly string CategoryClaimType = $"{ClaimsPrefix}category";
+        public static readonly string GroupRestrictionClaimType = $"{ClaimsPrefix}group_restriction";
         public static readonly string UserNameClaimType = $"{ClaimsPrefix}username";
         public static readonly string ClientNameClaimType = $"{ClaimsPrefix}client_name";
         private const string ClaimsPrefix = "protor_";
@@ -18,9 +18,9 @@ namespace ProtoR.Web.Infrastructure.Identity
             return permissions.Select(p => new Claim(PermissionClaimType, p.ToString(CultureInfo.InvariantCulture)));
         }
 
-        public static IEnumerable<Claim> ForCategories(IEnumerable<long> categories)
+        public static IEnumerable<Claim> ForGroupRestrictions(IEnumerable<string> groupRestrictions)
         {
-            return categories.Select(c => new Claim(CategoryClaimType, c.ToString(CultureInfo.InvariantCulture)));
+            return groupRestrictions.Select(c => new Claim(GroupRestrictionClaimType, c.ToString(CultureInfo.InvariantCulture)));
         }
 
         public static Claim ForUserName(string userName)

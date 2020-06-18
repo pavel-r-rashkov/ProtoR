@@ -38,7 +38,6 @@ namespace ProtoR.Infrastructure.DataAccess.Repositories
             var schemaGroupCacheItem = new SchemaGroupCacheItem
             {
                 Name = schemaGroup.Name,
-                CategoryId = schemaGroup.CategoryId,
                 CreatedBy = this.UserProvider.GetCurrentUserName(),
                 CreatedOn = DateTime.UtcNow,
             };
@@ -77,7 +76,6 @@ namespace ProtoR.Infrastructure.DataAccess.Repositories
             return Task.FromResult(new ProtoBufSchemaGroup(
                 schemaGroupCacheItem.Key,
                 schemaGroupCacheItem.Value.Name,
-                schemaGroupCacheItem.Value.CategoryId,
                 schemaCacheItems));
         }
 
@@ -87,7 +85,6 @@ namespace ProtoR.Infrastructure.DataAccess.Repositories
 
             var schemaGroupCache = this.Ignite.GetCache<long, SchemaGroupCacheItem>(this.schemaGroupCacheName);
             var schemaGroupCacheItem = await schemaGroupCache.GetAsync(schemaGroup.Id);
-            schemaGroupCacheItem.CategoryId = schemaGroup.CategoryId;
             await schemaGroupCache.PutAsync(schemaGroup.Id, schemaGroupCacheItem);
             await this.AddNewSchemas(schemaGroup, schemaGroup.Id);
         }

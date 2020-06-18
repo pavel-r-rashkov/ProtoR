@@ -17,7 +17,6 @@ namespace ProtoR.DataAccess.IntegrationTests.DataProviders
         private readonly ClientDataProvider dataProvider;
         private readonly ICache<long, ClientCacheItem> clientCache;
         private readonly ICache<ClientRoleKey, EmptyCacheItem> clientRoleCache;
-        private readonly ICache<ClientCategoryKey, EmptyCacheItem> clientCategoryCache;
         private readonly Fixture fixture;
 
         public ClientDataProviderTests(IgniteFixture igniteFixture)
@@ -32,10 +31,6 @@ namespace ProtoR.DataAccess.IntegrationTests.DataProviders
             this.clientRoleCache = this.igniteFixture.IgniteFactory
                 .Instance()
                 .GetCache<ClientRoleKey, EmptyCacheItem>(this.igniteFixture.Configuration.Value.ClientRoleCacheName);
-
-            this.clientCategoryCache = this.igniteFixture.IgniteFactory
-                .Instance()
-                .GetCache<ClientCategoryKey, EmptyCacheItem>(this.igniteFixture.Configuration.Value.ClientCategoryCacheName);
 
             this.fixture = new Fixture();
             this.fixture.Customizations.Add(new UtcRandomDateTimeSequenceGenerator());
@@ -93,15 +88,12 @@ namespace ProtoR.DataAccess.IntegrationTests.DataProviders
             client.RedirectUris = string.Join(',', this.fixture.CreateMany<string>());
             client.PostLogoutRedirectUris = string.Join(',', this.fixture.CreateMany<string>());
             client.AllowedCorsOrigins = string.Join(',', this.fixture.CreateMany<string>());
+            client.GroupRestrictions = "Abc*,B*";
 
             await this.clientCache.PutAsync(id, client);
 
             await this.clientRoleCache.PutAsync(
                 new ClientRoleKey { ClientId = id, RoleId = 1 },
-                new EmptyCacheItem());
-
-            await this.clientCategoryCache.PutAsync(
-                new ClientCategoryKey { ClientId = id, CategoryId = 1 },
                 new EmptyCacheItem());
         }
     }

@@ -23,6 +23,6 @@ namespace ProtoR.Application.Client
 
         public IEnumerable<long> RoleBindings { get; set; }
 
-        public IEnumerable<long> CategoryBindings { get; set; }
+        public IEnumerable<string> GroupRestrictions { get; set; }
     }
 }

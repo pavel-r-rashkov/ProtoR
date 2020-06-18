@@ -24,9 +24,9 @@ namespace ProtoR.Web.Resources.UserResource
         public IEnumerable<long> RoleBindings { get; set; }
 
         /// <summary>
-        /// List of category IDs associated with this user.
+        /// List of group restriction patterns associated with this user.
         /// </summary>
-        public IEnumerable<long> CategoryBindings { get; set; }
+        public IEnumerable<string> GroupRestrictions { get; set; }
 
         /// <inheritdoc cref="ICreationInfo" />
         public DateTime CreatedOn { get; set; }

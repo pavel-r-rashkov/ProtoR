@@ -2,8 +2,8 @@ namespace ProtoR.Domain.UnitTests.UserAggregateTests
 {
     using System;
     using System.Linq;
-    using ProtoR.Domain.CategoryAggregate;
     using ProtoR.Domain.RoleAggregate;
+    using ProtoR.Domain.SchemaGroupAggregate;
     using ProtoR.Domain.UserAggregate;
     using Xunit;
 
@@ -68,21 +68,36 @@ namespace ProtoR.Domain.UnitTests.UserAggregateTests
         }
 
         [Fact]
-        public void SetCategories_ShouldSetCategoryBindings()
+        public void SetGroupRestrictions_ShouldSetGroupRestrictions()
         {
             var user = this.CreateUser();
-            var categories = new long[] { 1, 2, 3 };
+            var restrictions = new GroupRestriction[]
+            {
+                new GroupRestriction("A*"),
+                new GroupRestriction("B*"),
+            };
 
-            user.SetCategories(categories);
+            user.GroupRestrictions = restrictions;
 
-            Assert.Equal(categories.Length, user.CategoryBindings.Count());
-            Assert.All(
-                user.CategoryBindings,
-                categoryBinding =>
-                {
-                    Assert.Contains(categoryBinding.CategoryId, categories);
-                    Assert.Equal(user.Id, categoryBinding.UserId);
-                });
+            Assert.Equal(restrictions.Length, user.GroupRestrictions.Count());
+        }
+
+        [Fact]
+        public void SetGroupRestrictions_WithNullGroupRestrictions_ShouldThrow()
+        {
+            var user = this.CreateUser();
+            GroupRestriction[] restrictions = null;
+
+            Assert.Throws<ArgumentNullException>(() => user.GroupRestrictions = restrictions);
+        }
+
+        [Fact]
+        public void SetGroupRestrictions_WithEmptyGroupRestrictions_ShouldThrow()
+        {
+            var user = this.CreateUser();
+            GroupRestriction[] restrictions = Array.Empty<GroupRestriction>();
+
+            Assert.Throws<ArgumentException>(() => user.GroupRestrictions = restrictions);
         }
 
         [Fact]
@@ -110,8 +125,8 @@ namespace ProtoR.Domain.UnitTests.UserAggregateTests
                 "test user",
                 "TEST USER",
                 "abc123",
-                Array.Empty<RoleBinding>(),
-                Array.Empty<CategoryBinding>());
+                new GroupRestriction[] { new GroupRestriction("*") },
+                Array.Empty<RoleBinding>());
         }
     }
 }

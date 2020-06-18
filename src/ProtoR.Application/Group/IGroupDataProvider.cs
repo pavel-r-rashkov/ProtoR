@@ -1,14 +1,16 @@
 namespace ProtoR.Application.Group
 {
+    using System;
     using System.Collections.Generic;
+    using System.Linq.Expressions;
     using System.Threading.Tasks;
 
     public interface IGroupDataProvider
     {
         Task<GroupDto> GetByName(string groupName);
 
-        Task<IEnumerable<GroupDto>> GetGroups(IEnumerable<long> categories);
+        Task<string> GetGroupNameById(long id);
 
-        Task<long> GetCategoryId(long groupId);
+        Task<IEnumerable<GroupDto>> GetGroups(Expression<Func<GroupDto, bool>> filter);
     }
 }

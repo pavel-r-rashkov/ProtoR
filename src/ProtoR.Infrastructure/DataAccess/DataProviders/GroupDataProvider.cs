@@ -1,7 +1,9 @@
 namespace ProtoR.Infrastructure.DataAccess.DataProviders
 {
+    using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Linq.Expressions;
     using System.Threading.Tasks;
     using Apache.Ignite.Core.Cache;
     using Apache.Ignite.Linq;
@@ -30,7 +32,6 @@ namespace ProtoR.Infrastructure.DataAccess.DataProviders
                 {
                     Id = c.Key,
                     c.Value.Name,
-                    c.Value.CategoryId,
                     c.Value.CreatedOn,
                     c.Value.CreatedBy,
                 })
@@ -45,51 +46,50 @@ namespace ProtoR.Infrastructure.DataAccess.DataProviders
             {
                 Id = group.Id,
                 Name = group.Name,
-                CategoryId = group.CategoryId,
                 CreatedOn = group.CreatedOn,
                 CreatedBy = group.CreatedBy,
             });
         }
 
-        public Task<IEnumerable<GroupDto>> GetGroups(IEnumerable<long> categories)
+        public Task<IEnumerable<GroupDto>> GetGroups(Expression<Func<GroupDto, bool>> filter = null)
         {
-            var cacheQueryable = this.groupCache.AsCacheQueryable();
-
-            if (categories != null)
-            {
-                cacheQueryable = cacheQueryable.Where(g => categories.Contains(g.Value.CategoryId));
-            }
-
-            var groups = cacheQueryable
+            var groups = this.groupCache
+                .AsCacheQueryable()
                 .Select(c => new
                 {
                     Id = c.Key,
                     c.Value.Name,
-                    c.Value.CategoryId,
                     c.Value.CreatedOn,
                     c.Value.CreatedBy,
-                })
-                .ToList();
+                });
 
-            return Task.FromResult(groups.Select(g => new GroupDto
+            if (filter != null)
             {
-                Id = g.Id,
-                Name = g.Name,
-                CategoryId = g.CategoryId,
-                CreatedOn = g.CreatedOn,
-                CreatedBy = g.CreatedBy,
-            }));
+                groups = groups.WhereWithTypeConversion(filter);
+            }
+
+            var results = groups
+                .ToList()
+                .Select(g => new GroupDto
+                {
+                    Id = g.Id,
+                    Name = g.Name,
+                    CreatedOn = g.CreatedOn,
+                    CreatedBy = g.CreatedBy,
+                });
+
+            return Task.FromResult(results);
         }
 
-        public Task<long> GetCategoryId(long groupId)
+        public Task<string> GetGroupNameById(long id)
         {
-            var categoryId = this.groupCache
+            var groupName = this.groupCache
                 .AsCacheQueryable()
-                .Where(g => g.Key == groupId)
-                .Select(g => g.Value.CategoryId)
+                .Where(c => c.Key == id)
+                .Select(c => c.Value.Name)
                 .FirstOrDefault();
 
-            return Task.FromResult(categoryId);
+            return Task.FromResult(groupName);
         }
     }
 }

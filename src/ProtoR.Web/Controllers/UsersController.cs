@@ -125,7 +125,6 @@ namespace ProtoR.Web.Controllers
         public async Task<ActionResult> Put(UserPutModel user)
         {
             var existingUser = await this.userManager.FindByIdAsync(user.Id.ToString(CultureInfo.InvariantCulture));
-            existingUser.SetCategories(user.Categories);
             existingUser.SetRoles(user.Roles);
             var result = await this.userManager.UpdateAsync(existingUser);
 

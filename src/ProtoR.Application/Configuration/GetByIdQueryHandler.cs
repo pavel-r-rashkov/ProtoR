@@ -3,9 +3,11 @@ namespace ProtoR.Application.Configuration
     using System;
     using System.Globalization;
     using System.Linq;
+    using System.Text.RegularExpressions;
     using System.Threading;
     using System.Threading.Tasks;
     using MediatR;
+    using ProtoR.Application.Common;
     using ProtoR.Application.Group;
     using ProtoR.Domain.ConfigurationAggregate;
     using ProtoR.Domain.Exceptions;
@@ -38,16 +40,18 @@ namespace ProtoR.Application.Configuration
                 throw new EntityNotFoundException<Configuration>((object)request.ConfigurationId);
             }
 
-            var categories = this.userProvider.GetCategoryRestrictions();
+            var groupRestrictions = this.userProvider.GetGroupRestrictions();
 
-            if (categories != null && configuration.GroupId != null)
+            if (groupRestrictions != null && configuration.GroupId != null)
             {
-                var categoryId = await this.groupData.GetCategoryId(configuration.GroupId.Value);
+                var groupName = await this.groupData.GetGroupNameById(configuration.GroupId.Value);
+                var regex = FilterGenerator.CreateFromPatterns(groupRestrictions);
+                var hasAccessToGroup = Regex.IsMatch(groupName, regex, RegexOptions.IgnoreCase);
 
-                if (!categories.Contains(categoryId))
+                if (!hasAccessToGroup)
                 {
-                    throw new InaccessibleCategoryException(
-                        categoryId,
+                    throw new InaccessibleGroupException(
+                        groupName,
                         this.userProvider.GetCurrentUserName());
                 }
             }

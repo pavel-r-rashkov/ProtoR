@@ -1,15 +1,12 @@
 namespace ProtoR.Web.Infrastructure.Modules
 {
     using Autofac;
-    using Microsoft.Extensions.Options;
-    using ProtoR.Application.Category;
     using ProtoR.Application.Client;
     using ProtoR.Application.Configuration;
     using ProtoR.Application.Group;
     using ProtoR.Application.Role;
     using ProtoR.Application.Schema;
     using ProtoR.Application.User;
-    using ProtoR.Domain.CategoryAggregate;
     using ProtoR.Domain.ClientAggregate;
     using ProtoR.Domain.ConfigurationAggregate;
     using ProtoR.Domain.RoleAggregate;
@@ -68,11 +65,6 @@ namespace ProtoR.Web.Infrastructure.Modules
                 .InstancePerLifetimeScope();
 
             builder
-                .RegisterType<CategoryRepository>()
-                .As<ICategoryRepository>()
-                .InstancePerLifetimeScope();
-
-            builder
                 .RegisterType<UserRepository>()
                 .As<IUserRepository>()
                 .InstancePerLifetimeScope();
@@ -100,11 +92,6 @@ namespace ProtoR.Web.Infrastructure.Modules
             builder
                 .RegisterType<RoleDataProvider>()
                 .As<IRoleDataProvider>()
-                .InstancePerLifetimeScope();
-
-            builder
-                .RegisterType<CategoryDataProvider>()
-                .As<ICategoryDataProvider>()
                 .InstancePerLifetimeScope();
 
             builder

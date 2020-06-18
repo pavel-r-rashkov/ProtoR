@@ -3,14 +3,14 @@ namespace ProtoR.Domain.ClientAggregate
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using ProtoR.Domain.CategoryAggregate;
     using ProtoR.Domain.RoleAggregate;
+    using ProtoR.Domain.SchemaGroupAggregate;
     using ProtoR.Domain.SeedWork;
 
     public class Client : Entity, IAggregateRoot
     {
         private List<RoleBinding> roleBindings;
-        private List<CategoryBinding> categoryBindings;
+        private IReadOnlyCollection<GroupRestriction> groupRestrictions;
 
         public Client(
             long id,
@@ -21,8 +21,8 @@ namespace ProtoR.Domain.ClientAggregate
             IReadOnlyCollection<Uri> redirectUris,
             IReadOnlyCollection<Uri> postLogoutRedirectUris,
             IReadOnlyCollection<string> allowedCorsOrigins,
-            IReadOnlyCollection<RoleBinding> roleBindings,
-            IReadOnlyCollection<CategoryBinding> categoryBindings)
+            IReadOnlyCollection<GroupRestriction> groupRestrictions,
+            IReadOnlyCollection<RoleBinding> roleBindings)
             : base(id)
         {
             this.ClientId = clientId;
@@ -32,8 +32,8 @@ namespace ProtoR.Domain.ClientAggregate
             this.RedirectUris = redirectUris;
             this.PostLogoutRedirectUris = postLogoutRedirectUris;
             this.AllowedCorsOrigins = allowedCorsOrigins;
+            this.GroupRestrictions = groupRestrictions;
             this.roleBindings = roleBindings.ToList();
-            this.categoryBindings = categoryBindings.ToList();
         }
 
         public string ClientId { get; set; }
@@ -50,21 +50,35 @@ namespace ProtoR.Domain.ClientAggregate
 
         public IReadOnlyCollection<string> AllowedCorsOrigins { get; set; }
 
-        public IReadOnlyCollection<RoleBinding> RoleBindings { get => this.roleBindings; }
+        public IReadOnlyCollection<GroupRestriction> GroupRestrictions
+        {
+            get
+            {
+                return this.groupRestrictions;
+            }
 
-        public IReadOnlyCollection<CategoryBinding> CategoryBindings { get => this.categoryBindings; }
+            set
+            {
+                if (value == null)
+                {
+                    throw new ArgumentNullException(nameof(this.GroupRestrictions));
+                }
+
+                if (!value.Any())
+                {
+                    throw new ArgumentException(nameof(this.GroupRestrictions));
+                }
+
+                this.groupRestrictions = value;
+            }
+        }
+
+        public IReadOnlyCollection<RoleBinding> RoleBindings { get => this.roleBindings; }
 
         public void SetRoles(IEnumerable<long> roles)
         {
             this.roleBindings = roles
                 .Select(roleId => new RoleBinding(roleId, null, this.Id))
-                .ToList();
-        }
-
-        public void SetCategories(IEnumerable<long> categories)
-        {
-            this.categoryBindings = categories
-                .Select(categoryId => new CategoryBinding(categoryId, null, this.Id))
                 .ToList();
         }
     }

@@ -8,11 +8,9 @@ namespace ProtoR.Domain.SchemaGroupAggregate
     public class ProtoBufSchemaGroup : SchemaGroup<ProtoBufSchema, FileDescriptorSet>
     {
         public ProtoBufSchemaGroup(
-            string name,
-            long categoryId)
+            string name)
             : base(
                 name,
-                categoryId,
                 RuleFactory.GetProtoBufRules(),
                 new ProtoBufSchemaFactory())
         {
@@ -21,12 +19,10 @@ namespace ProtoR.Domain.SchemaGroupAggregate
         public ProtoBufSchemaGroup(
             long id,
             string name,
-            long categoryId,
             IEnumerable<ProtoBufSchema> schemas)
             : base(
                 id,
                 name,
-                categoryId,
                 schemas,
                 RuleFactory.GetProtoBufRules(),
                 new ProtoBufSchemaFactory())

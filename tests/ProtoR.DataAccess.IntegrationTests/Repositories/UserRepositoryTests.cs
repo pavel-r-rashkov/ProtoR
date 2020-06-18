@@ -6,8 +6,8 @@ namespace ProtoR.DataAccess.IntegrationTests.Repositories
     using Apache.Ignite.Core.Cache;
     using Apache.Ignite.Linq;
     using ProtoR.DataAccess.IntegrationTests.Fixtures;
-    using ProtoR.Domain.CategoryAggregate;
     using ProtoR.Domain.RoleAggregate;
+    using ProtoR.Domain.SchemaGroupAggregate;
     using ProtoR.Domain.UserAggregate;
     using ProtoR.Infrastructure.DataAccess.CacheItems;
     using ProtoR.Infrastructure.DataAccess.Repositories;
@@ -20,7 +20,6 @@ namespace ProtoR.DataAccess.IntegrationTests.Repositories
         private readonly UserRepository repository;
         private readonly ICache<long, UserCacheItem> userCache;
         private readonly ICache<UserRoleKey, EmptyCacheItem> userRoleCache;
-        private readonly ICache<UserCategoryKey, EmptyCacheItem> userCategoryCache;
 
         public UserRepositoryTests(IgniteFixture igniteFixture)
         {
@@ -39,10 +38,6 @@ namespace ProtoR.DataAccess.IntegrationTests.Repositories
             this.userRoleCache = this.igniteFixture.IgniteFactory
                 .Instance()
                 .GetCache<UserRoleKey, EmptyCacheItem>(this.igniteFixture.Configuration.Value.UserRoleCacheName);
-
-            this.userCategoryCache = this.igniteFixture.IgniteFactory
-                .Instance()
-                .GetCache<UserCategoryKey, EmptyCacheItem>(this.igniteFixture.Configuration.Value.UserCategoryCacheName);
         }
 
         public void Dispose()
@@ -57,16 +52,16 @@ namespace ProtoR.DataAccess.IntegrationTests.Repositories
             var normalizedName = "TEST USER";
             var passwordHash = "abc123";
             var roleId = 1;
-            var categoryId = 1;
             long id = default;
+            var groupRestriction = "Zxc*";
 
             var user = new User(
                 id,
                 userName,
                 normalizedName,
                 passwordHash,
-                new RoleBinding[] { new RoleBinding(roleId, id, null) },
-                new CategoryBinding[] { new CategoryBinding(categoryId, id, null) });
+                new GroupRestriction[] { new GroupRestriction(groupRestriction) },
+                new RoleBinding[] { new RoleBinding(roleId, id, null) });
 
             var userId = await this.repository.Add(user);
 
@@ -75,6 +70,7 @@ namespace ProtoR.DataAccess.IntegrationTests.Repositories
             Assert.Equal(userName, userCacheItem.UserName);
             Assert.Equal(normalizedName, userCacheItem.NormalizedUserName);
             Assert.Equal(passwordHash, userCacheItem.PasswordHash);
+            Assert.Equal(groupRestriction, userCacheItem.GroupRestrictions);
 
             var roleBinding = this.userRoleCache
                 .AsCacheQueryable()
@@ -85,16 +81,6 @@ namespace ProtoR.DataAccess.IntegrationTests.Repositories
             Assert.NotNull(roleBinding);
             Assert.Equal(roleId, roleBinding.RoleId);
             Assert.Equal(userId, roleBinding.UserId);
-
-            var categoryBinding = this.userCategoryCache
-                .AsCacheQueryable()
-                .Where(r => r.Key.UserId == userId)
-                .Select(r => r.Key)
-                .FirstOrDefault();
-
-            Assert.NotNull(categoryBinding);
-            Assert.Equal(categoryId, categoryBinding.CategoryId);
-            Assert.Equal(userId, categoryBinding.UserId);
         }
 
         [Fact]
@@ -104,12 +90,12 @@ namespace ProtoR.DataAccess.IntegrationTests.Repositories
             var newPasswordHash = "testhash";
             var removedRoleId = 1;
             var newRoleId = 2;
-            var newCategoryId = 2;
+            var newGroupRestriction = "Qwer*";
 
             user.PasswordHash = newPasswordHash;
+            user.GroupRestrictions = new GroupRestriction[] { new GroupRestriction(newGroupRestriction) };
             user.AddRole(newRoleId);
             user.RemoveRole(removedRoleId);
-            user.SetCategories(new long[] { newCategoryId });
 
             await this.repository.Update(user);
 
@@ -121,19 +107,11 @@ namespace ProtoR.DataAccess.IntegrationTests.Repositories
                 .Select(r => r.Key)
                 .ToList();
 
-            var categoryBindings = this.userCategoryCache
-                .AsCacheQueryable()
-                .Where(r => r.Key.UserId == user.Id)
-                .Select(r => r.Key)
-                .ToList();
-
             Assert.Equal(newPasswordHash, userCacheItem.PasswordHash);
+            Assert.Equal(newGroupRestriction, userCacheItem.GroupRestrictions);
 
             Assert.Single(roleBindings);
             Assert.Equal(newRoleId, roleBindings.First().RoleId);
-
-            Assert.Single(categoryBindings);
-            Assert.Equal(newCategoryId, categoryBindings.First().CategoryId);
         }
 
         [Fact]
@@ -151,15 +129,8 @@ namespace ProtoR.DataAccess.IntegrationTests.Repositories
                 .Select(r => r.Key)
                 .ToList();
 
-            var categoryBindings = this.userCategoryCache
-                .AsCacheQueryable()
-                .Where(r => r.Key.UserId == user.Id)
-                .Select(r => r.Key)
-                .ToList();
-
             Assert.False(userCacheItem.Success);
             Assert.Empty(roleBindings);
-            Assert.Empty(categoryBindings);
         }
 
         [Fact]
@@ -174,7 +145,7 @@ namespace ProtoR.DataAccess.IntegrationTests.Repositories
             Assert.NotNull(user.NormalizedUserName);
             Assert.NotNull(user.PasswordHash);
             Assert.NotEmpty(user.RoleBindings);
-            Assert.NotEmpty(user.CategoryBindings);
+            Assert.NotEmpty(user.GroupRestrictions);
         }
 
         [Fact]
@@ -189,7 +160,7 @@ namespace ProtoR.DataAccess.IntegrationTests.Repositories
             Assert.NotNull(user.NormalizedUserName);
             Assert.NotNull(user.PasswordHash);
             Assert.NotEmpty(user.RoleBindings);
-            Assert.NotEmpty(user.CategoryBindings);
+            Assert.NotEmpty(user.GroupRestrictions);
         }
 
         [Fact]
@@ -207,30 +178,30 @@ namespace ProtoR.DataAccess.IntegrationTests.Repositories
         private async Task<User> InsertUser(long userId = 1)
         {
             var roleId = 1;
-            var categoryId = 1;
             var userName = "test user";
             var normalizedUserName = "TEST USER";
             var passwordHash = "abc123";
+            var groupRestriction = "*";
 
             await this.userCache.PutAsync(userId, new UserCacheItem
             {
                 UserName = userName,
                 NormalizedUserName = normalizedUserName,
                 PasswordHash = passwordHash,
+                GroupRestrictions = groupRestriction,
                 CreatedOn = DateTime.UtcNow,
                 CreatedBy = "test user",
             });
 
             await this.userRoleCache.PutAsync(new UserRoleKey { UserId = userId, RoleId = roleId }, new EmptyCacheItem());
-            await this.userCategoryCache.PutAsync(new UserCategoryKey { UserId = userId, CategoryId = categoryId }, new EmptyCacheItem());
 
             var user = new User(
                 userId,
                 userName,
                 normalizedUserName,
                 passwordHash,
-                new RoleBinding[] { new RoleBinding(roleId, userId, null) },
-                new CategoryBinding[] { new CategoryBinding(categoryId, userId, null) });
+                new GroupRestriction[] { new GroupRestriction(groupRestriction) },
+                new RoleBinding[] { new RoleBinding(roleId, userId, null) });
 
             return user;
         }

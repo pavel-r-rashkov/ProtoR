@@ -8,8 +8,6 @@ namespace ProtoR.Application.Group
 
         public string Name { get; set; }
 
-        public long CategoryId { get; set; }
-
         public DateTime CreatedOn { get; set; }
 
         public string CreatedBy { get; set; }

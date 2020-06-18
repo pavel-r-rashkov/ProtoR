@@ -1,11 +1,11 @@
 namespace ProtoR.Application.Group
 {
     using System;
-    using System.Linq;
+    using System.Text.RegularExpressions;
     using System.Threading;
     using System.Threading.Tasks;
     using MediatR;
-    using ProtoR.Domain.CategoryAggregate;
+    using ProtoR.Application.Common;
     using ProtoR.Domain.ConfigurationAggregate;
     using ProtoR.Domain.Exceptions;
     using ProtoR.Domain.SchemaGroupAggregate;
@@ -42,17 +42,22 @@ namespace ProtoR.Application.Group
                     request.GroupName);
             }
 
-            var categoryId = request.CategoryId ?? Category.DefaultCategoryId;
-            var categories = this.userProvider.GetCategoryRestrictions();
+            var groupRestrictions = this.userProvider.GetGroupRestrictions();
 
-            if (categories != null && !categories.Contains(categoryId))
+            if (groupRestrictions != null)
             {
-                throw new InaccessibleCategoryException(
-                    categoryId,
-                    this.userProvider.GetCurrentUserName());
+                var regex = FilterGenerator.CreateFromPatterns(groupRestrictions);
+                var hasAccessToGroup = Regex.IsMatch(request.GroupName, regex, RegexOptions.IgnoreCase);
+
+                if (!hasAccessToGroup)
+                {
+                    throw new InaccessibleGroupException(
+                        request.GroupName,
+                        this.userProvider.GetCurrentUserName());
+                }
             }
 
-            var group = new ProtoBufSchemaGroup(request.GroupName, categoryId);
+            var group = new ProtoBufSchemaGroup(request.GroupName);
             long groupId = await this.schemaGroupRepository.Add(group);
 
             Configuration defaultConfiguration = Configuration.DefaultGroupConfiguration(groupId);

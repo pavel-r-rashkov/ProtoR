@@ -20,8 +20,8 @@ namespace ProtoR.Web.Resources.UserResource
         public IEnumerable<long> Roles { get; set; }
 
         /// <summary>
-        /// List of category IDs associated with this user.
+        /// List of group restriction patterns associated with this user.
         /// </summary>
-        public IEnumerable<long> Categories { get; set; }
+        public IEnumerable<string> GroupRestrictions { get; set; }
     }
 }

@@ -37,7 +37,7 @@ namespace ProtoR.Web.Controllers
         /// <response code="200">Group list.</response>
         /// <response code="401">User or client is not authenticated.</response>
         /// <response code="403">
-        /// "GroupRead" permission is missing or user/client doesn't have access to the category associated with this group.
+        /// "GroupRead" permission is missing or user/client doesn't have access to this group.
         /// </response>
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ErrorModel), StatusCodes.Status401Unauthorized)]
@@ -60,7 +60,7 @@ namespace ProtoR.Web.Controllers
         /// <response code="400">Group data is invalid or a group with the same name already exists.</response>
         /// <response code="401">User or client is not authenticated.</response>
         /// <response code="403">
-        /// "GroupWrite" permission is missing or user/client doesn't have access to the category associated with this group.
+        /// "GroupWrite" permission is missing or user/client doesn't have access to this group.
         /// </response>
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(typeof(ErrorModel), StatusCodes.Status400BadRequest)]
@@ -77,40 +77,13 @@ namespace ProtoR.Web.Controllers
         }
 
         /// <summary>
-        /// Update existing configuration.
-        /// </summary>
-        /// <returns>No content.</returns>
-        /// <response code="204">Group updated successfully.</response>
-        /// <response code="400">Group data is invalid.</response>
-        /// <response code="401">User or client is not authenticated.</response>
-        /// <response code="403">
-        /// "GroupWrite" permission is missing or user/client doesn't have access to the category associated with this group.
-        /// </response>
-        /// <response code="404">Group with the specified ID doesn't exist.</response>
-        [ProducesResponseType(StatusCodes.Status204NoContent)]
-        [ProducesResponseType(typeof(ErrorModel), StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(typeof(ErrorModel), StatusCodes.Status401Unauthorized)]
-        [ProducesResponseType(typeof(ErrorModel), StatusCodes.Status403Forbidden)]
-        [ProducesResponseType(typeof(ErrorModel), StatusCodes.Status404NotFound)]
-        [HttpPut]
-        [Route("{GroupName}")]
-        [PermissionClaim(Permission.GroupWrite)]
-        public async Task<ActionResult> Put(GroupPutModel group)
-        {
-            var command = this.Mapper.Map<UpdateGroupCommand>(group);
-            await this.Mediator.Send(command);
-
-            return this.NoContent();
-        }
-
-        /// <summary>
         /// Get group by name.
         /// </summary>
         /// <returns>Group.</returns>
         /// <response code="200">Group with requested name.</response>
         /// <response code="401">User or client is not authenticated.</response>
         /// <response code="403">
-        /// "GroupRead" permission is missing or user/client doesn't have access to the category associated with this group.
+        /// "GroupRead" permission is missing or user/client doesn't have access to this group.
         /// </response>
         /// <response code="404">Group with specified name doesn't exist.</response>
         [ProducesResponseType(StatusCodes.Status200OK)]
@@ -135,7 +108,7 @@ namespace ProtoR.Web.Controllers
         /// <response code="204">Group deleted successfully.</response>
         /// <response code="401">User or client is not authenticated.</response>
         /// <response code="403">
-        /// "GroupWrite" permission is missing or user/client doesn't have access to the category associated with this group.
+        /// "GroupWrite" permission is missing or user/client doesn't have access to this group.
         /// </response>
         /// <response code="404">Group with specified name doesn't exist.</response>
         [ProducesResponseType(StatusCodes.Status204NoContent)]
@@ -159,7 +132,7 @@ namespace ProtoR.Web.Controllers
         /// <response code="200">Schemas list.</response>
         /// <response code="401">User or client is not authenticated.</response>
         /// <response code="403">
-        /// "SchemaRead" permission is missing or user/client doesn't have access to the category associated with this group.
+        /// "SchemaRead" permission is missing or user/client doesn't have access to this group.
         /// </response>
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ErrorModel), StatusCodes.Status401Unauthorized)]
@@ -183,7 +156,7 @@ namespace ProtoR.Web.Controllers
         /// <response code="400">Version is invalid.</response>
         /// <response code="401">User or client is not authenticated.</response>
         /// <response code="403">
-        /// "SchemaRead" permission is missing or user/client doesn't have access to the category associated with this group.
+        /// "SchemaRead" permission is missing or user/client doesn't have access to this group.
         /// </response>
         /// <response code="404">Schema with specified version doesn't exist.</response>
         [ProducesResponseType(StatusCodes.Status200OK)]
@@ -210,7 +183,7 @@ namespace ProtoR.Web.Controllers
         /// <response code="400">Schema is invalid or doesn't pass group rule restrictions.</response>
         /// <response code="401">User or client is not authenticated.</response>
         /// <response code="403">
-        /// "SchemaWrite" permission is missing or user/client doesn't have access to the category associated with this group.
+        /// "SchemaWrite" permission is missing or user/client doesn't have access to this group.
         /// </response>
         /// <response code="404">Group with specified name doesn't exist.</response>
         [ProducesResponseType(StatusCodes.Status201Created)]
@@ -249,7 +222,7 @@ namespace ProtoR.Web.Controllers
         /// <response code="400">Schema is invalid.</response>
         /// <response code="401">User or client is not authenticated.</response>
         /// <response code="403">
-        /// "SchemaRead" permission is missing or user/client doesn't have access to the category associated with this group.
+        /// "SchemaRead" permission is missing or user/client doesn't have access to this group.
         /// </response>
         /// <response code="404">Group with specified name doesn't exist.</response>
         [ProducesResponseType(StatusCodes.Status200OK)]
@@ -275,7 +248,7 @@ namespace ProtoR.Web.Controllers
         /// <response code="200">Configuration associated with requested group.</response>
         /// <response code="401">User or client is not authenticated.</response>
         /// <response code="403">
-        /// "ConfigurationRead" permission is missing or user/client doesn't have access to the category associated with this configuration.
+        /// "ConfigurationRead" permission is missing or user/client doesn't have access to this configuration.
         /// </response>
         /// <response code="404">Group with specified name doesn't exist.</response>
         [ProducesResponseType(StatusCodes.Status200OK)]

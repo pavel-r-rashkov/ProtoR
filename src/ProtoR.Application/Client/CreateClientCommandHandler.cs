@@ -5,9 +5,9 @@ namespace ProtoR.Application.Client
     using System.Threading;
     using System.Threading.Tasks;
     using MediatR;
-    using ProtoR.Domain.CategoryAggregate;
     using ProtoR.Domain.ClientAggregate;
     using ProtoR.Domain.RoleAggregate;
+    using ProtoR.Domain.SchemaGroupAggregate;
     using ProtoR.Domain.SeedWork;
 
     public class CreateClientCommandHandler : IRequestHandler<CreateClientCommand, long>
@@ -36,8 +36,8 @@ namespace ProtoR.Application.Client
                 request.RedirectUris.Select(u => new Uri(u)).ToList(),
                 request.PostLogoutRedirectUris.Select(u => new Uri(u)).ToList(),
                 request.AllowedCorsOrigins.ToList(),
-                request.RoleBindings.Select(rb => new RoleBinding(rb, null, 0)).ToList(),
-                request.CategoryBindings.Select(cb => new CategoryBinding(cb, null, 0)).ToList());
+                request.GroupRestrictions.Select(gr => new GroupRestriction(gr)).ToList(),
+                request.RoleBindings.Select(rb => new RoleBinding(rb, null, 0)).ToList());
 
             var id = await this.clientRepository.Add(client);
             await this.unitOfWork.SaveChanges();

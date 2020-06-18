@@ -4,9 +4,11 @@ namespace ProtoR.Application.Configuration
     using System.Collections.Generic;
     using System.Globalization;
     using System.Linq;
+    using System.Text.RegularExpressions;
     using System.Threading;
     using System.Threading.Tasks;
     using MediatR;
+    using ProtoR.Application.Common;
     using ProtoR.Application.Group;
     using ProtoR.Domain.ConfigurationAggregate;
     using ProtoR.Domain.Exceptions;
@@ -16,18 +18,18 @@ namespace ProtoR.Application.Configuration
     public class UpdateConfigurationCommandHandler : AsyncRequestHandler<UpdateConfigurationCommand>
     {
         private readonly IConfigurationRepository configurationRepository;
-        private readonly IGroupDataProvider groupDataProvider;
+        private readonly IGroupDataProvider groupData;
         private readonly IUnitOfWork unitOfWork;
         private readonly IUserProvider userProvider;
 
         public UpdateConfigurationCommandHandler(
             IConfigurationRepository configurationRepository,
-            IGroupDataProvider groupDataProvider,
+            IGroupDataProvider groupData,
             IUnitOfWork unitOfWork,
             IUserProvider userProvider)
         {
             this.configurationRepository = configurationRepository;
-            this.groupDataProvider = groupDataProvider;
+            this.groupData = groupData;
             this.unitOfWork = unitOfWork;
             this.userProvider = userProvider;
         }
@@ -44,16 +46,18 @@ namespace ProtoR.Application.Configuration
                 throw new EntityNotFoundException<Configuration>((object)request.ConfigurationId);
             }
 
-            var categories = this.userProvider.GetCategoryRestrictions();
+            var groupRestrictions = this.userProvider.GetGroupRestrictions();
 
-            if (categories != null && configuration.SchemaGroupId != null)
+            if (groupRestrictions != null && configuration.SchemaGroupId != null)
             {
-                var categoryId = await this.groupDataProvider.GetCategoryId(configuration.SchemaGroupId.Value);
+                var groupName = await this.groupData.GetGroupNameById(configuration.SchemaGroupId.Value);
+                var regex = FilterGenerator.CreateFromPatterns(groupRestrictions);
+                var hasAccessToGroup = Regex.IsMatch(groupName, regex, RegexOptions.IgnoreCase);
 
-                if (!categories.Contains(categoryId))
+                if (!hasAccessToGroup)
                 {
-                    throw new InaccessibleCategoryException(
-                        categoryId,
+                    throw new InaccessibleGroupException(
+                        groupName,
                         this.userProvider.GetCurrentUserName());
                 }
             }

@@ -1,22 +1,23 @@
 namespace ProtoR.Domain.UserAggregate
 {
+    using System;
     using System.Collections.Generic;
     using System.Linq;
-    using ProtoR.Domain.CategoryAggregate;
     using ProtoR.Domain.RoleAggregate;
+    using ProtoR.Domain.SchemaGroupAggregate;
     using ProtoR.Domain.SeedWork;
 
     public class User : Entity, IAggregateRoot
     {
         private List<RoleBinding> roleBindings;
-        private List<CategoryBinding> categoryBindings;
+        private IReadOnlyCollection<GroupRestriction> groupRestrictions;
 
         public User(string userName)
             : base(default)
         {
             this.UserName = userName;
             this.roleBindings = new List<RoleBinding>();
-            this.categoryBindings = new List<CategoryBinding>();
+            this.groupRestrictions = new List<GroupRestriction> { new GroupRestriction("*") };
         }
 
         public User(
@@ -24,15 +25,15 @@ namespace ProtoR.Domain.UserAggregate
             string userName,
             string normalizedUserName,
             string passwordHash,
-            IReadOnlyCollection<RoleBinding> roleBindings,
-            IReadOnlyCollection<CategoryBinding> categoryBindings)
+            IReadOnlyCollection<GroupRestriction> groupRestrictions,
+            IReadOnlyCollection<RoleBinding> roleBindings)
             : base(id)
         {
             this.UserName = userName;
             this.NormalizedUserName = normalizedUserName;
             this.PasswordHash = passwordHash;
+            this.GroupRestrictions = groupRestrictions;
             this.roleBindings = roleBindings.ToList();
-            this.categoryBindings = categoryBindings.ToList();
         }
 
         public string UserName { get; set; }
@@ -41,9 +42,30 @@ namespace ProtoR.Domain.UserAggregate
 
         public string PasswordHash { get; set; }
 
-        public IReadOnlyCollection<RoleBinding> RoleBindings { get => this.roleBindings; }
+        public IReadOnlyCollection<GroupRestriction> GroupRestrictions
+        {
+            get
+            {
+                return this.groupRestrictions;
+            }
 
-        public IReadOnlyCollection<CategoryBinding> CategoryBindings { get => this.categoryBindings; }
+            set
+            {
+                if (value == null)
+                {
+                    throw new ArgumentNullException(nameof(this.GroupRestrictions));
+                }
+
+                if (!value.Any())
+                {
+                    throw new ArgumentException(nameof(this.GroupRestrictions));
+                }
+
+                this.groupRestrictions = value;
+            }
+        }
+
+        public IReadOnlyCollection<RoleBinding> RoleBindings { get => this.roleBindings; }
 
         public void AddRole(long roleId)
         {
@@ -65,13 +87,6 @@ namespace ProtoR.Domain.UserAggregate
         {
             this.roleBindings = roleIds
                 .Select(r => new RoleBinding(r, this.Id, null))
-                .ToList();
-        }
-
-        public void SetCategories(IEnumerable<long> categoryIds)
-        {
-            this.categoryBindings = categoryIds
-                .Select(r => new CategoryBinding(r, this.Id, null))
                 .ToList();
         }
     }

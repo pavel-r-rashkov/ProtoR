@@ -9,16 +9,16 @@ namespace ProtoR.Infrastructure.DataAccess.Repositories
     using Apache.Ignite.Linq;
     using Microsoft.Extensions.Options;
     using ProtoR.Application;
-    using ProtoR.Domain.CategoryAggregate;
     using ProtoR.Domain.RoleAggregate;
+    using ProtoR.Domain.SchemaGroupAggregate;
     using ProtoR.Domain.UserAggregate;
     using ProtoR.Infrastructure.DataAccess.CacheItems;
 
     public class UserRepository : BaseRepository, IUserRepository
     {
+        private const char Separator = ',';
         private readonly ICache<long, UserCacheItem> userCache;
         private readonly ICache<UserRoleKey, EmptyCacheItem> userRoleCache;
-        private readonly ICache<UserCategoryKey, EmptyCacheItem> userCategoryCache;
 
         public UserRepository(
             IIgniteFactory igniteFactory,
@@ -28,7 +28,6 @@ namespace ProtoR.Infrastructure.DataAccess.Repositories
         {
             this.userCache = this.Ignite.GetOrCreateCache<long, UserCacheItem>(this.ConfigurationProvider.UserCacheName);
             this.userRoleCache = this.Ignite.GetOrCreateCache<UserRoleKey, EmptyCacheItem>(this.ConfigurationProvider.UserRoleCacheName);
-            this.userCategoryCache = this.Ignite.GetOrCreateCache<UserCategoryKey, EmptyCacheItem>(this.ConfigurationProvider.UserCategoryCacheName);
         }
 
         public async Task<long> Add(User user)
@@ -55,17 +54,8 @@ namespace ProtoR.Infrastructure.DataAccess.Repositories
                 },
                 new EmptyCacheItem()));
 
-            var userCategoryItems = user.CategoryBindings.Select(c => new KeyValuePair<UserCategoryKey, EmptyCacheItem>(
-                new UserCategoryKey
-                {
-                    UserId = id,
-                    CategoryId = c.CategoryId,
-                },
-                new EmptyCacheItem()));
-
             await this.userCache.PutIfAbsentAsync(id, userItem);
             await this.userRoleCache.PutAllAsync(userRoleItems);
-            await this.userCategoryCache.PutAllAsync(userCategoryItems);
 
             return id;
         }
@@ -81,14 +71,6 @@ namespace ProtoR.Infrastructure.DataAccess.Repositories
                 .ToList();
 
             await this.userRoleCache.RemoveAllAsync(userRoles);
-
-            var userCategories = this.userCategoryCache
-                .AsCacheQueryable()
-                .Where(cr => cr.Key.UserId == id)
-                .Select(cr => cr.Key)
-                .ToList();
-
-            await this.userCategoryCache.RemoveAllAsync(userCategories);
         }
 
         public async Task<User> GetById(long id)
@@ -100,7 +82,7 @@ namespace ProtoR.Infrastructure.DataAccess.Repositories
                 return null;
             }
 
-            var user = this.PopulateRolesAndCategories(id, userCacheItem);
+            var user = this.PopulateRoles(id, userCacheItem);
 
             return user;
         }
@@ -117,7 +99,7 @@ namespace ProtoR.Infrastructure.DataAccess.Repositories
                 return Task.FromResult((User)null);
             }
 
-            var user = this.PopulateRolesAndCategories(userCacheItem.Key, userCacheItem.Value);
+            var user = this.PopulateRoles(userCacheItem.Key, userCacheItem.Value);
 
             return Task.FromResult(user);
         }
@@ -137,8 +119,11 @@ namespace ProtoR.Infrastructure.DataAccess.Repositories
                 u.Value.UserName,
                 u.Value.NormalizedUserName,
                 u.Value.PasswordHash,
-                new List<RoleBinding>(),
-                new List<CategoryBinding>()));
+                u.Value.GroupRestrictions
+                    .Split(Separator, StringSplitOptions.RemoveEmptyEntries)
+                    .Select(t => new GroupRestriction(t))
+                    .ToList(),
+                new List<RoleBinding>()));
         }
 
         public async Task Update(User user)
@@ -168,33 +153,10 @@ namespace ProtoR.Infrastructure.DataAccess.Repositories
                     new UserRoleKey { UserId = user.Id, RoleId = rb.RoleId },
                     new EmptyCacheItem()));
 
-            var currentCategories = this.userCategoryCache
-                .AsCacheQueryable()
-                .Where(cr => cr.Key.UserId == user.Id)
-                .Select(cr => cr.Key)
-                .ToList();
-
-            var categoriesToDelete = currentCategories.Where(c => !user.CategoryBindings
-                .ToList()
-                .Select(cb => cb.CategoryId)
-                .Contains(c.CategoryId));
-
-            var categoriesToAdd = user.CategoryBindings
-                .ToList()
-                .Where(cb => !currentCategories
-                    .Select(cr => cr.CategoryId)
-                    .Contains(cb.CategoryId))
-                .Select(cb => new KeyValuePair<UserCategoryKey, EmptyCacheItem>(
-                    new UserCategoryKey { UserId = user.Id, CategoryId = cb.CategoryId },
-                    new EmptyCacheItem()));
-
             await this.userCache.PutAsync(user.Id, userCacheItem);
 
             await this.userRoleCache.PutAllAsync(rolesToAdd);
             await this.userRoleCache.RemoveAllAsync(rolesToDelete);
-
-            await this.userCategoryCache.PutAllAsync(categoriesToAdd);
-            await this.userCategoryCache.RemoveAllAsync(categoriesToDelete);
         }
 
         private void MapToUserCacheItem(User user, UserCacheItem cacheItem)
@@ -202,9 +164,10 @@ namespace ProtoR.Infrastructure.DataAccess.Repositories
             cacheItem.UserName = user.UserName;
             cacheItem.NormalizedUserName = user.NormalizedUserName;
             cacheItem.PasswordHash = user.PasswordHash;
+            cacheItem.GroupRestrictions = string.Join(Separator, user.GroupRestrictions.Select(g => g.Pattern));
         }
 
-        private User PopulateRolesAndCategories(long id, UserCacheItem userCacheItem)
+        private User PopulateRoles(long id, UserCacheItem userCacheItem)
         {
             var roles = this.userRoleCache
                 .AsCacheQueryable()
@@ -214,21 +177,16 @@ namespace ProtoR.Infrastructure.DataAccess.Repositories
                 .Select(roleId => new RoleBinding(roleId, null, id))
                 .ToList();
 
-            var categories = this.userCategoryCache
-                .AsCacheQueryable()
-                .Where(cr => cr.Key.UserId == id)
-                .Select(cr => cr.Key.CategoryId)
-                .ToList()
-                .Select(categoryId => new CategoryBinding(categoryId, null, id))
-                .ToList();
-
             return new User(
                 id,
                 userCacheItem.UserName,
                 userCacheItem.NormalizedUserName,
                 userCacheItem.PasswordHash,
-                roles,
-                categories);
+                userCacheItem.GroupRestrictions
+                    .Split(Separator, StringSplitOptions.RemoveEmptyEntries)
+                    .Select(t => new GroupRestriction(t))
+                    .ToList(),
+                roles);
         }
     }
 }
