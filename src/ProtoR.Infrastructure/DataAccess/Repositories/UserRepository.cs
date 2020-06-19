@@ -119,6 +119,7 @@ namespace ProtoR.Infrastructure.DataAccess.Repositories
                 u.Value.UserName,
                 u.Value.NormalizedUserName,
                 u.Value.PasswordHash,
+                u.Value.IsActive,
                 u.Value.GroupRestrictions
                     .Split(Separator, StringSplitOptions.RemoveEmptyEntries)
                     .Select(t => new GroupRestriction(t))
@@ -162,6 +163,7 @@ namespace ProtoR.Infrastructure.DataAccess.Repositories
         private void MapToUserCacheItem(User user, UserCacheItem cacheItem)
         {
             cacheItem.UserName = user.UserName;
+            cacheItem.IsActive = user.IsActive;
             cacheItem.NormalizedUserName = user.NormalizedUserName;
             cacheItem.PasswordHash = user.PasswordHash;
             cacheItem.GroupRestrictions = string.Join(Separator, user.GroupRestrictions.Select(g => g.Pattern));
@@ -182,6 +184,7 @@ namespace ProtoR.Infrastructure.DataAccess.Repositories
                 userCacheItem.UserName,
                 userCacheItem.NormalizedUserName,
                 userCacheItem.PasswordHash,
+                userCacheItem.IsActive,
                 userCacheItem.GroupRestrictions
                     .Split(Separator, StringSplitOptions.RemoveEmptyEntries)
                     .Select(t => new GroupRestriction(t))

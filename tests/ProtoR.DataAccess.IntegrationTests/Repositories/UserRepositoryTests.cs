@@ -54,12 +54,14 @@ namespace ProtoR.DataAccess.IntegrationTests.Repositories
             var roleId = 1;
             long id = default;
             var groupRestriction = "Zxc*";
+            var isActive = true;
 
             var user = new User(
                 id,
                 userName,
                 normalizedName,
                 passwordHash,
+                isActive,
                 new GroupRestriction[] { new GroupRestriction(groupRestriction) },
                 new RoleBinding[] { new RoleBinding(roleId, id, null) });
 
@@ -91,9 +93,11 @@ namespace ProtoR.DataAccess.IntegrationTests.Repositories
             var removedRoleId = 1;
             var newRoleId = 2;
             var newGroupRestriction = "Qwer*";
+            var newActiveState = false;
 
             user.PasswordHash = newPasswordHash;
             user.GroupRestrictions = new GroupRestriction[] { new GroupRestriction(newGroupRestriction) };
+            user.IsActive = newActiveState;
             user.AddRole(newRoleId);
             user.RemoveRole(removedRoleId);
 
@@ -109,6 +113,7 @@ namespace ProtoR.DataAccess.IntegrationTests.Repositories
 
             Assert.Equal(newPasswordHash, userCacheItem.PasswordHash);
             Assert.Equal(newGroupRestriction, userCacheItem.GroupRestrictions);
+            Assert.Equal(newActiveState, userCacheItem.IsActive);
 
             Assert.Single(roleBindings);
             Assert.Equal(newRoleId, roleBindings.First().RoleId);
@@ -144,6 +149,7 @@ namespace ProtoR.DataAccess.IntegrationTests.Repositories
             Assert.NotNull(user.UserName);
             Assert.NotNull(user.NormalizedUserName);
             Assert.NotNull(user.PasswordHash);
+            Assert.True(user.IsActive);
             Assert.NotEmpty(user.RoleBindings);
             Assert.NotEmpty(user.GroupRestrictions);
         }
@@ -159,6 +165,7 @@ namespace ProtoR.DataAccess.IntegrationTests.Repositories
             Assert.NotNull(user.UserName);
             Assert.NotNull(user.NormalizedUserName);
             Assert.NotNull(user.PasswordHash);
+            Assert.True(user.IsActive);
             Assert.NotEmpty(user.RoleBindings);
             Assert.NotEmpty(user.GroupRestrictions);
         }
@@ -182,12 +189,14 @@ namespace ProtoR.DataAccess.IntegrationTests.Repositories
             var normalizedUserName = "TEST USER";
             var passwordHash = "abc123";
             var groupRestriction = "*";
+            var isActive = true;
 
             await this.userCache.PutAsync(userId, new UserCacheItem
             {
                 UserName = userName,
                 NormalizedUserName = normalizedUserName,
                 PasswordHash = passwordHash,
+                IsActive = isActive,
                 GroupRestrictions = groupRestriction,
                 CreatedOn = DateTime.UtcNow,
                 CreatedBy = "test user",
@@ -200,6 +209,7 @@ namespace ProtoR.DataAccess.IntegrationTests.Repositories
                 userName,
                 normalizedUserName,
                 passwordHash,
+                isActive,
                 new GroupRestriction[] { new GroupRestriction(groupRestriction) },
                 new RoleBinding[] { new RoleBinding(roleId, userId, null) });
 

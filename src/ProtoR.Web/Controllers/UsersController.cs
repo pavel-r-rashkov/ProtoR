@@ -11,6 +11,7 @@ namespace ProtoR.Web.Controllers
     using Microsoft.AspNetCore.Identity;
     using Microsoft.AspNetCore.Mvc;
     using ProtoR.Application.User;
+    using ProtoR.Domain.SchemaGroupAggregate;
     using ProtoR.Domain.UserAggregate;
     using ProtoR.Web.Infrastructure.Identity;
     using ProtoR.Web.Resources;
@@ -89,6 +90,12 @@ namespace ProtoR.Web.Controllers
         public async Task<ActionResult> Post(UserPostModel user)
         {
             var newUser = new User(user.UserName);
+            newUser.IsActive = user.IsActive;
+            newUser.SetRoles(user.Roles ?? Array.Empty<long>());
+            newUser.GroupRestrictions = user.GroupRestrictions
+                .Select(pattern => new GroupRestriction(pattern))
+                .ToList();
+
             var result = await this.userManager.CreateAsync(newUser, user.Password);
 
             if (!result.Succeeded)
@@ -125,7 +132,12 @@ namespace ProtoR.Web.Controllers
         public async Task<ActionResult> Put(UserPutModel user)
         {
             var existingUser = await this.userManager.FindByIdAsync(user.Id.ToString(CultureInfo.InvariantCulture));
-            existingUser.SetRoles(user.Roles);
+            existingUser.IsActive = user.IsActive;
+            existingUser.SetRoles(user.Roles ?? Array.Empty<long>());
+            existingUser.GroupRestrictions = user.GroupRestrictions
+                .Select(pattern => new GroupRestriction(pattern))
+                .ToList();
+
             var result = await this.userManager.UpdateAsync(existingUser);
 
             if (!result.Succeeded)

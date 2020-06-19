@@ -254,6 +254,7 @@ namespace ProtoR.Infrastructure.DataAccess
                                 new QueryField("NormalizedUserName", typeof(string)) { NotNull = true },
                                 new QueryField("PasswordHash", typeof(string)) { NotNull = true },
                                 new QueryField("GroupRestrictions", typeof(string)) { NotNull = true },
+                                new QueryField("IsActive", typeof(bool)) { NotNull = true },
                                 new QueryField("CreatedBy", typeof(string)),
                                 new QueryField("CreatedOn", typeof(DateTime)) { NotNull = true },
                             },

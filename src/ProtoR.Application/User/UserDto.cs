@@ -9,6 +9,8 @@ namespace ProtoR.Application.User
 
         public string UserName { get; set; }
 
+        public bool IsActive { get; set; }
+
         public IEnumerable<long> RoleBindings { get; set; }
 
         public IEnumerable<string> GroupRestrictions { get; set; }

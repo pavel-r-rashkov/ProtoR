@@ -52,6 +52,7 @@ namespace ProtoR.ComponentTests.Configuration
                 "TestUser",
                 "TESTUSER",
                 "abc123",
+                true,
                 new List<GroupRestriction> { new GroupRestriction("*") },
                 new List<RoleBinding> { new RoleBinding(adminRoleId, default(int), null) });
             this.UserId = await userRepository.Add(user);

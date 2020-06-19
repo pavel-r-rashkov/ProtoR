@@ -81,6 +81,7 @@ namespace ProtoR.Infrastructure.DataAccess.DataProviders
             {
                 Id = id,
                 UserName = userCacheItem.UserName,
+                IsActive = userCacheItem.IsActive,
                 GroupRestrictions = userCacheItem.GroupRestrictions
                     .Split(Separator, StringSplitOptions.RemoveEmptyEntries),
                 CreatedBy = userCacheItem.CreatedBy,

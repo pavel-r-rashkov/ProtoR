@@ -25,7 +25,6 @@ namespace ProtoR.Application.Group
         public async Task<IEnumerable<GroupDto>> Handle(GetGroupsQuery request, CancellationToken cancellationToken)
         {
             var groupRestrictions = this.userProvider.GetGroupRestrictions();
-            groupRestrictions = new string[] { "*" }; // TODO
             Expression<Func<GroupDto, bool>> filter = null;
 
             if (groupRestrictions != null)

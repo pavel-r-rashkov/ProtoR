@@ -8,7 +8,7 @@ namespace ProtoR.Domain.SchemaGroupAggregate
     public class GroupRestriction : ValueObject<GroupRestriction>
     {
         public const string WildCard = "*";
-        private static readonly Regex PatternValidator = new Regex(@"^([\s0-9a-zA-Z\-_\*]+)$");
+        public static readonly Regex PatternValidator = new Regex(@"^([\s0-9a-zA-Z\-_\*]+)$");
 
         public GroupRestriction(string pattern)
         {

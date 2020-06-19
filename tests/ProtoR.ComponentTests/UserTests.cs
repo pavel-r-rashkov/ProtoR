@@ -67,7 +67,8 @@ namespace ProtoR.ComponentTests
             var user = new UserPostModel
             {
                 UserName = "NewTestUser",
-                Password = "Qwertyuiop1!",
+                Password = "Qwertyuiopas1!",
+                GroupRestrictions = new string[] { "*" },
             };
 
             using var contents = new JsonHttpContent(user);
@@ -132,7 +133,8 @@ namespace ProtoR.ComponentTests
                 new UserPostModel
                 {
                     UserName = null,
-                    Password = "Qwertyuiop1!",
+                    Password = "Qwertyuiopas1!",
+                    GroupRestrictions = new string[] { "*" },
                 },
             };
 
@@ -141,7 +143,8 @@ namespace ProtoR.ComponentTests
                 new UserPostModel
                 {
                     UserName = string.Empty,
-                    Password = "Qwertyuiop1!",
+                    Password = "Qwertyuiopas1!",
+                    GroupRestrictions = new string[] { "*" },
                 },
             };
 
@@ -150,7 +153,8 @@ namespace ProtoR.ComponentTests
                 new UserPostModel
                 {
                     UserName = "A-*bc",
-                    Password = "Qwertyuiop1!",
+                    Password = "Qwertyuiopas1!",
+                    GroupRestrictions = new string[] { "*" },
                 },
             };
 
@@ -158,8 +162,9 @@ namespace ProtoR.ComponentTests
             {
                 new UserPostModel
                 {
-                    UserName = "New User",
+                    UserName = "NewUser",
                     Password = null,
+                    GroupRestrictions = new string[] { "*" },
                 },
             };
 
@@ -167,8 +172,69 @@ namespace ProtoR.ComponentTests
             {
                 new UserPostModel
                 {
-                    UserName = "New User",
+                    UserName = "NewUser",
                     Password = "Abc1!",
+                    GroupRestrictions = new string[] { "*" },
+                },
+            };
+
+            yield return new object[]
+            {
+                new UserPostModel
+                {
+                    UserName = "NewUser",
+                    Password = "qwertyuiopas1!",
+                    GroupRestrictions = new string[] { "*" },
+                },
+            };
+
+            yield return new object[]
+            {
+                new UserPostModel
+                {
+                    UserName = "NewUser",
+                    Password = "QWERTYUIOPAS1!",
+                    GroupRestrictions = new string[] { "*" },
+                },
+            };
+
+            yield return new object[]
+            {
+                new UserPostModel
+                {
+                    UserName = "NewUser",
+                    Password = "Qwertyuiopasd!",
+                    GroupRestrictions = new string[] { "*" },
+                },
+            };
+
+            yield return new object[]
+            {
+                new UserPostModel
+                {
+                    UserName = "NewUser",
+                    Password = "Qwertyuiopas12",
+                    GroupRestrictions = new string[] { "*" },
+                },
+            };
+
+            yield return new object[]
+            {
+                new UserPostModel
+                {
+                    UserName = "NewUser",
+                    Password = "Qwertyuiopas1!",
+                    GroupRestrictions = Array.Empty<string>(),
+                },
+            };
+
+            yield return new object[]
+            {
+                new UserPostModel
+                {
+                    UserName = "NewUser",
+                    Password = "Qwertyuiopas1!",
+                    GroupRestrictions = new string[] { "Abc&*" },
                 },
             };
         }

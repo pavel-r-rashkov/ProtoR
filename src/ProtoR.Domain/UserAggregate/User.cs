@@ -25,6 +25,7 @@ namespace ProtoR.Domain.UserAggregate
             string userName,
             string normalizedUserName,
             string passwordHash,
+            bool isActive,
             IReadOnlyCollection<GroupRestriction> groupRestrictions,
             IReadOnlyCollection<RoleBinding> roleBindings)
             : base(id)
@@ -32,6 +33,7 @@ namespace ProtoR.Domain.UserAggregate
             this.UserName = userName;
             this.NormalizedUserName = normalizedUserName;
             this.PasswordHash = passwordHash;
+            this.IsActive = isActive;
             this.GroupRestrictions = groupRestrictions;
             this.roleBindings = roleBindings.ToList();
         }
@@ -41,6 +43,8 @@ namespace ProtoR.Domain.UserAggregate
         public string NormalizedUserName { get; set; }
 
         public string PasswordHash { get; set; }
+
+        public bool IsActive { get; set; }
 
         public IReadOnlyCollection<GroupRestriction> GroupRestrictions
         {

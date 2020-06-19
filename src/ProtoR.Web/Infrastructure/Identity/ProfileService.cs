@@ -36,7 +36,7 @@ namespace ProtoR.Web.Infrastructure.Identity
         public async Task IsActiveAsync(IsActiveContext context)
         {
             var user = await this.userManager.GetUserAsync(context.Subject);
-            context.IsActive = user != null;
+            context.IsActive = user != null && user.IsActive;
         }
     }
 }

@@ -15,6 +15,11 @@ namespace ProtoR.Web.Resources.UserResource
         public long Id { get; set; }
 
         /// <summary>
+        /// Is user active.
+        /// </summary>
+        public bool IsActive { get; set; }
+
+        /// <summary>
         /// List of role IDs associated with this user.
         /// </summary>
         public IEnumerable<long> Roles { get; set; }

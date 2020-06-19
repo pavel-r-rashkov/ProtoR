@@ -125,6 +125,7 @@ namespace ProtoR.Domain.UnitTests.UserAggregateTests
                 "test user",
                 "TEST USER",
                 "abc123",
+                true,
                 new GroupRestriction[] { new GroupRestriction("*") },
                 Array.Empty<RoleBinding>());
         }
