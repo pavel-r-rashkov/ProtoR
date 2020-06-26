@@ -15,7 +15,7 @@ namespace ProtoR.Domain.UnitTests
         }
 
         [Fact]
-        public async Task DuplicateGroupException_WithMessageMessage_ShouldThrow()
+        public async Task DuplicateGroupException_WithMessage_ShouldThrow()
         {
             await Assert.ThrowsAsync<DuplicateGroupException>(() => throw new DuplicateGroupException("Some message"));
         }
@@ -39,7 +39,7 @@ namespace ProtoR.Domain.UnitTests
         }
 
         [Fact]
-        public async Task EntityNotFoundException_WithMessageMessage_ShouldThrow()
+        public async Task EntityNotFoundException_WithMessage_ShouldThrow()
         {
             await Assert.ThrowsAsync<EntityNotFoundException<User>>(() => throw new EntityNotFoundException<User>("Some message"));
         }
@@ -63,7 +63,7 @@ namespace ProtoR.Domain.UnitTests
         }
 
         [Fact]
-        public async Task InaccessibleGroupException_WithMessageMessage_ShouldThrow()
+        public async Task InaccessibleGroupException_WithMessage_ShouldThrow()
         {
             await Assert.ThrowsAsync<InaccessibleGroupException>(() => throw new InaccessibleGroupException("Some message"));
         }
@@ -78,6 +78,54 @@ namespace ProtoR.Domain.UnitTests
         public async Task InaccessibleGroupException_WithPrincipalNameAndCategory_ShouldThrow()
         {
             await Assert.ThrowsAsync<InaccessibleGroupException>(() => throw new InaccessibleGroupException("Group name", "Client name"));
+        }
+
+        [Fact]
+        public async Task UserException_DefaultConstructor_ShouldThrow()
+        {
+            await Assert.ThrowsAsync<UserException>(() => throw new UserException());
+        }
+
+        [Fact]
+        public async Task UserException_WithMessage_ShouldThrow()
+        {
+            await Assert.ThrowsAsync<UserException>(() => throw new UserException("Some message"));
+        }
+
+        [Fact]
+        public async Task UserException_WithInnerException_ShouldThrow()
+        {
+            await Assert.ThrowsAsync<UserException>(() => throw new UserException("Some message", new Exception("Inner exception")));
+        }
+
+        [Fact]
+        public async Task UserException_WithPublicMessage_ShouldThrow()
+        {
+            await Assert.ThrowsAsync<UserException>(() => throw new UserException("Some message", "Public message"));
+        }
+
+        [Fact]
+        public async Task RoleException_DefaultConstructor_ShouldThrow()
+        {
+            await Assert.ThrowsAsync<RoleException>(() => throw new RoleException());
+        }
+
+        [Fact]
+        public async Task RoleException_WithMessage_ShouldThrow()
+        {
+            await Assert.ThrowsAsync<RoleException>(() => throw new RoleException("Some message"));
+        }
+
+        [Fact]
+        public async Task RoleException_WithInnerException_ShouldThrow()
+        {
+            await Assert.ThrowsAsync<RoleException>(() => throw new RoleException("Some message", new Exception("Inner exception")));
+        }
+
+        [Fact]
+        public async Task RoleException_WithPublicMessage_ShouldThrow()
+        {
+            await Assert.ThrowsAsync<RoleException>(() => throw new RoleException("Some message", "Public message"));
         }
     }
 }

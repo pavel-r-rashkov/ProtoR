@@ -143,6 +143,7 @@ namespace ProtoR.Infrastructure.DataAccess.Repositories
                 cacheItem.ClientId,
                 cacheItem.ClientName,
                 cacheItem.Secret,
+                cacheItem.IsActive,
                 cacheItem.GrantTypes.Split(Separator, StringSplitOptions.RemoveEmptyEntries),
                 cacheItem.RedirectUris
                     .Split(Separator, StringSplitOptions.RemoveEmptyEntries)
@@ -169,6 +170,7 @@ namespace ProtoR.Infrastructure.DataAccess.Repositories
                 ClientId = client.ClientId,
                 ClientName = client.ClientName,
                 Secret = client.Secret,
+                IsActive = client.IsActive,
                 GrantTypes = string.Join(Separator, client.GrantTypes),
                 RedirectUris = string.Join(Separator, client.RedirectUris),
                 PostLogoutRedirectUris = string.Join(Separator, client.PostLogoutRedirectUris),

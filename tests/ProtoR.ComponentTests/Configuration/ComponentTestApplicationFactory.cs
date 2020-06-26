@@ -64,6 +64,7 @@ namespace ProtoR.ComponentTests.Configuration
                 "client ID",
                 "client name",
                 "testsecret".Sha256(),
+                true,
                 new List<string> { "client_credentials" },
                 new List<Uri>(),
                 new List<Uri>(),

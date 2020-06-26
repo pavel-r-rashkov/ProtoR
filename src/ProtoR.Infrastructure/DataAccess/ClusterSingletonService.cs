@@ -16,7 +16,7 @@ namespace ProtoR.Infrastructure.DataAccess
     public class ClusterSingletonService : IService, IClusterSingletonService
     {
         private const string MutexNameFormat = "PROTOR_ADD_SCHEMA_{0}";
-        private readonly int mutextWaitTimeout = 1000 * 30;
+        private readonly int mutexWaitTimeout = 1000 * 30;
         [InstanceResource]
         private readonly IIgnite ignite = null;
         [NonSerialized]
@@ -45,7 +45,7 @@ namespace ProtoR.Infrastructure.DataAccess
             var mutexName = string.Format(CultureInfo.InvariantCulture, MutexNameFormat, command.GroupName);
             using var mutex = new Mutex(true, mutexName);
 
-            if (!mutex.WaitOne(this.mutextWaitTimeout))
+            if (!mutex.WaitOne(this.mutexWaitTimeout))
             {
                 throw new InvalidOperationException("Add schema mutex cannot be acquired");
             }

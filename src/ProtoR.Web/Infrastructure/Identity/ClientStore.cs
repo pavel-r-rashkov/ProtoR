@@ -26,7 +26,7 @@ namespace ProtoR.Web.Infrastructure.Identity
         {
             var dbClient = await this.clientRepository.GetByClientId(clientId);
 
-            if (dbClient == null)
+            if (dbClient == null || !dbClient.IsActive)
             {
                 return null;
             }

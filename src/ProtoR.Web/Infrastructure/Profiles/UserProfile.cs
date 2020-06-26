@@ -9,6 +9,10 @@ namespace ProtoR.Web.Infrastructure.Profiles
         public UserProfile()
         {
             this.CreateMap<UserDto, UserReadModel>();
+
+            this.CreateMap<UserPostModel, CreateUserCommand>();
+
+            this.CreateMap<UserPutModel, UpdateUserCommand>();
         }
     }
 }

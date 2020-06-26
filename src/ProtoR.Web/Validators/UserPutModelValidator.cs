@@ -7,6 +7,16 @@ namespace ProtoR.Web.Validators
     {
         public UserPutModelValidator()
         {
+            this.RuleFor(u => u.NewPassword)
+                .SetValidator(new PasswordValidator());
+
+            this.When(u => u.NewPassword != null, () =>
+            {
+                this.RuleFor(u => u.OldPassword)
+                    .NotEmpty()
+                    .NotNull();
+            });
+
             this.RuleFor(u => u.GroupRestrictions)
                 .NotNull()
                 .NotEmpty();

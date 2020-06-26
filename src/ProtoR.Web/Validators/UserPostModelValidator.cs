@@ -10,6 +10,7 @@ namespace ProtoR.Web.Validators
             this.RuleFor(u => u.UserName)
                 .NotNull()
                 .NotEmpty()
+                .Matches("^[A-Za-z0-9]*$")
                 .MaximumLength(500);
 
             this.RuleFor(u => u.Password)

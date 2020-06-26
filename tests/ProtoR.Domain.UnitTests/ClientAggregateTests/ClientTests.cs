@@ -83,6 +83,7 @@ namespace ProtoR.Domain.UnitTests.ClientAggregateTests
                 "Client ID",
                 "Client Name",
                 "secret",
+                true,
                 Array.Empty<string>(),
                 Array.Empty<Uri>(),
                 Array.Empty<Uri>(),

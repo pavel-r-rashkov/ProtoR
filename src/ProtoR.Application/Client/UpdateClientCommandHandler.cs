@@ -47,6 +47,7 @@ namespace ProtoR.Application.Client
             client.AllowedCorsOrigins = request.AllowedCorsOrigins.ToList();
             client.SetRoles(request.RoleBindings);
             client.GroupRestrictions = request.GroupRestrictions.Select(gr => new GroupRestriction(gr)).ToList();
+            client.IsActive = request.IsActive;
 
             await this.clientRepository.Update(client);
             await this.unitOfWork.SaveChanges();

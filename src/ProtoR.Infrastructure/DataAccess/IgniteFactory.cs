@@ -328,6 +328,7 @@ namespace ProtoR.Infrastructure.DataAccess
                                 new QueryField("ClientId", typeof(string)) { NotNull = true },
                                 new QueryField("ClientName", typeof(string)) { NotNull = true },
                                 new QueryField("Secret", typeof(string)) { NotNull = false },
+                                new QueryField("IsActive", typeof(bool)) { NotNull = false },
                                 new QueryField("GrantTypes", typeof(string)) { NotNull = true },
                                 new QueryField("RedirectUris", typeof(string)) { NotNull = true },
                                 new QueryField("PostLogoutRedirectUris", typeof(string)) { NotNull = true },

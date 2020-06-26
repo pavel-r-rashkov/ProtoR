@@ -17,6 +17,7 @@ namespace ProtoR.Domain.ClientAggregate
             string clientId,
             string clientName,
             string secret,
+            bool isActive,
             IReadOnlyCollection<string> grantTypes,
             IReadOnlyCollection<Uri> redirectUris,
             IReadOnlyCollection<Uri> postLogoutRedirectUris,
@@ -28,6 +29,7 @@ namespace ProtoR.Domain.ClientAggregate
             this.ClientId = clientId;
             this.ClientName = clientName;
             this.Secret = secret;
+            this.IsActive = isActive;
             this.GrantTypes = grantTypes;
             this.RedirectUris = redirectUris;
             this.PostLogoutRedirectUris = postLogoutRedirectUris;
@@ -41,6 +43,8 @@ namespace ProtoR.Domain.ClientAggregate
         public string ClientName { get; set; }
 
         public string Secret { get; set; }
+
+        public bool IsActive { get; set; }
 
         public IReadOnlyCollection<string> GrantTypes { get; set; }
 

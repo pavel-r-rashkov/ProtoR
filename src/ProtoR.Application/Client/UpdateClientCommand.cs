@@ -13,6 +13,8 @@ namespace ProtoR.Application.Client
 
         public string Secret { get; set; }
 
+        public bool IsActive { get; set; }
+
         public IEnumerable<string> GrantTypes { get; set; }
 
         public IEnumerable<string> RedirectUris { get; set; }

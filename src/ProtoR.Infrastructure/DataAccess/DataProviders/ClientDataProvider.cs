@@ -93,6 +93,7 @@ namespace ProtoR.Infrastructure.DataAccess.DataProviders
                 Id = id,
                 ClientId = clientCacheItem.ClientId,
                 ClientName = clientCacheItem.ClientName,
+                IsActive = clientCacheItem.IsActive,
                 GrantTypes = clientCacheItem.GrantTypes.Split(Separator, StringSplitOptions.RemoveEmptyEntries),
                 RedirectUris = clientCacheItem.RedirectUris.Split(Separator, StringSplitOptions.RemoveEmptyEntries),
                 PostLogoutRedirectUris = clientCacheItem.PostLogoutRedirectUris.Split(Separator, StringSplitOptions.RemoveEmptyEntries),

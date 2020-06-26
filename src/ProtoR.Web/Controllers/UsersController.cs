@@ -1,9 +1,6 @@
 namespace ProtoR.Web.Controllers
 {
-    using System;
     using System.Collections.Generic;
-    using System.Globalization;
-    using System.Linq;
     using System.Threading.Tasks;
     using AutoMapper;
     using MediatR;
@@ -11,7 +8,6 @@ namespace ProtoR.Web.Controllers
     using Microsoft.AspNetCore.Identity;
     using Microsoft.AspNetCore.Mvc;
     using ProtoR.Application.User;
-    using ProtoR.Domain.SchemaGroupAggregate;
     using ProtoR.Domain.UserAggregate;
     using ProtoR.Web.Infrastructure.Identity;
     using ProtoR.Web.Resources;
@@ -89,25 +85,8 @@ namespace ProtoR.Web.Controllers
         [PermissionClaim(Permission.UserWrite)]
         public async Task<ActionResult> Post(UserPostModel user)
         {
-            var newUser = new User(user.UserName);
-            newUser.IsActive = user.IsActive;
-            newUser.SetRoles(user.Roles ?? Array.Empty<long>());
-            newUser.GroupRestrictions = user.GroupRestrictions
-                .Select(pattern => new GroupRestriction(pattern))
-                .ToList();
-
-            var result = await this.userManager.CreateAsync(newUser, user.Password);
-
-            if (!result.Succeeded)
-            {
-                var error = string.Join(
-                    Environment.NewLine,
-                    result.Errors.Select(e => e.Description));
-
-                return this.BadRequest(new ErrorModel { Message = error });
-            }
-
-            var userId = await this.userManager.FindByNameAsync(user.UserName);
+            var command = this.Mapper.Map<CreateUserCommand>(user);
+            var userId = await this.Mediator.Send(command);
 
             return this.CreatedAtAction(nameof(this.Get), new { UserId = userId }, null);
         }
@@ -131,19 +110,8 @@ namespace ProtoR.Web.Controllers
         [PermissionClaim(Permission.UserWrite)]
         public async Task<ActionResult> Put(UserPutModel user)
         {
-            var existingUser = await this.userManager.FindByIdAsync(user.Id.ToString(CultureInfo.InvariantCulture));
-            existingUser.IsActive = user.IsActive;
-            existingUser.SetRoles(user.Roles ?? Array.Empty<long>());
-            existingUser.GroupRestrictions = user.GroupRestrictions
-                .Select(pattern => new GroupRestriction(pattern))
-                .ToList();
-
-            var result = await this.userManager.UpdateAsync(existingUser);
-
-            if (!result.Succeeded)
-            {
-                return this.BadRequest(result.Errors);
-            }
+            var command = this.Mapper.Map<UpdateUserCommand>(user);
+            await this.Mediator.Send(command);
 
             return this.NoContent();
         }
@@ -165,8 +133,7 @@ namespace ProtoR.Web.Controllers
         [PermissionClaim(Permission.UserWrite)]
         public async Task<ActionResult> Delete(long userId)
         {
-            var user = await this.userManager.FindByIdAsync(userId.ToString(CultureInfo.InvariantCulture));
-            await this.userManager.DeleteAsync(user);
+            await this.Mediator.Send(new DeleteUserCommand { UserId = userId });
 
             return this.NoContent();
         }

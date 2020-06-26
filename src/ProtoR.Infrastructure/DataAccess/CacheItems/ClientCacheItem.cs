@@ -10,6 +10,8 @@ namespace ProtoR.Infrastructure.DataAccess.CacheItems
 
         public string Secret { get; set; }
 
+        public bool IsActive { get; set; }
+
         public string GrantTypes { get; set; }
 
         public string RedirectUris { get; set; }

@@ -88,11 +88,10 @@ namespace ProtoR.Web.Controllers
         [PermissionClaim(Permission.RoleWrite)]
         public async Task<ActionResult> Post([FromBody]RoleWriteModel role)
         {
-            var newRole = new Role(role.Name, role.Permissions.Select(p => Domain.RoleAggregate.Permission.FromId(p)));
-            await this.manager.CreateAsync(newRole);
-            newRole = await this.manager.FindByNameAsync(newRole.Name);
+            var command = this.Mapper.Map<CreateRoleCommand>(role);
+            var roleId = await this.Mediator.Send(command);
 
-            return this.CreatedAtAction(nameof(this.GetById), new { RoleId = newRole.Id }, null);
+            return this.CreatedAtAction(nameof(this.GetById), new { RoleId = roleId }, null);
         }
 
         /// <summary>
@@ -114,9 +113,8 @@ namespace ProtoR.Web.Controllers
         [PermissionClaim(Permission.RoleWrite)]
         public async Task<ActionResult> Put(RoleWriteModel role)
         {
-            var roleToUpdate = await this.manager.FindByIdAsync(role.Id.ToString(CultureInfo.InvariantCulture));
-            this.Mapper.Map(role, roleToUpdate);
-            await this.manager.UpdateAsync(roleToUpdate);
+            var command = this.Mapper.Map<UpdateRoleCommand>(role);
+            await this.Mediator.Send(command);
 
             return this.NoContent();
         }
@@ -138,8 +136,7 @@ namespace ProtoR.Web.Controllers
         [PermissionClaim(Permission.RoleWrite)]
         public async Task<ActionResult> Delete(long roleId)
         {
-            var role = await this.manager.FindByIdAsync(roleId.ToString(CultureInfo.InvariantCulture));
-            await this.manager.DeleteAsync(role);
+            await this.Mediator.Send(new DeleteRoleCommand { RoleId = roleId });
 
             return this.NoContent();
         }

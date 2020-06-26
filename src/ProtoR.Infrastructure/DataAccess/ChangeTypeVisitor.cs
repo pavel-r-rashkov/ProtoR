@@ -23,9 +23,6 @@ namespace ProtoR.Infrastructure.DataAccess
             }
 
             return node;
-
-            // return this.parameters?.FirstOrDefault(p => p.Name == node.Name) ??
-            //     (node.Type == typeof(TSource) ? Expression.Parameter(typeof(TTarget), node.Name) : node);
         }
 
         protected override Expression VisitLambda<T>(Expression<T> node)

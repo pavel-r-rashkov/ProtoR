@@ -53,6 +53,7 @@ namespace ProtoR.DataAccess.IntegrationTests.Repositories
             var clientId = "client id";
             var clientName = "client name";
             var secret = "abc123";
+            var isActive = true;
             var grantTypes = new List<string> { "code" };
             var testUri = "http://test.com/";
             var redirectUris = new List<Uri> { new Uri(testUri) };
@@ -69,6 +70,7 @@ namespace ProtoR.DataAccess.IntegrationTests.Repositories
                 clientId,
                 clientName,
                 secret,
+                isActive,
                 grantTypes,
                 redirectUris,
                 postLogoutRedirectUris,
@@ -83,6 +85,7 @@ namespace ProtoR.DataAccess.IntegrationTests.Repositories
             Assert.Equal(clientId, clientCacheItem.ClientId);
             Assert.Equal(clientName, clientCacheItem.ClientName);
             Assert.Equal(secret, clientCacheItem.Secret);
+            Assert.Equal(isActive, clientCacheItem.IsActive);
             Assert.Contains(testUri, clientCacheItem.RedirectUris, StringComparison.InvariantCultureIgnoreCase);
             Assert.Contains(testUri, clientCacheItem.PostLogoutRedirectUris, StringComparison.InvariantCultureIgnoreCase);
             Assert.Contains(testOrigin, clientCacheItem.AllowedCorsOrigins, StringComparison.InvariantCultureIgnoreCase);
@@ -124,6 +127,7 @@ namespace ProtoR.DataAccess.IntegrationTests.Repositories
             Assert.NotNull(client);
             Assert.NotNull(client.ClientName);
             Assert.NotNull(client.Secret);
+            Assert.True(client.IsActive);
             Assert.NotEmpty(client.GrantTypes);
             Assert.NotEmpty(client.RedirectUris);
             Assert.NotEmpty(client.PostLogoutRedirectUris);
@@ -142,6 +146,7 @@ namespace ProtoR.DataAccess.IntegrationTests.Repositories
             Assert.NotNull(client);
             Assert.NotNull(client.ClientName);
             Assert.NotNull(client.Secret);
+            Assert.True(client.IsActive);
             Assert.NotEmpty(client.GrantTypes);
             Assert.NotEmpty(client.RedirectUris);
             Assert.NotEmpty(client.PostLogoutRedirectUris);
@@ -158,6 +163,7 @@ namespace ProtoR.DataAccess.IntegrationTests.Repositories
             var newClientId = "updated client id";
             var newClientName = "updated client name";
             var newSecret = "updated secret";
+            var newActiveState = false;
             var newGrantType = "client_credentials";
             var newRedirectUri = "https://updatedredirect.com/";
             var newPostLogoutUri = "https://updatedpostlogout.com/";
@@ -167,6 +173,7 @@ namespace ProtoR.DataAccess.IntegrationTests.Repositories
             client.ClientId = newClientId;
             client.ClientName = newClientName;
             client.Secret = newSecret;
+            client.IsActive = newActiveState;
             client.GrantTypes = new List<string> { newGrantType };
             client.RedirectUris = new List<Uri> { new Uri(newRedirectUri) };
             client.PostLogoutRedirectUris = new List<Uri> { new Uri(newPostLogoutUri) };
@@ -187,6 +194,7 @@ namespace ProtoR.DataAccess.IntegrationTests.Repositories
             Assert.Equal(newClientId, clientCacheItem.ClientId);
             Assert.Equal(newClientName, clientCacheItem.ClientName);
             Assert.Equal(newSecret, clientCacheItem.Secret);
+            Assert.Equal(newActiveState, clientCacheItem.IsActive);
             Assert.Equal(newGrantType, clientCacheItem.GrantTypes);
             Assert.Equal(newRedirectUri, clientCacheItem.RedirectUris);
             Assert.Equal(newPostLogoutUri, clientCacheItem.PostLogoutRedirectUris);
@@ -203,6 +211,7 @@ namespace ProtoR.DataAccess.IntegrationTests.Repositories
             var clientId = "client id";
             var clientName = "client name";
             var secret = "abc123";
+            var isActive = true;
             var grantTypes = new List<string> { "code" };
             var testUri = "http://test.com/";
             var redirectUris = new List<Uri> { new Uri(testUri) };
@@ -218,6 +227,7 @@ namespace ProtoR.DataAccess.IntegrationTests.Repositories
                 clientId,
                 clientName,
                 secret,
+                isActive,
                 grantTypes,
                 redirectUris,
                 postLogoutRedirectUris,
@@ -230,6 +240,7 @@ namespace ProtoR.DataAccess.IntegrationTests.Repositories
                 ClientId = clientId,
                 ClientName = clientName,
                 Secret = secret,
+                IsActive = isActive,
                 GrantTypes = testUri,
                 RedirectUris = testUri,
                 PostLogoutRedirectUris = testUri,

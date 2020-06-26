@@ -20,6 +20,16 @@ namespace ProtoR.Web.Resources.UserResource
         public bool IsActive { get; set; }
 
         /// <summary>
+        /// New password. Optional, if not provided the password will remain unchanged.
+        /// </summary>
+        public string NewPassword { get; set; }
+
+        /// <summary>
+        /// Current user password. Optional, if not provided the password will remain unchanged.
+        /// </summary>
+        public string OldPassword { get; set; }
+
+        /// <summary>
         /// List of role IDs associated with this user.
         /// </summary>
         public IEnumerable<long> Roles { get; set; }

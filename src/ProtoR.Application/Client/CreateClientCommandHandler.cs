@@ -32,6 +32,7 @@ namespace ProtoR.Application.Client
                 request.ClientId,
                 request.ClientName,
                 request.Secret?.ComputeSha256(),
+                request.IsActive,
                 request.GrantTypes.ToList(),
                 request.RedirectUris.Select(u => new Uri(u)).ToList(),
                 request.PostLogoutRedirectUris.Select(u => new Uri(u)).ToList(),
