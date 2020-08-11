@@ -10,6 +10,7 @@ namespace ProtoR.DataAccess.IntegrationTests.Repositories
     using ProtoR.Domain.ClientAggregate;
     using ProtoR.Domain.RoleAggregate;
     using ProtoR.Domain.SchemaGroupAggregate;
+    using ProtoR.Infrastructure.DataAccess;
     using ProtoR.Infrastructure.DataAccess.CacheItems;
     using ProtoR.Infrastructure.DataAccess.Repositories;
     using Xunit;
@@ -21,6 +22,7 @@ namespace ProtoR.DataAccess.IntegrationTests.Repositories
         private readonly ClientRepository repository;
         private readonly ICache<long, ClientCacheItem> clientCache;
         private readonly ICache<ClientRoleKey, EmptyCacheItem> clientRoleCache;
+        private readonly ICache<long, RoleCacheItem> roleCache;
 
         public ClientRepositoryTests(IgniteFixture igniteFixture)
         {
@@ -39,6 +41,10 @@ namespace ProtoR.DataAccess.IntegrationTests.Repositories
             this.clientRoleCache = this.igniteFixture.IgniteFactory
                 .Instance()
                 .GetCache<ClientRoleKey, EmptyCacheItem>(this.igniteFixture.Configuration.Value.ClientRoleCacheName);
+
+            this.roleCache = this.igniteFixture.IgniteFactory
+                .Instance()
+                .GetCache<long, RoleCacheItem>(this.igniteFixture.Configuration.Value.RoleCacheName);
         }
 
         public void Dispose()
@@ -78,6 +84,14 @@ namespace ProtoR.DataAccess.IntegrationTests.Repositories
                 groupRestrictions,
                 roleBindings);
 
+            await this.roleCache.PutAsync(roleId, new RoleCacheItem
+            {
+                Name = "testrole",
+                NormalizedName = "TESTROLE",
+                CreatedBy = "Author",
+                CreatedOn = DateTime.UtcNow,
+            });
+
             var id = await this.repository.Add(client);
 
             var clientCacheItem = await this.clientCache.GetAsync(id);
@@ -100,6 +114,25 @@ namespace ProtoR.DataAccess.IntegrationTests.Repositories
             Assert.NotNull(roleBinding);
             Assert.Equal(roleId, roleBinding.RoleId);
             Assert.Equal(id, roleBinding.ClientId);
+        }
+
+        [Fact]
+        public async Task Add_WithNonExistingRole_ShouldThrow()
+        {
+            var client = new Client(
+                default,
+                "client id",
+                "client name",
+                "abc123",
+                true,
+                new List<string> { "code" },
+                new List<Uri> { new Uri("http://test.com/") },
+                new List<Uri> { new Uri("http://test.com/") },
+                new List<string> { "http://test.com" },
+                new List<GroupRestriction> { new GroupRestriction("*") },
+                new List<RoleBinding> { new RoleBinding(10, null, default(long)) });
+
+            await Assert.ThrowsAsync<ForeignKeyViolationException>(async () => await this.repository.Add(client));
         }
 
         [Fact]
@@ -203,6 +236,16 @@ namespace ProtoR.DataAccess.IntegrationTests.Repositories
 
             Assert.Single(roleBindings);
             Assert.Equal(newRoleId, roleBindings.First().RoleId);
+        }
+
+        [Fact]
+        public async Task Update_WithNonExistingRole_ShouldThrow()
+        {
+            var client = await this.InsertClient();
+            var newRoleId = 10;
+            client.SetRoles(new long[] { newRoleId });
+
+            await Assert.ThrowsAsync<ForeignKeyViolationException>(async () => await this.repository.Update(client));
         }
 
         private async Task<Client> InsertClient()

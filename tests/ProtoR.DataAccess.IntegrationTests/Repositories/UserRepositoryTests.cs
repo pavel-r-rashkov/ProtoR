@@ -9,6 +9,7 @@ namespace ProtoR.DataAccess.IntegrationTests.Repositories
     using ProtoR.Domain.RoleAggregate;
     using ProtoR.Domain.SchemaGroupAggregate;
     using ProtoR.Domain.UserAggregate;
+    using ProtoR.Infrastructure.DataAccess;
     using ProtoR.Infrastructure.DataAccess.CacheItems;
     using ProtoR.Infrastructure.DataAccess.Repositories;
     using Xunit;
@@ -20,6 +21,7 @@ namespace ProtoR.DataAccess.IntegrationTests.Repositories
         private readonly UserRepository repository;
         private readonly ICache<long, UserCacheItem> userCache;
         private readonly ICache<UserRoleKey, EmptyCacheItem> userRoleCache;
+        private readonly ICache<long, RoleCacheItem> roleCache;
 
         public UserRepositoryTests(IgniteFixture igniteFixture)
         {
@@ -38,6 +40,10 @@ namespace ProtoR.DataAccess.IntegrationTests.Repositories
             this.userRoleCache = this.igniteFixture.IgniteFactory
                 .Instance()
                 .GetCache<UserRoleKey, EmptyCacheItem>(this.igniteFixture.Configuration.Value.UserRoleCacheName);
+
+            this.roleCache = this.igniteFixture.IgniteFactory
+                .Instance()
+                .GetCache<long, RoleCacheItem>(this.igniteFixture.Configuration.Value.RoleCacheName);
         }
 
         public void Dispose()
@@ -65,6 +71,14 @@ namespace ProtoR.DataAccess.IntegrationTests.Repositories
                 new GroupRestriction[] { new GroupRestriction(groupRestriction) },
                 new RoleBinding[] { new RoleBinding(roleId, id, null) });
 
+            await this.roleCache.PutAsync(roleId, new RoleCacheItem
+            {
+                Name = "testrole",
+                NormalizedName = "TESTROLE",
+                CreatedBy = "Author",
+                CreatedOn = DateTime.UtcNow,
+            });
+
             var userId = await this.repository.Add(user);
 
             var userCacheItem = await this.userCache.GetAsync(userId);
@@ -86,6 +100,21 @@ namespace ProtoR.DataAccess.IntegrationTests.Repositories
         }
 
         [Fact]
+        public async Task Add_WithNonExistingRole_ShouldThrow()
+        {
+            var user = new User(
+                default,
+                "testuser",
+                "TESTUSER",
+                "abc123",
+                true,
+                new GroupRestriction[] { new GroupRestriction("*") },
+                new RoleBinding[] { new RoleBinding(1, default(int), null) });
+
+            await Assert.ThrowsAsync<ForeignKeyViolationException>(async () => await this.repository.Add(user));
+        }
+
+        [Fact]
         public async Task Update_ShouldUpdateUser()
         {
             var user = await this.InsertUser();
@@ -100,6 +129,14 @@ namespace ProtoR.DataAccess.IntegrationTests.Repositories
             user.IsActive = newActiveState;
             user.AddRole(newRoleId);
             user.RemoveRole(removedRoleId);
+
+            await this.roleCache.PutAsync(newRoleId, new RoleCacheItem
+            {
+                Name = "testrole",
+                NormalizedName = "TESTROLE",
+                CreatedBy = "Author",
+                CreatedOn = DateTime.UtcNow,
+            });
 
             await this.repository.Update(user);
 
@@ -117,6 +154,16 @@ namespace ProtoR.DataAccess.IntegrationTests.Repositories
 
             Assert.Single(roleBindings);
             Assert.Equal(newRoleId, roleBindings.First().RoleId);
+        }
+
+        [Fact]
+        public async Task Update_WithNonExistingRole_ShouldThrow()
+        {
+            var user = await this.InsertUser();
+            var newRoleId = 10;
+            user.SetRoles(new long[] { newRoleId });
+
+            await Assert.ThrowsAsync<ForeignKeyViolationException>(async () => await this.repository.Update(user));
         }
 
         [Fact]

@@ -19,6 +19,7 @@ namespace ProtoR.Infrastructure.DataAccess.Repositories
         private const char Separator = ',';
         private readonly ICache<long, UserCacheItem> userCache;
         private readonly ICache<UserRoleKey, EmptyCacheItem> userRoleCache;
+        private readonly ICache<long, RoleCacheItem> roleCache;
 
         public UserRepository(
             IIgniteFactory igniteFactory,
@@ -28,6 +29,7 @@ namespace ProtoR.Infrastructure.DataAccess.Repositories
         {
             this.userCache = this.Ignite.GetOrCreateCache<long, UserCacheItem>(this.ConfigurationProvider.UserCacheName);
             this.userRoleCache = this.Ignite.GetOrCreateCache<UserRoleKey, EmptyCacheItem>(this.ConfigurationProvider.UserRoleCacheName);
+            this.roleCache = this.Ignite.GetOrCreateCache<long, RoleCacheItem>(this.ConfigurationProvider.RoleCacheName);
         }
 
         public async Task<long> Add(User user)
@@ -53,6 +55,14 @@ namespace ProtoR.Infrastructure.DataAccess.Repositories
                     RoleId = r.RoleId,
                 },
                 new EmptyCacheItem()));
+
+            var roleIds = userRoleItems.Select(cr => cr.Key.RoleId);
+            var rolesExist = this.roleCache.ContainsKeys(roleIds);
+
+            if (!rolesExist)
+            {
+                throw new ForeignKeyViolationException($"Tried to insert user roles with role IDs {string.Join(", ", roleIds)} but not all of the roles exist.");
+            }
 
             await this.userCache.PutIfAbsentAsync(id, userItem);
             await this.userRoleCache.PutAllAsync(userRoleItems);
@@ -153,6 +163,14 @@ namespace ProtoR.Infrastructure.DataAccess.Repositories
                 .Select(rb => new KeyValuePair<UserRoleKey, EmptyCacheItem>(
                     new UserRoleKey { UserId = user.Id, RoleId = rb.RoleId },
                     new EmptyCacheItem()));
+
+            var roleIds = rolesToAdd.Select(cr => cr.Key.RoleId);
+            var rolesExist = this.roleCache.ContainsKeys(roleIds);
+
+            if (!rolesExist)
+            {
+                throw new ForeignKeyViolationException($"Tried to insert user roles with role IDs {string.Join(", ", roleIds)} but not all of the roles exist.");
+            }
 
             await this.userCache.PutAsync(user.Id, userCacheItem);
 

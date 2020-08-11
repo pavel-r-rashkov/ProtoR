@@ -19,6 +19,7 @@ namespace ProtoR.Infrastructure.DataAccess.Repositories
         private const char Separator = ',';
         private readonly ICache<long, ClientCacheItem> clientCache;
         private readonly ICache<ClientRoleKey, EmptyCacheItem> clientRoleCache;
+        private readonly ICache<long, RoleCacheItem> roleCache;
 
         public ClientRepository(
             IIgniteFactory igniteFactory,
@@ -28,6 +29,7 @@ namespace ProtoR.Infrastructure.DataAccess.Repositories
         {
             this.clientCache = this.Ignite.GetOrCreateCache<long, ClientCacheItem>(this.ConfigurationProvider.ClientCacheName);
             this.clientRoleCache = this.Ignite.GetOrCreateCache<ClientRoleKey, EmptyCacheItem>(this.ConfigurationProvider.ClientRoleCacheName);
+            this.roleCache = this.Ignite.GetOrCreateCache<long, RoleCacheItem>(this.ConfigurationProvider.RoleCacheName);
         }
 
         public async Task<long> Add(Client client)
@@ -49,6 +51,14 @@ namespace ProtoR.Infrastructure.DataAccess.Repositories
                     RoleId = r.RoleId,
                 },
                 new EmptyCacheItem()));
+
+            var roleIds = clientRoleItems.Select(cr => cr.Key.RoleId);
+            var rolesExist = this.roleCache.ContainsKeys(roleIds);
+
+            if (!rolesExist)
+            {
+                throw new ForeignKeyViolationException($"Tried to insert client roles with role IDs {string.Join(", ", roleIds)} but not all of the roles exist.");
+            }
 
             await this.clientCache.PutIfAbsentAsync(id, clientItem);
             await this.clientRoleCache.PutAllAsync(clientRoleItems);
@@ -126,6 +136,14 @@ namespace ProtoR.Infrastructure.DataAccess.Repositories
                 .Select(rb => new KeyValuePair<ClientRoleKey, EmptyCacheItem>(
                     new ClientRoleKey { ClientId = client.Id, RoleId = rb.RoleId },
                     new EmptyCacheItem()));
+
+            var roleIds = rolesToAdd.Select(cr => cr.Key.RoleId);
+            var rolesExist = this.roleCache.ContainsKeys(roleIds);
+
+            if (!rolesExist)
+            {
+                throw new ForeignKeyViolationException($"Tried to insert client roles with role IDs {string.Join(", ", roleIds)} but not all of the roles exist.");
+            }
 
             await this.clientCache.PutAsync(client.Id, clientItem);
 
