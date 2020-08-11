@@ -33,13 +33,13 @@ namespace ProtoR.Application.Group
         protected override async Task Handle(CreateGroupCommand request, CancellationToken cancellationToken)
         {
             _ = request ?? throw new ArgumentNullException(nameof(request));
-            var existingGroup = await this.schemaGroupRepository.GetByName(request.GroupName);
+            var existingGroup = await this.schemaGroupRepository.GetByName(request.Name);
 
             if (existingGroup != null)
             {
                 throw new DuplicateGroupException(
-                    $"Cannot create group with name {request.GroupName}. Group with that name already exists.",
-                    request.GroupName);
+                    $"Cannot create group with name {request.Name}. Group with that name already exists.",
+                    request.Name);
             }
 
             var groupRestrictions = this.userProvider.GetGroupRestrictions();
@@ -47,17 +47,17 @@ namespace ProtoR.Application.Group
             if (groupRestrictions != null)
             {
                 var regex = FilterGenerator.CreateFromPatterns(groupRestrictions);
-                var hasAccessToGroup = Regex.IsMatch(request.GroupName, regex, RegexOptions.IgnoreCase);
+                var hasAccessToGroup = Regex.IsMatch(request.Name, regex, RegexOptions.IgnoreCase);
 
                 if (!hasAccessToGroup)
                 {
                     throw new InaccessibleGroupException(
-                        request.GroupName,
+                        request.Name,
                         this.userProvider.GetCurrentUserName());
                 }
             }
 
-            var group = new ProtoBufSchemaGroup(request.GroupName);
+            var group = new ProtoBufSchemaGroup(request.Name);
             long groupId = await this.schemaGroupRepository.Add(group);
 
             Configuration defaultConfiguration = Configuration.DefaultGroupConfiguration(groupId);

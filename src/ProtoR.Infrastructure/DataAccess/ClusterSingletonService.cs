@@ -42,7 +42,7 @@ namespace ProtoR.Infrastructure.DataAccess
             _ = command ?? throw new ArgumentNullException(nameof(command));
             using var childScope = this.autoFacPlugin.Scope.BeginLifetimeScope();
             var mediator = childScope.Resolve<IMediator>();
-            var mutexName = string.Format(CultureInfo.InvariantCulture, MutexNameFormat, command.GroupName);
+            var mutexName = string.Format(CultureInfo.InvariantCulture, MutexNameFormat, command.Name);
             using var mutex = new Mutex(true, mutexName);
 
             if (!mutex.WaitOne(this.mutexWaitTimeout))

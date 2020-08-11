@@ -5,6 +5,6 @@ namespace ProtoR.Application.Schema
 
     public class GetGroupSchemasQuery : IRequest<IEnumerable<SchemaDto>>
     {
-        public string GroupName { get; set; }
+        public string Name { get; set; }
     }
 }

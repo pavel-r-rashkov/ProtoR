@@ -7,7 +7,7 @@ namespace ProtoR.Web.Validators
     {
         public GroupWriteModelValidator()
         {
-            this.RuleFor(group => group.GroupName)
+            this.RuleFor(group => group.Name)
                 .NotNull()
                 .NotEmpty()
                 .MaximumLength(500);

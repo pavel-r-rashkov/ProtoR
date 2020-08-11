@@ -21,8 +21,8 @@ namespace ProtoR.Application.Schema
         {
             _ = request ?? throw new ArgumentNullException(nameof(request));
             SchemaDto schema = request.Version.Equals("latest", StringComparison.InvariantCultureIgnoreCase)
-                ? await this.dataProvider.GetLatestVersion(request.GroupName)
-                : await this.dataProvider.GetByVersion(request.GroupName, Convert.ToInt32(request.Version, CultureInfo.InvariantCulture));
+                ? await this.dataProvider.GetLatestVersion(request.Name)
+                : await this.dataProvider.GetByVersion(request.Name, Convert.ToInt32(request.Version, CultureInfo.InvariantCulture));
 
             if (schema == null)
             {

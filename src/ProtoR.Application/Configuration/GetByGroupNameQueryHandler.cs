@@ -27,11 +27,11 @@ namespace ProtoR.Application.Configuration
         public async Task<ConfigurationDto> Handle(GetByGroupNameQuery request, CancellationToken cancellationToken)
         {
             _ = request ?? throw new ArgumentNullException(nameof(request));
-            var configuration = await this.dataProvider.GetConfigByGroupName(request.GroupName);
+            var configuration = await this.dataProvider.GetConfigByGroupName(request.Name);
 
             if (configuration == null)
             {
-                throw new EntityNotFoundException<ProtoBufSchemaGroup>((object)request.GroupName);
+                throw new EntityNotFoundException<ProtoBufSchemaGroup>((object)request.Name);
             }
 
             var groupRestrictions = this.userProvider.GetGroupRestrictions();
@@ -39,12 +39,12 @@ namespace ProtoR.Application.Configuration
             if (groupRestrictions != null && configuration.GroupId != null)
             {
                 var regex = FilterGenerator.CreateFromPatterns(groupRestrictions);
-                var hasAccessToGroup = Regex.IsMatch(request.GroupName, regex, RegexOptions.IgnoreCase);
+                var hasAccessToGroup = Regex.IsMatch(request.Name, regex, RegexOptions.IgnoreCase);
 
                 if (!hasAccessToGroup)
                 {
                     throw new InaccessibleGroupException(
-                        request.GroupName,
+                        request.Name,
                         this.userProvider.GetCurrentUserName());
                 }
             }

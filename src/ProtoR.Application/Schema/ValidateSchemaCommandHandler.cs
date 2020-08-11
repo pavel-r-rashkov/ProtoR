@@ -31,11 +31,11 @@ namespace ProtoR.Application.Schema
         public async Task<SchemaValidationResultDto> Handle(ValidateSchemaCommand request, CancellationToken cancellationToken)
         {
             _ = request ?? throw new ArgumentNullException(nameof(request));
-            var group = await this.groupRepository.GetByName(request.GroupName);
+            var group = await this.groupRepository.GetByName(request.Name);
 
             if (group == null)
             {
-                throw new EntityNotFoundException<ProtoBufSchemaGroup>(request.GroupName);
+                throw new EntityNotFoundException<ProtoBufSchemaGroup>(request.Name);
             }
 
             var configuration = await this.configurationRepository.GetBySchemaGroupId(group.Id);

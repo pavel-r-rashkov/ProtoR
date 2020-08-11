@@ -4,6 +4,6 @@ namespace ProtoR.Application.Group
 
     public class GetByNameQuery : IRequest<GroupDto>
     {
-        public string GroupName { get; set; }
+        public string Name { get; set; }
     }
 }

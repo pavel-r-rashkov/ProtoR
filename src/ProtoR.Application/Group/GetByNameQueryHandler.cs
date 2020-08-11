@@ -26,11 +26,11 @@ namespace ProtoR.Application.Group
         public async Task<GroupDto> Handle(GetByNameQuery request, CancellationToken cancellationToken)
         {
             _ = request ?? throw new ArgumentNullException(nameof(request));
-            var group = await this.dataProvider.GetByName(request.GroupName);
+            var group = await this.dataProvider.GetByName(request.Name);
 
             if (group == null)
             {
-                throw new EntityNotFoundException<ProtoBufSchemaGroup>((object)request.GroupName);
+                throw new EntityNotFoundException<ProtoBufSchemaGroup>((object)request.Name);
             }
 
             var groupRestrictions = this.userProvider.GetGroupRestrictions();
@@ -38,12 +38,12 @@ namespace ProtoR.Application.Group
             if (groupRestrictions != null)
             {
                 var regex = FilterGenerator.CreateFromPatterns(groupRestrictions);
-                var hasAccessToGroup = Regex.IsMatch(request.GroupName, regex, RegexOptions.IgnoreCase);
+                var hasAccessToGroup = Regex.IsMatch(request.Name, regex, RegexOptions.IgnoreCase);
 
                 if (!hasAccessToGroup)
                 {
                     throw new InaccessibleGroupException(
-                        request.GroupName,
+                        request.Name,
                         this.userProvider.GetCurrentUserName());
                 }
             }

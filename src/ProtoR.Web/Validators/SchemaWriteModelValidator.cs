@@ -11,7 +11,7 @@ namespace ProtoR.Web.Validators
                 .NotNull()
                 .NotEmpty();
 
-            this.RuleFor(s => s.GroupName)
+            this.RuleFor(s => s.Name)
                 .NotNull()
                 .NotEmpty();
         }

@@ -8,6 +8,6 @@ namespace ProtoR.Web.Resources.GroupResource
         /// <summary>
         /// Group name.
         /// </summary>
-        public string GroupName { get; set; }
+        public string Name { get; set; }
     }
 }

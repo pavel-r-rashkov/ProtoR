@@ -4,7 +4,7 @@ namespace ProtoR.Application.Schema
 
     public class ValidateSchemaCommand : IRequest<SchemaValidationResultDto>
     {
-        public string GroupName { get; set; }
+        public string Name { get; set; }
 
         public string Contents { get; set; }
     }

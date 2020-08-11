@@ -19,7 +19,7 @@ namespace ProtoR.Application.Schema
         {
             _ = request ?? throw new ArgumentNullException(nameof(request));
 
-            return await this.dataProvider.GetGroupSchemas(request.GroupName);
+            return await this.dataProvider.GetGroupSchemas(request.Name);
         }
     }
 }

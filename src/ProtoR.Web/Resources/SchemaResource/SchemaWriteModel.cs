@@ -11,7 +11,7 @@ namespace ProtoR.Web.Resources.SchemaResource
         /// Group name.
         /// </summary>
         [SwaggerExclude]
-        public string GroupName { get; set; }
+        public string Name { get; set; }
 
         /// <summary>
         /// Schema contents.

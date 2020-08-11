@@ -4,6 +4,6 @@ namespace ProtoR.Application.Configuration
 
     public class GetByGroupNameQuery : IRequest<ConfigurationDto>
     {
-        public string GroupName { get; set; }
+        public string Name { get; set; }
     }
 }

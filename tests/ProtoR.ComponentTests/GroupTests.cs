@@ -120,7 +120,7 @@ namespace ProtoR.ComponentTests
             };
             var group = new GroupWriteModel
             {
-                GroupName = "New group name",
+                Name = "New group name",
             };
 
             using var contents = new JsonHttpContent(group);
@@ -138,7 +138,7 @@ namespace ProtoR.ComponentTests
             };
             var group = new GroupWriteModel
             {
-                GroupName = "Test Group",
+                Name = "Test Group",
             };
 
             using var contents = new JsonHttpContent(group);
@@ -302,7 +302,7 @@ namespace ProtoR.ComponentTests
             {
                 new GroupWriteModel
                 {
-                    GroupName = null,
+                    Name = null,
                 },
             };
 
@@ -310,7 +310,7 @@ namespace ProtoR.ComponentTests
             {
                 new GroupWriteModel
                 {
-                    GroupName = string.Empty,
+                    Name = string.Empty,
                 },
             };
 
@@ -318,7 +318,7 @@ namespace ProtoR.ComponentTests
             {
                 new GroupWriteModel
                 {
-                    GroupName = new string('a', 501),
+                    Name = new string('a', 501),
                 },
             };
         }

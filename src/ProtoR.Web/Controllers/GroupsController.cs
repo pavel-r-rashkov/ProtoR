@@ -73,7 +73,7 @@ namespace ProtoR.Web.Controllers
             var command = this.Mapper.Map<CreateGroupCommand>(group);
             var created = await this.Mediator.Send(command);
 
-            return this.CreatedAtAction(nameof(this.GetByName), new { group.GroupName }, null);
+            return this.CreatedAtAction(nameof(this.GetByName), new { group.Name }, null);
         }
 
         /// <summary>
@@ -91,7 +91,7 @@ namespace ProtoR.Web.Controllers
         [ProducesResponseType(typeof(ErrorModel), StatusCodes.Status403Forbidden)]
         [ProducesResponseType(typeof(ErrorModel), StatusCodes.Status404NotFound)]
         [HttpGet]
-        [Route("{GroupName}")]
+        [Route("{Name}")]
         [PermissionClaim(Permission.GroupRead)]
         public async Task<ActionResult<ResponseModel<GroupReadModel>>> GetByName([FromRoute]GetByNameQuery query)
         {
@@ -116,7 +116,7 @@ namespace ProtoR.Web.Controllers
         [ProducesResponseType(typeof(ErrorModel), StatusCodes.Status403Forbidden)]
         [ProducesResponseType(typeof(ErrorModel), StatusCodes.Status404NotFound)]
         [HttpDelete]
-        [Route("{GroupName}")]
+        [Route("{Name}")]
         [PermissionClaim(Permission.GroupWrite)]
         public async Task<ActionResult> Delete(DeleteGroupCommand command)
         {
@@ -138,7 +138,7 @@ namespace ProtoR.Web.Controllers
         [ProducesResponseType(typeof(ErrorModel), StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(typeof(ErrorModel), StatusCodes.Status403Forbidden)]
         [HttpGet]
-        [Route("{GroupName}/Schemas")]
+        [Route("{Name}/Schemas")]
         [PermissionClaim(Permission.SchemaRead)]
         public async Task<ActionResult<ResponseModel<IEnumerable<SchemaReadModel>>>> GetSchemas([FromRoute]GetGroupSchemasQuery query)
         {
@@ -165,7 +165,7 @@ namespace ProtoR.Web.Controllers
         [ProducesResponseType(typeof(ErrorModel), StatusCodes.Status403Forbidden)]
         [ProducesResponseType(typeof(ErrorModel), StatusCodes.Status404NotFound)]
         [HttpGet]
-        [Route("{GroupName}/Schemas/{Version}")]
+        [Route("{Name}/Schemas/{Version}")]
         [PermissionClaim(Permission.SchemaRead)]
         public async Task<ActionResult<ResponseModel<SchemaReadModel>>> GetSchema([FromRoute]GetByVersionQuery query)
         {
@@ -192,7 +192,7 @@ namespace ProtoR.Web.Controllers
         [ProducesResponseType(typeof(ErrorModel), StatusCodes.Status403Forbidden)]
         [ProducesResponseType(typeof(ErrorModel), StatusCodes.Status404NotFound)]
         [HttpPost]
-        [Route("{GroupName}/Schemas")]
+        [Route("{Name}/Schemas")]
         [PermissionClaim(Permission.SchemaWrite)]
         public async Task<ActionResult> PostSchema(SchemaWriteModel schema)
         {
@@ -208,7 +208,7 @@ namespace ProtoR.Web.Controllers
                 nameof(this.GetSchema),
                 new
                 {
-                    schema.GroupName,
+                    schema.Name,
                     Version = commandResult.NewVersion,
                 },
                 commandResult.RuleViolations);
@@ -231,7 +231,7 @@ namespace ProtoR.Web.Controllers
         [ProducesResponseType(typeof(ErrorModel), StatusCodes.Status403Forbidden)]
         [ProducesResponseType(typeof(ErrorModel), StatusCodes.Status404NotFound)]
         [HttpPost]
-        [Route("{GroupName}/SchemaTest")]
+        [Route("{Name}/SchemaTest")]
         [PermissionClaim(Permission.SchemaRead)]
         public async Task<ActionResult<ResponseModel<IEnumerable<RuleViolationDto>>>> ValidationCheck(SchemaWriteModel schema)
         {
@@ -256,7 +256,7 @@ namespace ProtoR.Web.Controllers
         [ProducesResponseType(typeof(ErrorModel), StatusCodes.Status403Forbidden)]
         [ProducesResponseType(typeof(ErrorModel), StatusCodes.Status404NotFound)]
         [HttpGet]
-        [Route("{GroupName}/Configuration")]
+        [Route("{Name}/Configuration")]
         [PermissionClaim(Permission.ConfigurationRead)]
         public async Task<ActionResult<ResponseModel<ConfigurationReadModel>>> GetConfiguration([FromRoute]GetByGroupNameQuery query)
         {

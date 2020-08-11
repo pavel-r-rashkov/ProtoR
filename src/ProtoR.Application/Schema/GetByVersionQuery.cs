@@ -4,7 +4,7 @@ namespace ProtoR.Application.Schema
 
     public class GetByVersionQuery : IRequest<SchemaDto>
     {
-        public string GroupName { get; set; }
+        public string Name { get; set; }
 
         public string Version { get; set; }
     }

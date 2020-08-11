@@ -4,6 +4,6 @@ namespace ProtoR.Application.Group
 
     public class DeleteGroupCommand : IRequest
     {
-        public string GroupName { get; set; }
+        public string Name { get; set; }
     }
 }
