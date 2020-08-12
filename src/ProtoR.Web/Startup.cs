@@ -9,6 +9,7 @@
     using Microsoft.Extensions.Options;
     using ProtoR.Web.Infrastructure;
     using ProtoR.Web.Infrastructure.Identity;
+    using ProtoR.Web.Infrastructure.ModelBinders;
 
     public class Startup
     {
@@ -31,7 +32,10 @@
 
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddControllersWithViews();
+            services.AddControllersWithViews(options =>
+            {
+                options.AddModelBinders();
+            });
             services
                 .AddControllers()
                 .ConfigureCustomApiBehaviorOptions()
@@ -45,7 +49,8 @@
                 .AddCustomIdentity()
                 .AddCustomIdentityServer(authOptions)
                 .AddCustomCors()
-                .AddCustomAuthentication();
+                .AddCustomAuthentication()
+                .ConfigureFluentValidation();
         }
 
         public void Configure(

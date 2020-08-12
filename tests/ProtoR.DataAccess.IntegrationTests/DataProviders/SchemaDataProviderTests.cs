@@ -6,6 +6,7 @@ namespace ProtoR.DataAccess.IntegrationTests.DataProviders
     using System.Threading.Tasks;
     using Apache.Ignite.Core.Cache;
     using AutoFixture;
+    using ProtoR.Application.Common;
     using ProtoR.Application.Schema;
     using ProtoR.DataAccess.IntegrationTests.Fixtures;
     using ProtoR.Infrastructure.DataAccess.CacheItems;
@@ -77,10 +78,14 @@ namespace ProtoR.DataAccess.IntegrationTests.DataProviders
                 this.schemaCache.Put(i + 1, schemas[i]);
             }
 
-            IEnumerable<SchemaDto> result = await this.dataProvider.GetGroupSchemas(group.Name);
+            var result = await this.dataProvider.GetGroupSchemas(
+                group.Name,
+                Array.Empty<Filter>(),
+                SortOrder.Default("Id"),
+                Pagination.Default());
 
             Assert.NotNull(result);
-            Assert.Equal(schemas.Count, result.Count());
+            Assert.NotEmpty(result.Items);
         }
 
         [Fact]

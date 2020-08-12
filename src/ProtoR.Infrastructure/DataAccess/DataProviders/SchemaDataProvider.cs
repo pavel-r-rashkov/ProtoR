@@ -6,6 +6,7 @@ namespace ProtoR.Infrastructure.DataAccess.DataProviders
     using Apache.Ignite.Core.Cache;
     using Apache.Ignite.Linq;
     using Microsoft.Extensions.Options;
+    using ProtoR.Application.Common;
     using ProtoR.Application.Schema;
     using ProtoR.Infrastructure.DataAccess.CacheItems;
 
@@ -55,7 +56,11 @@ namespace ProtoR.Infrastructure.DataAccess.DataProviders
             };
         }
 
-        public async Task<IEnumerable<SchemaDto>> GetGroupSchemas(string groupName)
+        public async Task<PagedResult<SchemaDto>> GetGroupSchemas(
+            string groupName,
+            IEnumerable<Filter> filters,
+            IEnumerable<SortOrder> sortOrders,
+            Pagination pagination)
         {
             long groupId = await this.GetGroupId(groupName);
             ICache<long, SchemaCacheItem> schemaCache = this.Ignite.GetCache<long, SchemaCacheItem>(this.schemaCacheName);
@@ -70,16 +75,26 @@ namespace ProtoR.Infrastructure.DataAccess.DataProviders
                     c.Value.CreatedBy,
                     c.Value.CreatedOn,
                 })
-                .ToList();
+                .Filter(filters);
 
-            return schemas.Select(s => new SchemaDto
-            {
-                Id = s.Id,
-                Version = s.Version,
-                Contents = s.Contents,
-                CreatedBy = s.CreatedBy,
-                CreatedOn = s.CreatedOn,
-            });
+            var totalCount = schemas
+                .Select(s => s.Id)
+                .Count();
+
+            var results = schemas
+                .Sort(sortOrders)
+                .Page(pagination)
+                .ToList()
+                .Select(s => new SchemaDto
+                {
+                    Id = s.Id,
+                    Version = s.Version,
+                    Contents = s.Contents,
+                    CreatedBy = s.CreatedBy,
+                    CreatedOn = s.CreatedOn,
+                });
+
+            return new PagedResult<SchemaDto>(totalCount, results);
         }
 
         public async Task<SchemaDto> GetLatestVersion(string groupName)

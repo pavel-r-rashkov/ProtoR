@@ -4,6 +4,7 @@ namespace ProtoR.DataAccess.IntegrationTests.DataProviders
     using System.Threading.Tasks;
     using Apache.Ignite.Core.Cache;
     using AutoFixture;
+    using ProtoR.Application.Common;
     using ProtoR.DataAccess.IntegrationTests.Fixtures;
     using ProtoR.Domain.RoleAggregate;
     using ProtoR.Infrastructure.DataAccess.CacheItems;
@@ -62,9 +63,12 @@ namespace ProtoR.DataAccess.IntegrationTests.DataProviders
                 await this.InsertRole(i + 1);
             }
 
-            var roles = await this.dataProvider.GetRoles();
+            var roles = await this.dataProvider.GetRoles(
+                Array.Empty<Filter>(),
+                SortOrder.Default("Id"),
+                Pagination.Default());
 
-            Assert.NotEmpty(roles);
+            Assert.NotEmpty(roles.Items);
         }
 
         private async Task InsertRole(int id)

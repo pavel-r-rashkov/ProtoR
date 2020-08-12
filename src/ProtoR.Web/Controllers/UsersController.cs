@@ -7,6 +7,7 @@ namespace ProtoR.Web.Controllers
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Identity;
     using Microsoft.AspNetCore.Mvc;
+    using ProtoR.Application.Common;
     using ProtoR.Application.User;
     using ProtoR.Domain.UserAggregate;
     using ProtoR.Web.Infrastructure.Identity;
@@ -38,12 +39,12 @@ namespace ProtoR.Web.Controllers
         [ProducesResponseType(typeof(ErrorModel), StatusCodes.Status403Forbidden)]
         [HttpGet]
         [PermissionClaim(Permission.UserRead)]
-        public async Task<ActionResult<ResponseModel<IEnumerable<UserReadModel>>>> Get([FromRoute]GetUsersQuery query)
+        public async Task<ActionResult<ResponseModel<PagedResult<UserReadModel>>>> Get([FromQuery]GetUsersQuery query)
         {
             var users = await this.Mediator.Send(query);
-            var userResources = this.Mapper.Map<IEnumerable<UserReadModel>>(users);
+            var userResources = this.Mapper.Map<PagedResult<UserReadModel>>(users);
 
-            return this.Ok(new ResponseModel<IEnumerable<UserReadModel>>(userResources));
+            return this.Ok(new ResponseModel<PagedResult<UserReadModel>>(userResources));
         }
 
         /// <summary>

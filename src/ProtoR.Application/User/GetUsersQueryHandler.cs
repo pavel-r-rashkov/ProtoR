@@ -1,11 +1,11 @@
 namespace ProtoR.Application.User
 {
-    using System.Collections.Generic;
     using System.Threading;
     using System.Threading.Tasks;
     using MediatR;
+    using ProtoR.Application.Common;
 
-    public class GetUsersQueryHandler : IRequestHandler<GetUsersQuery, IEnumerable<UserDto>>
+    public class GetUsersQueryHandler : IRequestHandler<GetUsersQuery, PagedResult<UserDto>>
     {
         private readonly IUserDataProvider userDataProvider;
 
@@ -14,9 +14,12 @@ namespace ProtoR.Application.User
             this.userDataProvider = userDataProvider;
         }
 
-        public async Task<IEnumerable<UserDto>> Handle(GetUsersQuery request, CancellationToken cancellationToken)
+        public async Task<PagedResult<UserDto>> Handle(GetUsersQuery request, CancellationToken cancellationToken)
         {
-            return await this.userDataProvider.GetUsers();
+            return await this.userDataProvider.GetUsers(
+                request.Filter,
+                request.OrderBy,
+                request.Pagination);
         }
     }
 }

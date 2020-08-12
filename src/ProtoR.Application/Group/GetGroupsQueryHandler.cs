@@ -9,7 +9,7 @@ namespace ProtoR.Application.Group
     using MediatR;
     using ProtoR.Application.Common;
 
-    public class GetGroupsQueryHandler : IRequestHandler<GetGroupsQuery, IEnumerable<GroupDto>>
+    public class GetGroupsQueryHandler : IRequestHandler<GetGroupsQuery, PagedResult<GroupDto>>
     {
         private readonly IGroupDataProvider dataProvider;
         private readonly IUserProvider userProvider;
@@ -22,7 +22,7 @@ namespace ProtoR.Application.Group
             this.userProvider = userProvider;
         }
 
-        public async Task<IEnumerable<GroupDto>> Handle(GetGroupsQuery request, CancellationToken cancellationToken)
+        public async Task<PagedResult<GroupDto>> Handle(GetGroupsQuery request, CancellationToken cancellationToken)
         {
             var groupRestrictions = this.userProvider.GetGroupRestrictions();
             Expression<Func<GroupDto, bool>> filter = null;
@@ -33,7 +33,11 @@ namespace ProtoR.Application.Group
                 filter = f => Regex.IsMatch(f.Name, regex, RegexOptions.IgnoreCase);
             }
 
-            return await this.dataProvider.GetGroups(filter);
+            return await this.dataProvider.GetGroups(
+                filter,
+                request.Filter,
+                request.OrderBy,
+                request.Pagination);
         }
     }
 }

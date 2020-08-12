@@ -6,6 +6,7 @@ namespace ProtoR.Infrastructure.DataAccess.DataProviders
     using Apache.Ignite.Core.Cache;
     using Apache.Ignite.Linq;
     using Microsoft.Extensions.Options;
+    using ProtoR.Application.Common;
     using ProtoR.Application.Role;
     using ProtoR.Infrastructure.DataAccess.CacheItems;
 
@@ -45,7 +46,10 @@ namespace ProtoR.Infrastructure.DataAccess.DataProviders
             return role;
         }
 
-        public Task<IEnumerable<RoleDto>> GetRoles()
+        public Task<PagedResult<RoleDto>> GetRoles(
+            IEnumerable<Filter> filters,
+            IEnumerable<SortOrder> sortOrders,
+            Pagination pagination)
         {
             var permissionGroups = this.rolePermissionCache
                 .AsCacheQueryable()
@@ -62,12 +66,34 @@ namespace ProtoR.Infrastructure.DataAccess.DataProviders
 
             var roles = this.roleCache
                 .AsCacheQueryable()
-                .ToList()
-                .Select(c =>
+                .Select(r => new
                 {
-                    var role = this.MapToRoleDto(c.Key, c.Value);
+                    Id = r.Key,
+                    r.Value.Name,
+                    r.Value.CreatedBy,
+                    r.Value.CreatedOn,
+                })
+                .Filter(filters);
 
-                    if (permissionGroups.TryGetValue(c.Key, out var permissions))
+            var totalCount = roles
+                .Select(r => r.Id)
+                .Count();
+
+            var results = roles
+                .Sort(sortOrders)
+                .Page(pagination)
+                .ToList()
+                .Select(r =>
+                {
+                    var role = new RoleDto
+                    {
+                        Id = r.Id,
+                        Name = r.Name,
+                        CreatedBy = r.CreatedBy,
+                        CreatedOn = r.CreatedOn,
+                    };
+
+                    if (permissionGroups.TryGetValue(r.Id, out var permissions))
                     {
                         role.Permissions = permissions;
                     }
@@ -75,7 +101,7 @@ namespace ProtoR.Infrastructure.DataAccess.DataProviders
                     return role;
                 });
 
-            return Task.FromResult(roles);
+            return Task.FromResult(new PagedResult<RoleDto>(totalCount, results));
         }
 
         private RoleDto MapToRoleDto(long id, RoleCacheItem roleCacheItem)

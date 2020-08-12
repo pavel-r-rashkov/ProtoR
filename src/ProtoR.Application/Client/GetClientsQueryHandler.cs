@@ -4,8 +4,9 @@ namespace ProtoR.Application.Client
     using System.Threading;
     using System.Threading.Tasks;
     using MediatR;
+    using ProtoR.Application.Common;
 
-    public class GetClientsQueryHandler : IRequestHandler<GetClientsQuery, IEnumerable<ClientDto>>
+    public class GetClientsQueryHandler : IRequestHandler<GetClientsQuery, PagedResult<ClientDto>>
     {
         private readonly IClientDataProvider clientData;
 
@@ -14,9 +15,12 @@ namespace ProtoR.Application.Client
             this.clientData = clientData;
         }
 
-        public async Task<IEnumerable<ClientDto>> Handle(GetClientsQuery request, CancellationToken cancellationToken)
+        public async Task<PagedResult<ClientDto>> Handle(GetClientsQuery request, CancellationToken cancellationToken)
         {
-            return await this.clientData.GetClients();
+            return await this.clientData.GetClients(
+                request.Filter,
+                request.OrderBy,
+                request.Pagination);
         }
     }
 }

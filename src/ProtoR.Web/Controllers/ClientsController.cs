@@ -7,6 +7,7 @@ namespace ProtoR.Web.Controllers
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Mvc;
     using ProtoR.Application.Client;
+    using ProtoR.Application.Common;
     using ProtoR.Web.Infrastructure.Identity;
     using ProtoR.Web.Resources;
     using ProtoR.Web.Resources.ClientResource;
@@ -32,12 +33,12 @@ namespace ProtoR.Web.Controllers
         [ProducesResponseType(typeof(ErrorModel), StatusCodes.Status403Forbidden)]
         [HttpGet]
         [PermissionClaim(Permission.ClientRead)]
-        public async Task<ActionResult<ResponseModel<IEnumerable<ClientReadModel>>>> Get([FromRoute]GetClientsQuery query)
+        public async Task<ActionResult<ResponseModel<PagedResult<ClientReadModel>>>> Get([FromQuery]GetClientsQuery query)
         {
             var clients = await this.Mediator.Send(query);
-            var clientResources = this.Mapper.Map<IEnumerable<ClientReadModel>>(clients);
+            var clientResources = this.Mapper.Map<PagedResult<ClientReadModel>>(clients);
 
-            return this.Ok(new ResponseModel<IEnumerable<ClientReadModel>>(clientResources));
+            return this.Ok(new ResponseModel<PagedResult<ClientReadModel>>(clientResources));
         }
 
         /// <summary>

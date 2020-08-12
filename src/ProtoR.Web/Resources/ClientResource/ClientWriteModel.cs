@@ -32,7 +32,7 @@ namespace ProtoR.Web.Resources.ClientResource
         /// <summary>
         /// Client state. Inactive clients cannot be authenitcated.
         /// </summary>
-        public string IsActive { get; set; }
+        public bool IsActive { get; set; }
 
         /// <summary>
         /// client_credentials or authorization_code.

@@ -1,14 +1,13 @@
 namespace ProtoR.Web.Controllers
 {
     using System.Collections.Generic;
-    using System.Globalization;
-    using System.Linq;
     using System.Threading.Tasks;
     using AutoMapper;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Identity;
     using Microsoft.AspNetCore.Mvc;
+    using ProtoR.Application.Common;
     using ProtoR.Application.Role;
     using ProtoR.Domain.RoleAggregate;
     using ProtoR.Web.Infrastructure.Identity;
@@ -41,12 +40,12 @@ namespace ProtoR.Web.Controllers
         [ProducesResponseType(typeof(ErrorModel), StatusCodes.Status403Forbidden)]
         [HttpGet]
         [PermissionClaim(Permission.RoleRead)]
-        public async Task<ActionResult<ResponseModel<IEnumerable<RoleReadModel>>>> Get()
+        public async Task<ActionResult<ResponseModel<PagedResult<RoleReadModel>>>> Get([FromQuery]GetRolesQuery query)
         {
-            var roles = await this.Mediator.Send(new GetRolesQuery());
-            var roleResources = this.Mapper.Map<IEnumerable<RoleReadModel>>(roles);
+            var roles = await this.Mediator.Send(query);
+            var roleResources = this.Mapper.Map<PagedResult<RoleReadModel>>(roles);
 
-            return this.Ok(new ResponseModel<IEnumerable<RoleReadModel>>(roleResources));
+            return this.Ok(new ResponseModel<PagedResult<RoleReadModel>>(roleResources));
         }
 
         /// <summary>

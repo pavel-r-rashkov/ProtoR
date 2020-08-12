@@ -8,6 +8,7 @@ namespace ProtoR.Infrastructure.DataAccess.DataProviders
     using Apache.Ignite.Linq;
     using Microsoft.Extensions.Options;
     using ProtoR.Application.Client;
+    using ProtoR.Application.Common;
     using ProtoR.Infrastructure.DataAccess.CacheItems;
 
     public class ClientDataProvider : BaseDataProvider, IClientDataProvider
@@ -48,7 +49,10 @@ namespace ProtoR.Infrastructure.DataAccess.DataProviders
             return client;
         }
 
-        public Task<IEnumerable<ClientDto>> GetClients()
+        public Task<PagedResult<ClientDto>> GetClients(
+            IEnumerable<Filter> filters,
+            IEnumerable<SortOrder> sortOrders,
+            Pagination pagination)
         {
             var roleGroups = this.clientRoleCache
                 .AsCacheQueryable()
@@ -59,12 +63,48 @@ namespace ProtoR.Infrastructure.DataAccess.DataProviders
 
             var clients = this.clientCache
                 .AsCacheQueryable()
+                .Select(c => new
+                {
+                    Id = c.Key,
+                    c.Value.ClientId,
+                    c.Value.ClientName,
+                    c.Value.IsActive,
+                    c.Value.GrantTypes,
+                    c.Value.RedirectUris,
+                    c.Value.PostLogoutRedirectUris,
+                    c.Value.AllowedCorsOrigins,
+                    c.Value.GroupRestrictions,
+                    c.Value.CreatedBy,
+                    c.Value.CreatedOn,
+                })
+                .Filter(filters);
+
+            var totalCount = clients
+                .Select(c => c.Id)
+                .Count();
+
+            var results = clients
+                .Sort(sortOrders)
+                .Page(pagination)
                 .ToList()
                 .Select(c =>
                 {
-                    var client = this.MapFromCacheItem(c.Key, c.Value);
+                    var client = new ClientDto
+                    {
+                        Id = c.Id,
+                        ClientId = c.ClientId,
+                        ClientName = c.ClientName,
+                        IsActive = c.IsActive,
+                        GrantTypes = c.GrantTypes.Split(Separator, StringSplitOptions.RemoveEmptyEntries),
+                        RedirectUris = c.RedirectUris.Split(Separator, StringSplitOptions.RemoveEmptyEntries),
+                        PostLogoutRedirectUris = c.PostLogoutRedirectUris.Split(Separator, StringSplitOptions.RemoveEmptyEntries),
+                        AllowedCorsOrigins = c.AllowedCorsOrigins.Split(Separator, StringSplitOptions.RemoveEmptyEntries),
+                        GroupRestrictions = c.GroupRestrictions.Split(Separator, StringSplitOptions.RemoveEmptyEntries),
+                        CreatedBy = c.CreatedBy,
+                        CreatedOn = c.CreatedOn,
+                    };
 
-                    if (roleGroups.TryGetValue(c.Key, out var roles))
+                    if (roleGroups.TryGetValue(c.Id, out var roles))
                     {
                         client.RoleBindings = roles;
                     }
@@ -72,7 +112,7 @@ namespace ProtoR.Infrastructure.DataAccess.DataProviders
                     return client;
                 });
 
-            return Task.FromResult(clients);
+            return Task.FromResult(new PagedResult<ClientDto>(totalCount, results));
         }
 
         public Task<IEnumerable<string>> GetOrigins()

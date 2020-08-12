@@ -7,6 +7,7 @@ namespace ProtoR.Infrastructure.DataAccess.DataProviders
     using Apache.Ignite.Core.Cache;
     using Apache.Ignite.Linq;
     using Microsoft.Extensions.Options;
+    using ProtoR.Application.Common;
     using ProtoR.Application.User;
     using ProtoR.Infrastructure.DataAccess.CacheItems;
 
@@ -48,7 +49,10 @@ namespace ProtoR.Infrastructure.DataAccess.DataProviders
             return user;
         }
 
-        public Task<IEnumerable<UserDto>> GetUsers()
+        public Task<PagedResult<UserDto>> GetUsers(
+            IEnumerable<Filter> filters,
+            IEnumerable<SortOrder> sortOrders,
+            Pagination pagination)
         {
             var roleGroups = this.userRoleCache
                 .AsCacheQueryable()
@@ -59,12 +63,39 @@ namespace ProtoR.Infrastructure.DataAccess.DataProviders
 
             var users = this.userCache
                 .AsCacheQueryable()
+                .Select(u => new
+                {
+                    Id = u.Key,
+                    u.Value.UserName,
+                    u.Value.IsActive,
+                    u.Value.GroupRestrictions,
+                    u.Value.CreatedBy,
+                    u.Value.CreatedOn,
+                })
+                .Filter(filters);
+
+            var totalCount = users
+                .Select(u => u.Id)
+                .Count();
+
+            var results = users
+                .Sort(sortOrders)
+                .Page(pagination)
                 .ToList()
                 .Select(c =>
                 {
-                    var user = this.MapFromCacheItem(c.Key, c.Value);
+                    var user = new UserDto
+                    {
+                        Id = c.Id,
+                        UserName = c.UserName,
+                        IsActive = c.IsActive,
+                        GroupRestrictions = c.GroupRestrictions
+                            .Split(Separator, StringSplitOptions.RemoveEmptyEntries),
+                        CreatedBy = c.CreatedBy,
+                        CreatedOn = c.CreatedOn,
+                    };
 
-                    if (roleGroups.TryGetValue(c.Key, out var roles))
+                    if (roleGroups.TryGetValue(c.Id, out var roles))
                     {
                         user.RoleBindings = roles;
                     }
@@ -72,7 +103,7 @@ namespace ProtoR.Infrastructure.DataAccess.DataProviders
                     return user;
                 });
 
-            return Task.FromResult(users);
+            return Task.FromResult(new PagedResult<UserDto>(totalCount, results));
         }
 
         private UserDto MapFromCacheItem(long id, UserCacheItem userCacheItem)

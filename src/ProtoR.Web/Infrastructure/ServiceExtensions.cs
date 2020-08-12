@@ -8,6 +8,7 @@ namespace ProtoR.Web.Infrastructure
     using System.Reflection;
     using System.Security.Cryptography.X509Certificates;
     using System.Threading.Tasks;
+    using FluentValidation;
     using IdentityServer4.Models;
     using IdentityServer4.Services;
     using Microsoft.AspNetCore.Authorization;
@@ -17,10 +18,12 @@ namespace ProtoR.Web.Infrastructure
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.OpenApi.Models;
+    using ProtoR.Application.Common;
     using ProtoR.Domain.RoleAggregate;
     using ProtoR.Domain.UserAggregate;
     using ProtoR.Infrastructure.DataAccess;
     using ProtoR.Web.Infrastructure.Identity;
+    using ProtoR.Web.Infrastructure.ModelBinders;
     using ProtoR.Web.Infrastructure.Swagger;
     using ProtoR.Web.Resources;
     using Swashbuckle.AspNetCore.Swagger;
@@ -39,6 +42,7 @@ namespace ProtoR.Web.Infrastructure
 
                 config.SchemaFilter<SwaggerExcludeFilter>();
                 config.OperationFilter<HybridOperationFilter>();
+                config.OperationFilter<IgnoreParameterPrefixFilter>();
 
                 var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
                 var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
@@ -164,6 +168,34 @@ namespace ProtoR.Web.Infrastructure
                     });
                 };
             });
+        }
+
+        public static MvcOptions AddModelBinders(this MvcOptions options)
+        {
+            options.ModelBinderProviders.Insert(0, new PaginationBinderProvider());
+            options.ModelBinderProviders.Insert(0, new FilterBinderProvider());
+            options.ModelBinderProviders.Insert(0, new SortOrderBinderProvider());
+
+            return options;
+        }
+
+        public static void ConfigureFluentValidation(this IServiceCollection services)
+        {
+            ValidatorOptions.PropertyNameResolver = (type, member, expression) =>
+            {
+                if (member == null)
+                {
+                    return null;
+                }
+
+                if (member is PropertyInfo property
+                    && property.PropertyType == typeof(Pagination))
+                {
+                    return string.Empty;
+                }
+
+                return member.Name;
+            };
         }
     }
 }

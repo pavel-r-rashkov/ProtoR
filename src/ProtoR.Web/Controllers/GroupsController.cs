@@ -4,9 +4,11 @@ namespace ProtoR.Web.Controllers
     using System.Linq;
     using System.Threading.Tasks;
     using AutoMapper;
+    using HybridModelBinding;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Mvc;
+    using ProtoR.Application.Common;
     using ProtoR.Application.Configuration;
     using ProtoR.Application.Group;
     using ProtoR.Application.Schema;
@@ -44,12 +46,12 @@ namespace ProtoR.Web.Controllers
         [ProducesResponseType(typeof(ErrorModel), StatusCodes.Status403Forbidden)]
         [HttpGet]
         [PermissionClaim(Permission.GroupRead)]
-        public async Task<ActionResult<ResponseModel<IEnumerable<GroupReadModel>>>> Get()
+        public async Task<ActionResult<ResponseModel<PagedResult<GroupReadModel>>>> Get([FromQuery]GetGroupsQuery query)
         {
-            IEnumerable<GroupDto> groupsDto = await this.Mediator.Send(new GetGroupsQuery());
-            var groupResources = this.Mapper.Map<IEnumerable<GroupReadModel>>(groupsDto);
+            var groupsDto = await this.Mediator.Send(query);
+            var groupResources = this.Mapper.Map<PagedResult<GroupReadModel>>(groupsDto);
 
-            return this.Ok(new ResponseModel<IEnumerable<GroupReadModel>>(groupResources));
+            return this.Ok(new ResponseModel<PagedResult<GroupReadModel>>(groupResources));
         }
 
         /// <summary>
@@ -140,12 +142,12 @@ namespace ProtoR.Web.Controllers
         [HttpGet]
         [Route("{Name}/Schemas")]
         [PermissionClaim(Permission.SchemaRead)]
-        public async Task<ActionResult<ResponseModel<IEnumerable<SchemaReadModel>>>> GetSchemas([FromRoute]GetGroupSchemasQuery query)
+        public async Task<ActionResult<ResponseModel<PagedResult<SchemaReadModel>>>> GetSchemas([FromRoute]GetGroupSchemasQuery query)
         {
-            IEnumerable<SchemaDto> schemasDto = await this.Mediator.Send(query);
-            var schemaResources = this.Mapper.Map<IEnumerable<SchemaReadModel>>(schemasDto);
+            var schemasDto = await this.Mediator.Send(query);
+            var schemaResources = this.Mapper.Map<PagedResult<SchemaReadModel>>(schemasDto);
 
-            return this.Ok(new ResponseModel<IEnumerable<SchemaReadModel>>(schemaResources));
+            return this.Ok(new ResponseModel<PagedResult<SchemaReadModel>>(schemaResources));
         }
 
         /// <summary>

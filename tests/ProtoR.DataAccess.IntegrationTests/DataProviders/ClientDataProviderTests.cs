@@ -5,6 +5,7 @@ namespace ProtoR.DataAccess.IntegrationTests.DataProviders
     using System.Threading.Tasks;
     using Apache.Ignite.Core.Cache;
     using AutoFixture;
+    using ProtoR.Application.Common;
     using ProtoR.DataAccess.IntegrationTests.Fixtures;
     using ProtoR.Infrastructure.DataAccess.CacheItems;
     using ProtoR.Infrastructure.DataAccess.DataProviders;
@@ -62,9 +63,12 @@ namespace ProtoR.DataAccess.IntegrationTests.DataProviders
                 await this.InsertClient(i + 1);
             }
 
-            var clients = await this.dataProvider.GetClients();
+            var clients = await this.dataProvider.GetClients(
+                Array.Empty<Filter>(),
+                SortOrder.Default("Id"),
+                Pagination.Default());
 
-            Assert.Equal(clientsCount, clients.Count());
+            Assert.Equal(clientsCount, clients.Items.Count());
         }
 
         [Fact]

@@ -4,6 +4,7 @@ namespace ProtoR.DataAccess.IntegrationTests.DataProviders
     using System.Threading.Tasks;
     using Apache.Ignite.Core.Cache;
     using AutoFixture;
+    using ProtoR.Application.Common;
     using ProtoR.DataAccess.IntegrationTests.Fixtures;
     using ProtoR.Infrastructure.DataAccess.CacheItems;
     using ProtoR.Infrastructure.DataAccess.DataProviders;
@@ -61,9 +62,12 @@ namespace ProtoR.DataAccess.IntegrationTests.DataProviders
                 await this.InsertUser(i + 1);
             }
 
-            var users = await this.dataProvider.GetUsers();
+            var users = await this.dataProvider.GetUsers(
+                Array.Empty<Filter>(),
+                SortOrder.Default("Id"),
+                Pagination.Default());
 
-            Assert.NotEmpty(users);
+            Assert.NotEmpty(users.Items);
         }
 
         private async Task InsertUser(long id)

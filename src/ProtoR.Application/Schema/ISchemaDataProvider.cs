@@ -2,6 +2,7 @@ namespace ProtoR.Application.Schema
 {
     using System.Collections.Generic;
     using System.Threading.Tasks;
+    using ProtoR.Application.Common;
 
     public interface ISchemaDataProvider
     {
@@ -9,6 +10,10 @@ namespace ProtoR.Application.Schema
 
         Task<SchemaDto> GetLatestVersion(string groupName);
 
-        Task<IEnumerable<SchemaDto>> GetGroupSchemas(string groupName);
+        Task<PagedResult<SchemaDto>> GetGroupSchemas(
+            string groupName,
+            IEnumerable<Filter> filters,
+            IEnumerable<SortOrder> sortOrders,
+            Pagination pagination);
     }
 }

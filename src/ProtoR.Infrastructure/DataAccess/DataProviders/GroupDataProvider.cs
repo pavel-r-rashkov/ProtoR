@@ -8,6 +8,7 @@ namespace ProtoR.Infrastructure.DataAccess.DataProviders
     using Apache.Ignite.Core.Cache;
     using Apache.Ignite.Linq;
     using Microsoft.Extensions.Options;
+    using ProtoR.Application.Common;
     using ProtoR.Application.Group;
     using ProtoR.Infrastructure.DataAccess.CacheItems;
 
@@ -51,7 +52,11 @@ namespace ProtoR.Infrastructure.DataAccess.DataProviders
             });
         }
 
-        public Task<IEnumerable<GroupDto>> GetGroups(Expression<Func<GroupDto, bool>> filter = null)
+        public Task<PagedResult<GroupDto>> GetGroups(
+            Expression<Func<GroupDto, bool>> filter,
+            IEnumerable<Filter> filters,
+            IEnumerable<SortOrder> sortOrders,
+            Pagination pagination)
         {
             var groups = this.groupCache
                 .AsCacheQueryable()
@@ -68,6 +73,15 @@ namespace ProtoR.Infrastructure.DataAccess.DataProviders
                 groups = groups.WhereWithTypeConversion(filter);
             }
 
+            groups = groups.Filter(filters);
+            var totalCount = groups
+                .Select(g => g.Id)
+                .Count();
+
+            groups = groups
+                .Sort(sortOrders)
+                .Page(pagination);
+
             var results = groups
                 .ToList()
                 .Select(g => new GroupDto
@@ -78,7 +92,7 @@ namespace ProtoR.Infrastructure.DataAccess.DataProviders
                     CreatedBy = g.CreatedBy,
                 });
 
-            return Task.FromResult(results);
+            return Task.FromResult(new PagedResult<GroupDto>(totalCount, results));
         }
 
         public Task<string> GetGroupNameById(long id)

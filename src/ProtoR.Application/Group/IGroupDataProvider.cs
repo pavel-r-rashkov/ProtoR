@@ -4,6 +4,7 @@ namespace ProtoR.Application.Group
     using System.Collections.Generic;
     using System.Linq.Expressions;
     using System.Threading.Tasks;
+    using ProtoR.Application.Common;
 
     public interface IGroupDataProvider
     {
@@ -11,6 +12,10 @@ namespace ProtoR.Application.Group
 
         Task<string> GetGroupNameById(long id);
 
-        Task<IEnumerable<GroupDto>> GetGroups(Expression<Func<GroupDto, bool>> filter);
+        Task<PagedResult<GroupDto>> GetGroups(
+            Expression<Func<GroupDto, bool>> filter,
+            IEnumerable<Filter> filters,
+            IEnumerable<SortOrder> sortOrders,
+            Pagination pagination);
     }
 }
