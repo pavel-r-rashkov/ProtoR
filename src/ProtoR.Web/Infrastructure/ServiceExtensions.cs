@@ -2,6 +2,7 @@ namespace ProtoR.Web.Infrastructure
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics;
     using System.IO;
     using System.Linq;
     using System.Net;
@@ -9,6 +10,7 @@ namespace ProtoR.Web.Infrastructure
     using System.Security.Cryptography.X509Certificates;
     using System.Threading.Tasks;
     using FluentValidation;
+    using FluentValidation.AspNetCore;
     using IdentityServer4.Models;
     using IdentityServer4.Services;
     using Microsoft.AspNetCore.Authorization;
@@ -17,6 +19,7 @@ namespace ProtoR.Web.Infrastructure
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
+    using Microsoft.Extensions.Diagnostics.HealthChecks;
     using Microsoft.OpenApi.Models;
     using ProtoR.Application.Common;
     using ProtoR.Domain.RoleAggregate;
@@ -179,8 +182,10 @@ namespace ProtoR.Web.Infrastructure
             return options;
         }
 
-        public static void ConfigureFluentValidation(this IServiceCollection services)
+        public static IMvcBuilder AddCustomFluentValidation(this IMvcBuilder builder)
         {
+            builder.AddFluentValidation(config => config.RegisterValidatorsFromAssemblyContaining<Startup>());
+
             ValidatorOptions.PropertyNameResolver = (type, member, expression) =>
             {
                 if (member == null)
@@ -196,6 +201,15 @@ namespace ProtoR.Web.Infrastructure
 
                 return member.Name;
             };
+
+            return builder;
+        }
+
+        public static IHealthChecksBuilder AddCustomHealthChecks(this IServiceCollection services)
+        {
+            return services
+                .AddHealthChecks()
+                .AddCheck<IgniteHealthCheck>(IgniteHealthCheck.Name);
         }
     }
 }

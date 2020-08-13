@@ -109,5 +109,15 @@ namespace ProtoR.Web.Infrastructure
 
             return app;
         }
+
+        public static IApplicationBuilder UseCustomEndpoints(this IApplicationBuilder app)
+        {
+            return app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapControllers();
+                endpoints.MapDefaultControllerRoute();
+                endpoints.MapHealthChecks("/hc");
+            });
+        }
     }
 }

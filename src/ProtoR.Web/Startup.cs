@@ -1,7 +1,6 @@
 ﻿namespace ProtoR.Web
 {
     using Autofac;
-    using FluentValidation.AspNetCore;
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.Extensions.Configuration;
@@ -9,7 +8,6 @@
     using Microsoft.Extensions.Options;
     using ProtoR.Web.Infrastructure;
     using ProtoR.Web.Infrastructure.Identity;
-    using ProtoR.Web.Infrastructure.ModelBinders;
 
     public class Startup
     {
@@ -40,7 +38,7 @@
                 .AddControllers()
                 .ConfigureCustomApiBehaviorOptions()
                 .AddHybridModelBinder()
-                .AddFluentValidation(config => config.RegisterValidatorsFromAssemblyContaining<Startup>());
+                .AddCustomFluentValidation();
 
             var authOptions = this.Configuration.Get<AuthenticationConfiguration>();
             services
@@ -50,7 +48,7 @@
                 .AddCustomIdentityServer(authOptions)
                 .AddCustomCors()
                 .AddCustomAuthentication()
-                .ConfigureFluentValidation();
+                .AddCustomHealthChecks();
         }
 
         public void Configure(
@@ -65,11 +63,7 @@
                 .UseRouting()
                 .UseCors()
                 .UseCustomAuthentication(authOptions)
-                .UseEndpoints(endpoints =>
-                {
-                    endpoints.MapControllers();
-                    endpoints.MapDefaultControllerRoute();
-                });
+                .UseCustomEndpoints();
         }
     }
 }
