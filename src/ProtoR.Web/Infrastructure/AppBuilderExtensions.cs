@@ -15,6 +15,7 @@ namespace ProtoR.Web.Infrastructure
     using ProtoR.Infrastructure.DataAccess;
     using ProtoR.Web.Infrastructure.Identity;
     using ProtoR.Web.Resources;
+    using Serilog;
 
     public static class AppBuilderExtensions
     {
@@ -43,7 +44,9 @@ namespace ProtoR.Web.Infrastructure
             return app;
         }
 
-        public static IApplicationBuilder UseCustomExceptionHandler(this IApplicationBuilder app)
+        public static IApplicationBuilder UseCustomExceptionHandler(
+            this IApplicationBuilder app,
+            ILogger logger)
         {
             app.UseExceptionHandler(options =>
             {
@@ -76,9 +79,12 @@ namespace ProtoR.Web.Infrastructure
                                 error = exception.PublicMessage;
                                 break;
                         }
+
+                        logger
+                            .ForContext(Serilog.Core.Constants.SourceContextPropertyName, nameof(UseCustomExceptionHandler))
+                            .Warning(exceptionHandlerPathFeature?.Error, "Exception handled in middleware");
                     }
 
-                    // TODO Log exception
                     var serializerSettings = new JsonSerializerSettings
                     {
                         ContractResolver = new DefaultContractResolver

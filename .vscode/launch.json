@@ -39,7 +39,7 @@
             // Enable launching a web browser when ASP.NET Core starts. For more information: https://aka.ms/VSCode-CS-LaunchJson-WebBrowser
             "serverReadyAction": {
                 "action": "openExternally",
-                "pattern": "^\\s*Now listening on:\\s+(https?://\\S+)"                
+                "pattern": "^\\s*Now listening on:\\s+(https?://\\S+)"
             },
             "env": {
                 "ASPNETCORE_ENVIRONMENT": "Development",
@@ -50,7 +50,9 @@
 				"PROTOR_AuthenticationEnabled": "false",
 				// "PROTOR_SigningCredentialPath": "path/to/integritycert.pfx",
                 // "PROTOR_SigningCredentialPassword": "integritycert.pfx password goes here",
-                "COMPlus_EnableAlternateStackCheck": "1"
+				"COMPlus_EnableAlternateStackCheck": "1",
+				"PROTOR_Logging__MinLevel": "Warning",
+				// "PROTOR_Logging__LogFileLocation": "/path/to/log.txt"
             },
             "sourceFileMap": {
                 "/Views": "${workspaceFolder}/Views"

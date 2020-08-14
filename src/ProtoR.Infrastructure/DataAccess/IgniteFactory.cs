@@ -1,7 +1,6 @@
 namespace ProtoR.Infrastructure.DataAccess
 {
     using System;
-    using System.Diagnostics;
     using System.Linq;
     using System.Threading.Tasks;
     using Apache.Ignite.Core;
@@ -24,14 +23,19 @@ namespace ProtoR.Infrastructure.DataAccess
     {
         private readonly IgniteExternalConfiguration externalConfiguration;
         private readonly IMediator mediator;
+        private readonly Serilog.ILogger logger;
         private IIgnite ignite;
 
         public IgniteFactory(
             IOptions<IgniteExternalConfiguration> externalConfiguration,
-            IMediator mediator)
+            IMediator mediator,
+            Serilog.ILogger logger)
         {
             this.externalConfiguration = externalConfiguration.Value;
             this.mediator = mediator;
+            this.logger = logger.ForContext(
+                Serilog.Core.Constants.SourceContextPropertyName,
+                CacheConstants.IgniteLogSource);
         }
 
         public IIgnite Instance()
@@ -59,22 +63,27 @@ namespace ProtoR.Infrastructure.DataAccess
 
             if (!cluster.IsActive())
             {
-                Debug.WriteLine("-------- Activate cluster");
+                this.logger.Information("Cluster is disabled, activating");
                 cluster.SetActive(true);
+                this.logger.Information("Cluster activated");
             }
             else
             {
-                Debug.WriteLine("-------- Join / Change topology");
+                this.logger.Information("Cluster is activated, changing topology");
                 var baseLine = cluster.GetBaselineTopology();
                 baseLine.Add(cluster.GetLocalNode());
                 cluster.SetBaselineTopology(baseLine);
+                this.logger.Information("Topology changed");
             }
 
             this.InitializeCaches();
+            this.logger.Information("Caches initialized");
             this.CreateInitialData().GetAwaiter().GetResult();
+            this.logger.Information("Initial data created");
 
             var services = cluster.ForNodes(cluster.GetNodes()).GetServices();
             services.DeployClusterSingleton(nameof(IClusterSingletonService), new ClusterSingletonService());
+            this.logger.Information("Deployed service {0}", nameof(IClusterSingletonService));
         }
 
         private async Task CreateInitialData()
@@ -120,13 +129,14 @@ namespace ProtoR.Infrastructure.DataAccess
             {
                 // Authentication can be enabled only when persistence is active
                 AuthenticationEnabled = externalConfiguration.EnablePersistence,
+                Logger = new IgniteSerilogLogger(this.logger),
                 WorkDirectory = storagePath,
                 BinaryConfiguration = new BinaryConfiguration
                 {
                     Serializer = new BinaryReflectiveSerializer { ForceTimestamp = true },
                 },
                 PluginConfigurations = new[] { new AutoFacPluginConfiguration() },
-                FailureHandler = new NoOpFailureHandler(), // TODO For Debug
+                FailureHandler = new NoOpFailureHandler(),
                 ClientMode = false,
                 DiscoverySpi = new TcpDiscoverySpi
                 {

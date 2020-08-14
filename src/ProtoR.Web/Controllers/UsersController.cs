@@ -1,30 +1,23 @@
 namespace ProtoR.Web.Controllers
 {
-    using System.Collections.Generic;
     using System.Threading.Tasks;
     using AutoMapper;
     using MediatR;
     using Microsoft.AspNetCore.Http;
-    using Microsoft.AspNetCore.Identity;
     using Microsoft.AspNetCore.Mvc;
     using ProtoR.Application.Common;
     using ProtoR.Application.User;
-    using ProtoR.Domain.UserAggregate;
     using ProtoR.Web.Infrastructure.Identity;
     using ProtoR.Web.Resources;
     using ProtoR.Web.Resources.UserResource;
 
     public class UsersController : BaseController
     {
-        private readonly UserManager<User> userManager;
-
         public UsersController(
             IMediator mediator,
-            IMapper mapper,
-            UserManager<User> userManager)
+            IMapper mapper)
             : base(mediator, mapper)
         {
-            this.userManager = userManager;
         }
 
         /// <summary>

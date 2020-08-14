@@ -8,6 +8,7 @@
     using Microsoft.Extensions.Options;
     using ProtoR.Web.Infrastructure;
     using ProtoR.Web.Infrastructure.Identity;
+    using Serilog;
 
     public class Startup
     {
@@ -53,12 +54,13 @@
 
         public void Configure(
             IApplicationBuilder application,
-            IOptions<AuthenticationConfiguration> authOptions)
+            IOptions<AuthenticationConfiguration> authOptions,
+            ILogger logger)
         {
             application
                 .UseIgnite()
                 .UseCustomSwagger(this.Environment)
-                .UseCustomExceptionHandler()
+                .UseCustomExceptionHandler(logger)
                 .UseHttpsRedirection()
                 .UseRouting()
                 .UseCors()

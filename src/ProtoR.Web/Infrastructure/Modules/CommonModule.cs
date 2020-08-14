@@ -3,6 +3,7 @@ namespace ProtoR.Web.Infrastructure.Modules
     using Autofac;
     using ProtoR.Application;
     using ProtoR.Web.Infrastructure;
+    using Serilog;
 
     public class CommonModule : Module
     {
@@ -12,6 +13,9 @@ namespace ProtoR.Web.Infrastructure.Modules
                 .RegisterType<UserProvider>()
                 .As<IUserProvider>()
                 .InstancePerLifetimeScope();
+
+            builder
+                .RegisterInstance(Log.Logger);
         }
     }
 }

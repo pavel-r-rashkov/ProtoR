@@ -6,6 +6,7 @@ namespace ProtoR.DataAccess.IntegrationTests.Fixtures
     using Moq;
     using ProtoR.Infrastructure.DataAccess;
     using ProtoR.Infrastructure.DataAccess.CacheItems;
+    using Serilog;
 
     public sealed class IgniteFixture : IDisposable
     {
@@ -33,7 +34,11 @@ namespace ProtoR.DataAccess.IntegrationTests.Fixtures
                 EnablePersistence = true,
             };
             this.Configuration = Options.Create(externalConfiguration);
-            this.IgniteFactory = new IgniteFactory(this.Configuration, new Mock<IMediator>().Object);
+            var logger = new LoggerConfiguration().CreateLogger();
+            this.IgniteFactory = new IgniteFactory(
+                this.Configuration,
+                new Mock<IMediator>().Object,
+                logger);
             this.IgniteFactory.InitalizeIgnite();
         }
 

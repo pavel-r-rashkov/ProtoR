@@ -1,15 +1,12 @@
 namespace ProtoR.Web.Controllers
 {
-    using System.Collections.Generic;
     using System.Threading.Tasks;
     using AutoMapper;
     using MediatR;
     using Microsoft.AspNetCore.Http;
-    using Microsoft.AspNetCore.Identity;
     using Microsoft.AspNetCore.Mvc;
     using ProtoR.Application.Common;
     using ProtoR.Application.Role;
-    using ProtoR.Domain.RoleAggregate;
     using ProtoR.Web.Infrastructure.Identity;
     using ProtoR.Web.Resources;
     using ProtoR.Web.Resources.RoleResource;
@@ -17,15 +14,11 @@ namespace ProtoR.Web.Controllers
 
     public class RolesController : BaseController
     {
-        private readonly RoleManager<Role> manager;
-
         public RolesController(
             IMediator mediator,
-            IMapper mapper,
-            RoleManager<Role> manager)
+            IMapper mapper)
             : base(mediator, mapper)
         {
-            this.manager = manager;
         }
 
         /// <summary>

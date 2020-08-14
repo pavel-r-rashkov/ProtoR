@@ -11,6 +11,7 @@ namespace ProtoR.Infrastructure.DataAccess
     using MediatR;
     using ProtoR.Application.Schema;
     using ProtoR.Infrastructure.DataAccess.DependencyInjection;
+    using Serilog;
 
     [Serializable]
     public class ClusterSingletonService : IService, IClusterSingletonService
@@ -42,6 +43,8 @@ namespace ProtoR.Infrastructure.DataAccess
             _ = command ?? throw new ArgumentNullException(nameof(command));
             using var childScope = this.autoFacPlugin.Scope.BeginLifetimeScope();
             var mediator = childScope.Resolve<IMediator>();
+            var logger = childScope.Resolve<ILogger>();
+
             var mutexName = string.Format(CultureInfo.InvariantCulture, MutexNameFormat, command.Name);
             using var mutex = new Mutex(true, mutexName);
 
@@ -59,7 +62,7 @@ namespace ProtoR.Infrastructure.DataAccess
             }
             catch (AggregateException ex)
             {
-                // TODO log
+                logger.Error(ex, "Error adding schema from cluster singleton service");
                 throw ex.InnerException;
             }
             finally
