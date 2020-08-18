@@ -125,5 +125,15 @@ namespace ProtoR.Web.Infrastructure
                 endpoints.MapHealthChecks("/hc");
             });
         }
+
+        public static IApplicationBuilder UseCustomHttpsRedirection(this IApplicationBuilder app, IOptions<TlsConfiguration> tlsConfiguration)
+        {
+            if (tlsConfiguration.Value.ForceHttps)
+            {
+                app.UseHttpsRedirection();
+            }
+
+            return app;
+        }
     }
 }

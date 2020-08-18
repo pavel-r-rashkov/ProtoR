@@ -55,13 +55,14 @@
         public void Configure(
             IApplicationBuilder application,
             IOptions<AuthenticationConfiguration> authOptions,
+            IOptions<TlsConfiguration> tlsConfiguration,
             ILogger logger)
         {
             application
                 .UseIgnite()
                 .UseCustomSwagger(this.Environment)
                 .UseCustomExceptionHandler(logger)
-                .UseHttpsRedirection()
+                .UseCustomHttpsRedirection(tlsConfiguration)
                 .UseRouting()
                 .UseCors()
                 .UseCustomAuthentication(authOptions)

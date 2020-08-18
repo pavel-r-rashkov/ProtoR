@@ -2,7 +2,6 @@ namespace ProtoR.Web.Infrastructure
 {
     using System;
     using System.Collections.Generic;
-    using System.Diagnostics;
     using System.IO;
     using System.Linq;
     using System.Net;
@@ -19,7 +18,6 @@ namespace ProtoR.Web.Infrastructure
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
-    using Microsoft.Extensions.Diagnostics.HealthChecks;
     using Microsoft.OpenApi.Models;
     using ProtoR.Application.Common;
     using ProtoR.Domain.RoleAggregate;
@@ -147,6 +145,7 @@ namespace ProtoR.Web.Infrastructure
         {
             services.Configure<IgniteExternalConfiguration>(configuration);
             services.Configure<AuthenticationConfiguration>(configuration);
+            services.Configure<TlsConfiguration>(configuration.GetSection(nameof(TlsConfiguration)));
 
             return services;
         }

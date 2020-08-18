@@ -37,5 +37,7 @@ namespace ProtoR.Infrastructure.DataAccess
         public string StoragePath { get; set; }
 
         public bool EnablePersistence { get; set; }
+
+        public IgniteTlsConfiguration TlsConfiguration { get; set; }
     }
 }

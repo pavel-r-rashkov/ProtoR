@@ -12,6 +12,7 @@ namespace ProtoR.Infrastructure.DataAccess
     using Apache.Ignite.Core.Discovery.Tcp;
     using Apache.Ignite.Core.Discovery.Tcp.Static;
     using Apache.Ignite.Core.Failure;
+    using Apache.Ignite.Core.Ssl;
     using Autofac;
     using MediatR;
     using Microsoft.Extensions.Options;
@@ -21,6 +22,7 @@ namespace ProtoR.Infrastructure.DataAccess
 
     public class IgniteFactory : IIgniteFactory
     {
+        private const string DefaultStoreType = "jks";
         private readonly IgniteExternalConfiguration externalConfiguration;
         private readonly IMediator mediator;
         private readonly Serilog.ILogger logger;
@@ -124,11 +126,29 @@ namespace ProtoR.Infrastructure.DataAccess
         private IgniteConfiguration CreateIgniteConfig(IgniteExternalConfiguration externalConfiguration)
         {
             string storagePath = externalConfiguration.StoragePath;
+            SslContextFactory sslContextFactory = null;
+
+            if (externalConfiguration.TlsConfiguration != null
+                && !string.IsNullOrEmpty(externalConfiguration.TlsConfiguration.KeyStoreLocation))
+            {
+                sslContextFactory = new SslContextFactory(
+                    externalConfiguration.TlsConfiguration.KeyStoreLocation,
+                    externalConfiguration.TlsConfiguration.KeyStorePassword,
+                    externalConfiguration.TlsConfiguration.TrustStoreLocation,
+                    externalConfiguration.TlsConfiguration.TrustStorePassword)
+                {
+                    KeyStoreType = externalConfiguration.TlsConfiguration.KeyStoreType ?? DefaultStoreType,
+                    TrustStoreType = externalConfiguration.TlsConfiguration.TrustStoreType ?? DefaultStoreType,
+                };
+            }
+
+            // Authentication can be enabled only when persistence is active
+            var authenticationEnabled = externalConfiguration.EnablePersistence;
 
             return new IgniteConfiguration
             {
-                // Authentication can be enabled only when persistence is active
-                AuthenticationEnabled = externalConfiguration.EnablePersistence,
+                SslContextFactory = sslContextFactory,
+                AuthenticationEnabled = authenticationEnabled,
                 Logger = new IgniteSerilogLogger(this.logger),
                 WorkDirectory = storagePath,
                 BinaryConfiguration = new BinaryConfiguration
