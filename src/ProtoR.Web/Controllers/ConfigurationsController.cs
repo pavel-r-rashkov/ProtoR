@@ -51,17 +51,17 @@ namespace ProtoR.Web.Controllers
         /// </summary>
         /// <returns>No content.</returns>
         /// <response code="204">Configuration updated successfully.</response>
-        /// <response code="400">Configuration data is invalid.</response>
         /// <response code="401">User or client is not authenticated.</response>
         /// <response code="403">
         /// "ConfigurationWrite" permission is missing or user/client doesn't have access to the group associated with this configuration.
         /// </response>
         /// <response code="404">Configuration with the specified ID doesn't exist.</response>
+        /// <response code="422">Configuration data is invalid.</response>
         [ProducesResponseType(StatusCodes.Status204NoContent)]
-        [ProducesResponseType(typeof(ErrorModel), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ErrorModel), StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(typeof(ErrorModel), StatusCodes.Status403Forbidden)]
         [ProducesResponseType(typeof(ErrorModel), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ErrorModel), StatusCodes.Status422UnprocessableEntity)]
         [HttpPut]
         [Route("{ConfigurationId}")]
         [PermissionClaim(Permission.ConfigurationWrite)]

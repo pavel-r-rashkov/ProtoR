@@ -164,7 +164,7 @@ namespace ProtoR.Web.Infrastructure
                             ErrorMessages = context.ModelState[errorKey].Errors.Select(error => error.ErrorMessage),
                         });
 
-                    return new BadRequestObjectResult(new ErrorModel
+                    return new UnprocessableEntityObjectResult(new ErrorModel
                     {
                         Errors = errors,
                         Message = "Invalid request data.",

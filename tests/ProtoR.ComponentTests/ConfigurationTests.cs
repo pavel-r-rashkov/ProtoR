@@ -151,7 +151,7 @@ namespace ProtoR.ComponentTests
         }
 
         [Fact]
-        public async Task PutConfiguration_WithInvalidConfiguration_ShouldReturn400BadRequest()
+        public async Task PutConfiguration_WithInvalidConfiguration_ShouldReturn422UnprocessableEntity()
         {
             var uriBuilder = new UriBuilder(Constants.BaseAddress)
             {
@@ -177,7 +177,7 @@ namespace ProtoR.ComponentTests
             using var contents = new JsonHttpContent(configuration);
             var response = await this.Client.PutAsync(uriBuilder.Uri, contents);
 
-            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+            Assert.Equal(HttpStatusCode.UnprocessableEntity, response.StatusCode);
         }
     }
 }

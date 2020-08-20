@@ -130,7 +130,7 @@ namespace ProtoR.ComponentTests
         }
 
         [Fact]
-        public async Task CreateGroup_WithDuplicatedGroupName_ShouldReturn400BadRequest()
+        public async Task CreateGroup_WithDuplicatedGroupName_ShouldReturn422UnprocessableEntity()
         {
             var uriBuilder = new UriBuilder(Constants.BaseAddress)
             {
@@ -144,12 +144,12 @@ namespace ProtoR.ComponentTests
             using var contents = new JsonHttpContent(group);
             var response = await this.Client.PostAsync(uriBuilder.Uri, contents);
 
-            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+            Assert.Equal(HttpStatusCode.UnprocessableEntity, response.StatusCode);
         }
 
         [Theory]
         [MemberData(nameof(InvalidGroups))]
-        public async Task CreateGroup_WithInvalidData_ShouldReturn400BadRequest(GroupWriteModel group)
+        public async Task CreateGroup_WithInvalidData_ShouldReturn422UnprocessableEntity(GroupWriteModel group)
         {
             var uriBuilder = new UriBuilder(Constants.BaseAddress)
             {
@@ -159,7 +159,7 @@ namespace ProtoR.ComponentTests
             using var contents = new JsonHttpContent(group);
             var response = await this.Client.PostAsync(uriBuilder.Uri, contents);
 
-            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+            Assert.Equal(HttpStatusCode.UnprocessableEntity, response.StatusCode);
         }
 
         [Fact]
@@ -199,7 +199,7 @@ namespace ProtoR.ComponentTests
         }
 
         [Fact]
-        public async Task CreateSchema_WithInvalidSchema_ShouldReturn400BadRequest()
+        public async Task CreateSchema_WithInvalidSchema_ShouldReturn422UnprocessableEntity()
         {
             var uriBuilder = new UriBuilder(Constants.BaseAddress)
             {
@@ -213,7 +213,7 @@ namespace ProtoR.ComponentTests
             using var contents = new JsonHttpContent(group);
             var response = await this.Client.PostAsync(uriBuilder.Uri, contents);
 
-            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+            Assert.Equal(HttpStatusCode.UnprocessableEntity, response.StatusCode);
         }
 
         [Fact]
@@ -253,7 +253,7 @@ namespace ProtoR.ComponentTests
         }
 
         [Fact]
-        public async Task SchemaTest_WithInvalidSchema_ShouldReturn400BadRequest()
+        public async Task SchemaTest_WithInvalidSchema_ShouldReturn422UnprocessableEntity()
         {
             var uriBuilder = new UriBuilder(Constants.BaseAddress)
             {
@@ -267,7 +267,7 @@ namespace ProtoR.ComponentTests
             using var contents = new JsonHttpContent(group);
             var response = await this.Client.PostAsync(uriBuilder.Uri, contents);
 
-            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+            Assert.Equal(HttpStatusCode.UnprocessableEntity, response.StatusCode);
         }
 
         [Fact]

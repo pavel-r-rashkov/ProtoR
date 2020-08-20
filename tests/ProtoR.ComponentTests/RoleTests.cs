@@ -84,7 +84,7 @@ namespace ProtoR.ComponentTests
 
         [Theory]
         [MemberData(nameof(InvalidRoles))]
-        public async Task PostRole_WithInvalidData_ShouldReturn400BadRequest(RoleWriteModel role)
+        public async Task PostRole_WithInvalidData_ShouldReturn422UnprocessableEntity(RoleWriteModel role)
         {
             var uriBuilder = new UriBuilder(Constants.BaseAddress)
             {
@@ -94,7 +94,7 @@ namespace ProtoR.ComponentTests
             using var contents = new JsonHttpContent(role);
             var response = await this.Client.PostAsync(uriBuilder.Uri, contents);
 
-            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+            Assert.Equal(HttpStatusCode.UnprocessableEntity, response.StatusCode);
         }
 
         [Fact]
@@ -123,7 +123,7 @@ namespace ProtoR.ComponentTests
 
         [Theory]
         [MemberData(nameof(InvalidRoles))]
-        public async Task PutRole_WithInvalidData_ShouldReturn400BadRequest(RoleWriteModel role)
+        public async Task PutRole_WithInvalidData_ShouldReturn422UnprocessableEntity(RoleWriteModel role)
         {
             var id = this.ApplicationFactory.RoleId;
             var uriBuilder = new UriBuilder(Constants.BaseAddress)
@@ -134,7 +134,7 @@ namespace ProtoR.ComponentTests
             using var contents = new JsonHttpContent(role);
             var response = await this.Client.PutAsync(uriBuilder.Uri, contents);
 
-            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+            Assert.Equal(HttpStatusCode.UnprocessableEntity, response.StatusCode);
         }
 
         [Fact]

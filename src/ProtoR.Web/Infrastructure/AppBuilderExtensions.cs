@@ -75,7 +75,7 @@ namespace ProtoR.Web.Infrastructure
                                 error = exception.PublicMessage;
                                 break;
                             case DomainException exception:
-                                statusCode = (int)HttpStatusCode.BadRequest;
+                                statusCode = (int)HttpStatusCode.UnprocessableEntity;
                                 error = exception.PublicMessage;
                                 break;
                         }

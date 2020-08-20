@@ -69,13 +69,13 @@ namespace ProtoR.Web.Controllers
         /// </summary>
         /// <returns>No content.</returns>
         /// <response code="201">Role created successfully.</response>
-        /// <response code="400">Role data is invalid.</response>
+        /// <response code="422">Role data is invalid.</response>
         /// <response code="401">User or client is not authenticated.</response>
         /// <response code="403">"RoleWrite" permission is missing.</response>
         [ProducesResponseType(StatusCodes.Status201Created)]
-        [ProducesResponseType(typeof(ErrorModel), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ErrorModel), StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(typeof(ErrorModel), StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(typeof(ErrorModel), StatusCodes.Status422UnprocessableEntity)]
         [HttpPost]
         [PermissionClaim(Permission.RoleWrite)]
         public async Task<ActionResult> Post([FromBody]RoleWriteModel role)
@@ -91,12 +91,12 @@ namespace ProtoR.Web.Controllers
         /// </summary>
         /// <returns>No content.</returns>
         /// <response code="204">Role updated successfully.</response>
-        /// <response code="400">Role data is invalid.</response>
         /// <response code="401">User or client is not authenticated.</response>
         /// <response code="403">"RoleWrite" permission is missing.</response>
         /// <response code="404">Role with the specified ID doesn't exist.</response>
+        /// <response code="422">Role data is invalid.</response>
         [ProducesResponseType(StatusCodes.Status204NoContent)]
-        [ProducesResponseType(typeof(ErrorModel), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ErrorModel), StatusCodes.Status422UnprocessableEntity)]
         [ProducesResponseType(typeof(ErrorModel), StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(typeof(ErrorModel), StatusCodes.Status403Forbidden)]
         [ProducesResponseType(typeof(ErrorModel), StatusCodes.Status404NotFound)]

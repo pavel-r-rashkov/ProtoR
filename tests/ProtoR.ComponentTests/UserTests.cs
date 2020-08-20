@@ -79,7 +79,7 @@ namespace ProtoR.ComponentTests
 
         [Theory]
         [MemberData(nameof(InvalidNewUsers))]
-        public async Task PostUser_WithInvalidData_ShouldReturn400BadRequest(UserPostModel user)
+        public async Task PostUser_WithInvalidData_ShouldReturn422UnprocessableEntity(UserPostModel user)
         {
             var uriBuilder = new UriBuilder(Constants.BaseAddress)
             {
@@ -89,7 +89,7 @@ namespace ProtoR.ComponentTests
             using var contents = new JsonHttpContent(user);
             var response = await this.Client.PostAsync(uriBuilder.Uri, contents);
 
-            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+            Assert.Equal(HttpStatusCode.UnprocessableEntity, response.StatusCode);
         }
 
         [Fact]

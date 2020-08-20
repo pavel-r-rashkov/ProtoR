@@ -59,15 +59,15 @@ namespace ProtoR.Web.Controllers
         /// </summary>
         /// <returns>No content.</returns>
         /// <response code="201">Group created successfully.</response>
-        /// <response code="400">Group data is invalid or a group with the same name already exists.</response>
         /// <response code="401">User or client is not authenticated.</response>
         /// <response code="403">
         /// "GroupWrite" permission is missing or user/client doesn't have access to this group.
         /// </response>
+        /// <response code="422">Group data is invalid or a group with the same name already exists.</response>
         [ProducesResponseType(StatusCodes.Status201Created)]
-        [ProducesResponseType(typeof(ErrorModel), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ErrorModel), StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(typeof(ErrorModel), StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(typeof(ErrorModel), StatusCodes.Status422UnprocessableEntity)]
         [HttpPost]
         [PermissionClaim(Permission.GroupWrite)]
         public async Task<ActionResult> Post(GroupWriteModel group)
@@ -155,17 +155,17 @@ namespace ProtoR.Web.Controllers
         /// </summary>
         /// <returns>Schema.</returns>
         /// <response code="200">Schema with requested version.</response>
-        /// <response code="400">Version is invalid.</response>
         /// <response code="401">User or client is not authenticated.</response>
         /// <response code="403">
         /// "SchemaRead" permission is missing or user/client doesn't have access to this group.
         /// </response>
         /// <response code="404">Schema with specified version doesn't exist.</response>
+        /// <response code="422">Version is invalid.</response>
         [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(ErrorModel), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ErrorModel), StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(typeof(ErrorModel), StatusCodes.Status403Forbidden)]
         [ProducesResponseType(typeof(ErrorModel), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ErrorModel), StatusCodes.Status422UnprocessableEntity)]
         [HttpGet]
         [Route("{Name}/Schemas/{Version}")]
         [PermissionClaim(Permission.SchemaRead)]
@@ -182,17 +182,17 @@ namespace ProtoR.Web.Controllers
         /// </summary>
         /// <returns>No content.</returns>
         /// <response code="201">Schema was added successfully.</response>
-        /// <response code="400">Schema is invalid or doesn't pass group rule restrictions.</response>
         /// <response code="401">User or client is not authenticated.</response>
         /// <response code="403">
         /// "SchemaWrite" permission is missing or user/client doesn't have access to this group.
         /// </response>
         /// <response code="404">Group with specified name doesn't exist.</response>
+        /// <response code="422">Schema is invalid or doesn't pass group rule restrictions.</response>
         [ProducesResponseType(StatusCodes.Status201Created)]
-        [ProducesResponseType(typeof(ErrorModel), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ErrorModel), StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(typeof(ErrorModel), StatusCodes.Status403Forbidden)]
         [ProducesResponseType(typeof(ErrorModel), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ErrorModel), StatusCodes.Status422UnprocessableEntity)]
         [HttpPost]
         [Route("{Name}/Schemas")]
         [PermissionClaim(Permission.SchemaWrite)]
@@ -221,17 +221,17 @@ namespace ProtoR.Web.Controllers
         /// </summary>
         /// <returns>Validation result.</returns>
         /// <response code="200">Schema validation result.</response>
-        /// <response code="400">Schema is invalid.</response>
         /// <response code="401">User or client is not authenticated.</response>
         /// <response code="403">
         /// "SchemaRead" permission is missing or user/client doesn't have access to this group.
         /// </response>
         /// <response code="404">Group with specified name doesn't exist.</response>
+        /// <response code="422">Schema is invalid.</response>
         [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(ErrorModel), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ErrorModel), StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(typeof(ErrorModel), StatusCodes.Status403Forbidden)]
         [ProducesResponseType(typeof(ErrorModel), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ErrorModel), StatusCodes.Status422UnprocessableEntity)]
         [HttpPost]
         [Route("{Name}/SchemaTest")]
         [PermissionClaim(Permission.SchemaRead)]

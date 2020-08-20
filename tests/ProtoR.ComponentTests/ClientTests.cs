@@ -82,7 +82,7 @@ namespace ProtoR.ComponentTests
 
         [Theory]
         [MemberData(nameof(InvalidClients))]
-        public async Task PostClient_WithInvalidData_ShouldReturn400BadRequest(ClientWriteModel authClient)
+        public async Task PostClient_WithInvalidData_ShouldReturn422UnprocessableEntity(ClientWriteModel authClient)
         {
             var uriBuilder = new UriBuilder(Constants.BaseAddress)
             {
@@ -92,7 +92,7 @@ namespace ProtoR.ComponentTests
             using var contents = new JsonHttpContent(authClient);
             var response = await this.Client.PostAsync(uriBuilder.Uri, contents);
 
-            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+            Assert.Equal(HttpStatusCode.UnprocessableEntity, response.StatusCode);
         }
 
         [Fact]
@@ -144,7 +144,7 @@ namespace ProtoR.ComponentTests
 
         [Theory]
         [MemberData(nameof(InvalidClients))]
-        public async Task PutClient_WithInvalidData_ShouldReturn400BadRequest(ClientWriteModel authClient)
+        public async Task PutClient_WithInvalidData_ShouldReturn422UnprocessableEntity(ClientWriteModel authClient)
         {
             var id = this.ApplicationFactory.ClientId;
             var uriBuilder = new UriBuilder(Constants.BaseAddress)
@@ -155,7 +155,7 @@ namespace ProtoR.ComponentTests
             using var contents = new JsonHttpContent(authClient);
             var response = await this.Client.PutAsync(uriBuilder.Uri, contents);
 
-            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+            Assert.Equal(HttpStatusCode.UnprocessableEntity, response.StatusCode);
         }
 
         [Fact]
