@@ -20,8 +20,8 @@ namespace ProtoR.Infrastructure.DataAccess.DataProviders
             IOptions<IgniteExternalConfiguration> configurationProvider)
             : base(igniteFactory, configurationProvider)
         {
-            this.roleCache = this.Ignite.GetOrCreateCache<long, RoleCacheItem>(this.ConfigurationProvider.RoleCacheName);
-            this.rolePermissionCache = this.Ignite.GetOrCreateCache<RolePermissionKey, EmptyCacheItem>(this.ConfigurationProvider.RolePermissionCacheName);
+            this.roleCache = this.Ignite.GetOrCreateCache<long, RoleCacheItem>(this.ConfigurationProvider.CacheNames.RoleCacheName);
+            this.rolePermissionCache = this.Ignite.GetOrCreateCache<RolePermissionKey, EmptyCacheItem>(this.ConfigurationProvider.CacheNames.RolePermissionCacheName);
         }
 
         public async Task<RoleDto> GetById(long id)

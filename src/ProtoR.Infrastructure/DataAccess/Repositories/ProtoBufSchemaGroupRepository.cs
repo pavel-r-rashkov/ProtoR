@@ -25,10 +25,10 @@ namespace ProtoR.Infrastructure.DataAccess.Repositories
             IOptions<IgniteExternalConfiguration> configurationProvider)
             : base(igniteFactory, configurationProvider, userProvider)
         {
-            this.schemaCacheName = this.ConfigurationProvider.SchemaCacheName;
-            this.schemaGroupCacheName = this.ConfigurationProvider.SchemaGroupCacheName;
-            this.configurationCacheName = this.ConfigurationProvider.ConfigurationCacheName;
-            this.ruleConfigurationCacheName = this.ConfigurationProvider.RuleConfigurationCacheName;
+            this.schemaCacheName = this.ConfigurationProvider.CacheNames.SchemaCacheName;
+            this.schemaGroupCacheName = this.ConfigurationProvider.CacheNames.SchemaGroupCacheName;
+            this.configurationCacheName = this.ConfigurationProvider.CacheNames.ConfigurationCacheName;
+            this.ruleConfigurationCacheName = this.ConfigurationProvider.CacheNames.RuleConfigurationCacheName;
         }
 
         public async Task<long> Add(ProtoBufSchemaGroup schemaGroup)

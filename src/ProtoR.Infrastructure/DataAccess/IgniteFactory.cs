@@ -95,16 +95,16 @@ namespace ProtoR.Infrastructure.DataAccess
 
         private void InitializeCaches()
         {
-            this.ignite.GetOrCreateCache<long, ConfigurationCacheItem>(this.externalConfiguration.ConfigurationCacheName);
-            this.ignite.GetOrCreateCache<long, RuleConfigurationCacheItem>(this.externalConfiguration.RuleConfigurationCacheName);
-            this.ignite.GetOrCreateCache<long, SchemaCacheItem>(this.externalConfiguration.SchemaCacheName);
-            this.ignite.GetOrCreateCache<long, SchemaGroupCacheItem>(this.externalConfiguration.SchemaGroupCacheName);
-            this.ignite.GetOrCreateCache<long, UserCacheItem>(this.externalConfiguration.UserCacheName);
-            this.ignite.GetOrCreateCache<UserRoleKey, EmptyCacheItem>(this.externalConfiguration.UserRoleCacheName);
-            this.ignite.GetOrCreateCache<long, RoleCacheItem>(this.externalConfiguration.RoleCacheName);
-            this.ignite.GetOrCreateCache<RolePermissionKey, EmptyCacheItem>(this.externalConfiguration.RolePermissionCacheName);
-            this.ignite.GetOrCreateCache<long, ClientCacheItem>(this.externalConfiguration.ClientCacheName);
-            this.ignite.GetOrCreateCache<ClientRoleKey, EmptyCacheItem>(this.externalConfiguration.ClientRoleCacheName);
+            this.ignite.GetOrCreateCache<long, ConfigurationCacheItem>(this.externalConfiguration.CacheNames.ConfigurationCacheName);
+            this.ignite.GetOrCreateCache<long, RuleConfigurationCacheItem>(this.externalConfiguration.CacheNames.RuleConfigurationCacheName);
+            this.ignite.GetOrCreateCache<long, SchemaCacheItem>(this.externalConfiguration.CacheNames.SchemaCacheName);
+            this.ignite.GetOrCreateCache<long, SchemaGroupCacheItem>(this.externalConfiguration.CacheNames.SchemaGroupCacheName);
+            this.ignite.GetOrCreateCache<long, UserCacheItem>(this.externalConfiguration.CacheNames.UserCacheName);
+            this.ignite.GetOrCreateCache<UserRoleKey, EmptyCacheItem>(this.externalConfiguration.CacheNames.UserRoleCacheName);
+            this.ignite.GetOrCreateCache<long, RoleCacheItem>(this.externalConfiguration.CacheNames.RoleCacheName);
+            this.ignite.GetOrCreateCache<RolePermissionKey, EmptyCacheItem>(this.externalConfiguration.CacheNames.RolePermissionCacheName);
+            this.ignite.GetOrCreateCache<long, ClientCacheItem>(this.externalConfiguration.CacheNames.ClientCacheName);
+            this.ignite.GetOrCreateCache<ClientRoleKey, EmptyCacheItem>(this.externalConfiguration.CacheNames.ClientRoleCacheName);
 
             this.CreateSequence<ConfigurationCacheItem>();
             this.CreateSequence<RuleConfigurationCacheItem>();
@@ -190,7 +190,7 @@ namespace ProtoR.Infrastructure.DataAccess
                 CacheConfiguration = new[]
                 {
                     new CacheConfiguration(
-                        externalConfiguration.SchemaCacheName,
+                        externalConfiguration.CacheNames.SchemaCacheName,
                         new QueryEntity
                         {
                             KeyType = typeof(long),
@@ -211,7 +211,7 @@ namespace ProtoR.Infrastructure.DataAccess
                         WriteSynchronizationMode = CacheWriteSynchronizationMode.FullSync,
                     },
                     new CacheConfiguration(
-                        externalConfiguration.SchemaGroupCacheName,
+                        externalConfiguration.CacheNames.SchemaGroupCacheName,
                         new QueryEntity
                         {
                             KeyType = typeof(long),
@@ -230,7 +230,7 @@ namespace ProtoR.Infrastructure.DataAccess
                         WriteSynchronizationMode = CacheWriteSynchronizationMode.FullSync,
                     },
                     new CacheConfiguration(
-                        externalConfiguration.ConfigurationCacheName,
+                        externalConfiguration.CacheNames.ConfigurationCacheName,
                         new QueryEntity
                         {
                             KeyType = typeof(long),
@@ -251,7 +251,7 @@ namespace ProtoR.Infrastructure.DataAccess
                         WriteSynchronizationMode = CacheWriteSynchronizationMode.FullSync,
                     },
                     new CacheConfiguration(
-                        externalConfiguration.RuleConfigurationCacheName,
+                        externalConfiguration.CacheNames.RuleConfigurationCacheName,
                         new QueryEntity
                         {
                             KeyType = typeof(long),
@@ -271,7 +271,7 @@ namespace ProtoR.Infrastructure.DataAccess
                         WriteSynchronizationMode = CacheWriteSynchronizationMode.FullSync,
                     },
                     new CacheConfiguration(
-                        externalConfiguration.UserCacheName,
+                        externalConfiguration.CacheNames.UserCacheName,
                         new QueryEntity
                         {
                             KeyType = typeof(long),
@@ -294,7 +294,7 @@ namespace ProtoR.Infrastructure.DataAccess
                         WriteSynchronizationMode = CacheWriteSynchronizationMode.FullSync,
                     },
                     new CacheConfiguration(
-                        externalConfiguration.UserRoleCacheName,
+                        externalConfiguration.CacheNames.UserRoleCacheName,
                         new QueryEntity
                         {
                             KeyType = typeof(UserRoleKey),
@@ -310,7 +310,7 @@ namespace ProtoR.Infrastructure.DataAccess
                         WriteSynchronizationMode = CacheWriteSynchronizationMode.FullSync,
                     },
                     new CacheConfiguration(
-                        externalConfiguration.RoleCacheName,
+                        externalConfiguration.CacheNames.RoleCacheName,
                         new QueryEntity
                         {
                             KeyType = typeof(long),
@@ -330,7 +330,7 @@ namespace ProtoR.Infrastructure.DataAccess
                         WriteSynchronizationMode = CacheWriteSynchronizationMode.FullSync,
                     },
                     new CacheConfiguration(
-                        externalConfiguration.RolePermissionCacheName,
+                        externalConfiguration.CacheNames.RolePermissionCacheName,
                         new QueryEntity
                         {
                             KeyType = typeof(RolePermissionKey),
@@ -346,7 +346,7 @@ namespace ProtoR.Infrastructure.DataAccess
                         WriteSynchronizationMode = CacheWriteSynchronizationMode.FullSync,
                     },
                     new CacheConfiguration(
-                        externalConfiguration.ClientCacheName,
+                        externalConfiguration.CacheNames.ClientCacheName,
                         new QueryEntity
                         {
                             KeyType = typeof(long),
@@ -373,7 +373,7 @@ namespace ProtoR.Infrastructure.DataAccess
                         WriteSynchronizationMode = CacheWriteSynchronizationMode.FullSync,
                     },
                     new CacheConfiguration(
-                        externalConfiguration.ClientRoleCacheName,
+                        externalConfiguration.CacheNames.ClientRoleCacheName,
                         new QueryEntity
                         {
                             KeyType = typeof(ClientRoleKey),

@@ -2,7 +2,9 @@ namespace ProtoR.ComponentTests.Configuration
 {
     using System;
     using System.Collections.Generic;
+    using System.IO;
     using System.Linq;
+    using System.Reflection;
     using System.Threading.Tasks;
     using Autofac;
     using IdentityServer4.Models;
@@ -20,7 +22,6 @@ namespace ProtoR.ComponentTests.Configuration
     using ProtoR.Domain.UserAggregate;
     using ProtoR.Infrastructure.DataAccess;
     using ProtoR.Web;
-    using ProtoR.Web.Infrastructure.Identity;
     using Serilog;
     using Client = ProtoR.Domain.ClientAggregate.Client;
     using Permission = ProtoR.Domain.RoleAggregate.Permission;
@@ -126,28 +127,9 @@ namespace ProtoR.ComponentTests.Configuration
                 .UseServiceProviderFactory(new TestAutofacServiceProviderFactory(this.OverrideContainerConfiguration))
                 .ConfigureAppConfiguration(configuration =>
                 {
-                    configuration.AddInMemoryCollection(new[]
-                    {
-                        new KeyValuePair<string, string>(nameof(IgniteExternalConfiguration.SchemaCacheName), "SchemaCacheName_ComponentTest"),
-                        new KeyValuePair<string, string>(nameof(IgniteExternalConfiguration.SchemaGroupCacheName), "SchemaGroupCacheName_ComponentTest"),
-                        new KeyValuePair<string, string>(nameof(IgniteExternalConfiguration.ConfigurationCacheName), "ConfigurationCacheName_ComponentTest"),
-                        new KeyValuePair<string, string>(nameof(IgniteExternalConfiguration.RuleConfigurationCacheName), "RuleConfigurationCacheName_ComponentTest"),
-                        new KeyValuePair<string, string>(nameof(IgniteExternalConfiguration.UserCacheName), "UserCacheName_ComponentTest"),
-                        new KeyValuePair<string, string>(nameof(IgniteExternalConfiguration.UserRoleCacheName), "UserRoleCacheName_ComponentTest"),
-                        new KeyValuePair<string, string>(nameof(IgniteExternalConfiguration.UserCategoryCacheName), "UserCategoryCacheName_ComponentTest"),
-                        new KeyValuePair<string, string>(nameof(IgniteExternalConfiguration.RoleCacheName), "RoleCacheName_ComponentTest"),
-                        new KeyValuePair<string, string>(nameof(IgniteExternalConfiguration.RolePermissionCacheName), "RolePermissionCacheName_ComponentTest"),
-                        new KeyValuePair<string, string>(nameof(IgniteExternalConfiguration.CategoryCacheName), "CategoryCacheName_ComponentTest"),
-                        new KeyValuePair<string, string>(nameof(IgniteExternalConfiguration.ClientCacheName), "ClientCacheName_ComponentTest"),
-                        new KeyValuePair<string, string>(nameof(IgniteExternalConfiguration.ClientRoleCacheName), "ClientRoleCacheName_ComponentTest"),
-                        new KeyValuePair<string, string>(nameof(IgniteExternalConfiguration.ClientCategoryCacheName), "ClientCategoryCacheName_ComponentTest"),
-                        new KeyValuePair<string, string>(nameof(IgniteExternalConfiguration.DiscoveryPort), "8000"),
-                        new KeyValuePair<string, string>(nameof(IgniteExternalConfiguration.CommunicationPort), "9000"),
-                        new KeyValuePair<string, string>(nameof(IgniteExternalConfiguration.NodeEndpoints), "127.0.0.1:8000"),
-                        new KeyValuePair<string, string>(nameof(IgniteExternalConfiguration.StoragePath), "/tmp/component-tests"),
-                        new KeyValuePair<string, string>(nameof(IgniteExternalConfiguration.EnablePersistence), "false"),
-                        new KeyValuePair<string, string>(nameof(AuthenticationConfiguration.AuthenticationEnabled), "true"),
-                    });
+                    var directory = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
+                    var settingsLocation = Path.Combine(directory, "appsettings.json");
+                    configuration.AddJsonFile(settingsLocation);
                 })
                 .ConfigureServices((hostBuilder, services) =>
                 {

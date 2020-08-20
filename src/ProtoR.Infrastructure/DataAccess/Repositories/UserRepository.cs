@@ -27,9 +27,9 @@ namespace ProtoR.Infrastructure.DataAccess.Repositories
             IUserProvider userProvider)
             : base(igniteFactory, configurationProvider, userProvider)
         {
-            this.userCache = this.Ignite.GetOrCreateCache<long, UserCacheItem>(this.ConfigurationProvider.UserCacheName);
-            this.userRoleCache = this.Ignite.GetOrCreateCache<UserRoleKey, EmptyCacheItem>(this.ConfigurationProvider.UserRoleCacheName);
-            this.roleCache = this.Ignite.GetOrCreateCache<long, RoleCacheItem>(this.ConfigurationProvider.RoleCacheName);
+            this.userCache = this.Ignite.GetOrCreateCache<long, UserCacheItem>(this.ConfigurationProvider.CacheNames.UserCacheName);
+            this.userRoleCache = this.Ignite.GetOrCreateCache<UserRoleKey, EmptyCacheItem>(this.ConfigurationProvider.CacheNames.UserRoleCacheName);
+            this.roleCache = this.Ignite.GetOrCreateCache<long, RoleCacheItem>(this.ConfigurationProvider.CacheNames.RoleCacheName);
         }
 
         public async Task<long> Add(User user)

@@ -143,9 +143,10 @@ namespace ProtoR.Web.Infrastructure
 
         public static IServiceCollection AddConfiguration(this IServiceCollection services, IConfiguration configuration)
         {
-            services.Configure<IgniteExternalConfiguration>(configuration);
-            services.Configure<AuthenticationConfiguration>(configuration);
-            services.Configure<TlsConfiguration>(configuration.GetSection(nameof(TlsConfiguration)));
+            services
+                .Configure<IgniteExternalConfiguration>(configuration.GetSection("Ignite"))
+                .Configure<AuthenticationConfiguration>(configuration.GetSection(nameof(AuthenticationConfiguration)))
+                .Configure<TlsConfiguration>(configuration.GetSection(nameof(TlsConfiguration)));
 
             return services;
         }

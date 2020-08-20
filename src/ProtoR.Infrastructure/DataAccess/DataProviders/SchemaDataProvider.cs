@@ -20,8 +20,8 @@ namespace ProtoR.Infrastructure.DataAccess.DataProviders
             IOptions<IgniteExternalConfiguration> configurationProvider)
             : base(igniteFactory, configurationProvider)
         {
-            this.groupCacheName = this.ConfigurationProvider.SchemaGroupCacheName;
-            this.schemaCacheName = this.ConfigurationProvider.SchemaCacheName;
+            this.groupCacheName = this.ConfigurationProvider.CacheNames.SchemaGroupCacheName;
+            this.schemaCacheName = this.ConfigurationProvider.CacheNames.SchemaCacheName;
         }
 
         public async Task<SchemaDto> GetByVersion(string groupName, int version)

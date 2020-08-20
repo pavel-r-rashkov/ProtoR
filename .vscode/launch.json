@@ -43,16 +43,8 @@
             },
             "env": {
                 "ASPNETCORE_ENVIRONMENT": "Development",
-				"PROTOR_DiscoveryPort": "10100",
-				"PROTOR_CommunicationPort": "9100",
-				"PROTOR_NodeEndpoints": "127.0.0.1:10100",
-				"PROTOR_StoragePath": "/tmp/ignite-node-data",
-				"PROTOR_AuthenticationEnabled": "false",
-				// "PROTOR_SigningCredentialPath": "path/to/integritycert.pfx",
-                // "PROTOR_SigningCredentialPassword": "integritycert.pfx password goes here",
 				"COMPlus_EnableAlternateStackCheck": "1",
-				"PROTOR_Logging__MinLevel": "Warning",
-				// "PROTOR_Logging__LogFileLocation": "/path/to/log.txt"
+				"PROTOR_Logging__MinLevel": "Warning"
             },
             "sourceFileMap": {
                 "/Views": "${workspaceFolder}/Views"

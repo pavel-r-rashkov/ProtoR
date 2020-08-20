@@ -25,8 +25,8 @@ namespace ProtoR.Infrastructure.DataAccess.Repositories
             IUserProvider userProvider)
             : base(igniteFactory, configurationProvider, userProvider)
         {
-            this.configurationCacheName = this.ConfigurationProvider.ConfigurationCacheName;
-            this.ruleConfigurationGroupCacheName = this.ConfigurationProvider.RuleConfigurationCacheName;
+            this.configurationCacheName = this.ConfigurationProvider.CacheNames.ConfigurationCacheName;
+            this.ruleConfigurationGroupCacheName = this.ConfigurationProvider.CacheNames.RuleConfigurationCacheName;
         }
 
         public async Task<long> Add(Configuration configuration)

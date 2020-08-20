@@ -42,22 +42,23 @@ namespace ProtoR.DataAccess.IntegrationTests.Repositories
                 this.igniteFixture.Configuration);
 
             this.fixture.Customizations.Add(new UtcRandomDateTimeSequenceGenerator());
+            var cacheNames = this.igniteFixture.Configuration.Value.CacheNames;
 
             this.schemaCache = this.igniteFixture.IgniteFactory
                 .Instance()
-                .GetCache<long, SchemaCacheItem>(this.igniteFixture.Configuration.Value.SchemaCacheName);
+                .GetCache<long, SchemaCacheItem>(cacheNames.SchemaCacheName);
 
             this.schemaGroupCache = this.igniteFixture.IgniteFactory
                 .Instance()
-                .GetCache<long, SchemaGroupCacheItem>(this.igniteFixture.Configuration.Value.SchemaGroupCacheName);
+                .GetCache<long, SchemaGroupCacheItem>(cacheNames.SchemaGroupCacheName);
 
             this.configurationCache = this.igniteFixture.IgniteFactory
                 .Instance()
-                .GetCache<long, ConfigurationCacheItem>(this.igniteFixture.Configuration.Value.ConfigurationCacheName);
+                .GetCache<long, ConfigurationCacheItem>(cacheNames.ConfigurationCacheName);
 
             this.ruleConfigurationCache = this.igniteFixture.IgniteFactory
                 .Instance()
-                .GetCache<long, RuleConfigurationCacheItem>(this.igniteFixture.Configuration.Value.RuleConfigurationCacheName);
+                .GetCache<long, RuleConfigurationCacheItem>(cacheNames.RuleConfigurationCacheName);
         }
 
         public void Dispose()

@@ -33,17 +33,19 @@ namespace ProtoR.DataAccess.IntegrationTests.Repositories
                 this.igniteFixture.Configuration,
                 userProviderStub);
 
+            var cacheNames = this.igniteFixture.Configuration.Value.CacheNames;
+
             this.userCache = this.igniteFixture.IgniteFactory
                 .Instance()
-                .GetCache<long, UserCacheItem>(this.igniteFixture.Configuration.Value.UserCacheName);
+                .GetCache<long, UserCacheItem>(cacheNames.UserCacheName);
 
             this.userRoleCache = this.igniteFixture.IgniteFactory
                 .Instance()
-                .GetCache<UserRoleKey, EmptyCacheItem>(this.igniteFixture.Configuration.Value.UserRoleCacheName);
+                .GetCache<UserRoleKey, EmptyCacheItem>(cacheNames.UserRoleCacheName);
 
             this.roleCache = this.igniteFixture.IgniteFactory
                 .Instance()
-                .GetCache<long, RoleCacheItem>(this.igniteFixture.Configuration.Value.RoleCacheName);
+                .GetCache<long, RoleCacheItem>(cacheNames.RoleCacheName);
         }
 
         public void Dispose()

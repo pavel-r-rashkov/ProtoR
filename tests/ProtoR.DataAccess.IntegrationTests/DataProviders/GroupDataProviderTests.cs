@@ -28,7 +28,7 @@ namespace ProtoR.DataAccess.IntegrationTests.DataProviders
 
             this.groupCache = this.igniteFixture.IgniteFactory
                 .Instance()
-                .GetCache<long, SchemaGroupCacheItem>(this.igniteFixture.Configuration.Value.SchemaGroupCacheName);
+                .GetCache<long, SchemaGroupCacheItem>(this.igniteFixture.Configuration.Value.CacheNames.SchemaGroupCacheName);
 
             this.fixture.Customizations.Add(new UtcRandomDateTimeSequenceGenerator());
         }

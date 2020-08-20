@@ -20,9 +20,9 @@ namespace ProtoR.Infrastructure.DataAccess.DataProviders
             IOptions<IgniteExternalConfiguration> configurationProvider)
             : base(igniteFactory, configurationProvider)
         {
-            this.groupCacheName = this.ConfigurationProvider.SchemaGroupCacheName;
-            this.configurationCacheName = this.ConfigurationProvider.ConfigurationCacheName;
-            this.ruleConfigurationCacheName = this.ConfigurationProvider.RuleConfigurationCacheName;
+            this.groupCacheName = this.ConfigurationProvider.CacheNames.SchemaGroupCacheName;
+            this.configurationCacheName = this.ConfigurationProvider.CacheNames.ConfigurationCacheName;
+            this.ruleConfigurationCacheName = this.ConfigurationProvider.CacheNames.RuleConfigurationCacheName;
         }
 
         public async Task<ConfigurationDto> GetById(long id)

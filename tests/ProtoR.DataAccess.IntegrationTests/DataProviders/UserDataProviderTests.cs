@@ -23,14 +23,15 @@ namespace ProtoR.DataAccess.IntegrationTests.DataProviders
         {
             this.igniteFixture = igniteFixture;
             this.dataProvider = new UserDataProvider(this.igniteFixture.IgniteFactory, this.igniteFixture.Configuration);
+            var cacheNames = this.igniteFixture.Configuration.Value.CacheNames;
 
             this.userCache = this.igniteFixture.IgniteFactory
                 .Instance()
-                .GetCache<long, UserCacheItem>(this.igniteFixture.Configuration.Value.UserCacheName);
+                .GetCache<long, UserCacheItem>(cacheNames.UserCacheName);
 
             this.userRoleCache = this.igniteFixture.IgniteFactory
                 .Instance()
-                .GetCache<UserRoleKey, EmptyCacheItem>(this.igniteFixture.Configuration.Value.UserRoleCacheName);
+                .GetCache<UserRoleKey, EmptyCacheItem>(cacheNames.UserRoleCacheName);
 
             this.fixture = new Fixture();
             this.fixture.Customizations.Add(new UtcRandomDateTimeSequenceGenerator());

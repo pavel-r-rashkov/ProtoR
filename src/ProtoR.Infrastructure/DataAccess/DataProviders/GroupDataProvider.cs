@@ -21,7 +21,7 @@ namespace ProtoR.Infrastructure.DataAccess.DataProviders
             IOptions<IgniteExternalConfiguration> configurationProvider)
             : base(igniteFactory, configurationProvider)
         {
-            this.groupCache = this.Ignite.GetCache<long, SchemaGroupCacheItem>(this.ConfigurationProvider.SchemaGroupCacheName);
+            this.groupCache = this.Ignite.GetCache<long, SchemaGroupCacheItem>(this.ConfigurationProvider.CacheNames.SchemaGroupCacheName);
         }
 
         public Task<GroupDto> GetByName(string groupName)
