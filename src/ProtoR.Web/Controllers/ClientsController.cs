@@ -25,11 +25,7 @@ namespace ProtoR.Web.Controllers
         /// </summary>
         /// <returns>Clients.</returns>
         /// <response code="200">Client list.</response>
-        /// <response code="401">User or client is not authenticated.</response>
-        /// <response code="403">"ClientRead" permission is missing.</response>
         [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(ErrorModel), StatusCodes.Status401Unauthorized)]
-        [ProducesResponseType(typeof(ErrorModel), StatusCodes.Status403Forbidden)]
         [HttpGet]
         [PermissionClaim(Permission.ClientRead)]
         public async Task<ActionResult<ResponseModel<PagedResult<ClientReadModel>>>> Get([FromQuery]GetClientsQuery query)
@@ -45,12 +41,8 @@ namespace ProtoR.Web.Controllers
         /// </summary>
         /// <returns>Client.</returns>
         /// <response code="200">Client with requested ID.</response>
-        /// <response code="401">User or client is not authenticated.</response>
-        /// <response code="403">"ClientRead" permission is missing.</response>
         /// <response code="404">Client with the specified ID doesn't exist.</response>
         [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(ErrorModel), StatusCodes.Status401Unauthorized)]
-        [ProducesResponseType(typeof(ErrorModel), StatusCodes.Status403Forbidden)]
         [ProducesResponseType(typeof(ErrorModel), StatusCodes.Status404NotFound)]
         [HttpGet]
         [Route("{ClientId}")]
@@ -68,13 +60,7 @@ namespace ProtoR.Web.Controllers
         /// </summary>
         /// <returns>No content.</returns>
         /// <response code="201">Client created successfully.</response>
-        /// <response code="401">User or client is not authenticated.</response>
-        /// <response code="403">"ClientWrite" permission is missing.</response>
-        /// <response code="422">Client data is invalid.</response>
         [ProducesResponseType(StatusCodes.Status201Created)]
-        [ProducesResponseType(typeof(ErrorModel), StatusCodes.Status401Unauthorized)]
-        [ProducesResponseType(typeof(ErrorModel), StatusCodes.Status403Forbidden)]
-        [ProducesResponseType(typeof(ErrorModel), StatusCodes.Status422UnprocessableEntity)]
         [HttpPost]
         [PermissionClaim(Permission.ClientWrite)]
         public async Task<ActionResult> Post(ClientWriteModel client)
@@ -90,15 +76,9 @@ namespace ProtoR.Web.Controllers
         /// </summary>
         /// <returns>No content.</returns>
         /// <response code="204">Client updated successfully.</response>
-        /// <response code="401">User or client is not authenticated.</response>
-        /// <response code="403">"ClientWrite" permission is missing.</response>
         /// <response code="404">Client with the specified ID doesn't exist.</response>
-        /// <response code="422">Client data is invalid.</response>
         [ProducesResponseType(StatusCodes.Status204NoContent)]
-        [ProducesResponseType(typeof(ErrorModel), StatusCodes.Status401Unauthorized)]
-        [ProducesResponseType(typeof(ErrorModel), StatusCodes.Status403Forbidden)]
         [ProducesResponseType(typeof(ErrorModel), StatusCodes.Status404NotFound)]
-        [ProducesResponseType(typeof(ErrorModel), StatusCodes.Status422UnprocessableEntity)]
         [HttpPut]
         [Route("{Id}")]
         [PermissionClaim(Permission.ClientWrite)]
@@ -115,12 +95,8 @@ namespace ProtoR.Web.Controllers
         /// </summary>
         /// <returns>No conent.</returns>
         /// <response code="204">Client deleted successfully.</response>
-        /// <response code="401">User or client is not authenticated.</response>
-        /// <response code="403">"ClientWrite" permission is missing.</response>
         /// <response code="404">Client with the specified ID doesn't exist.</response>
         [ProducesResponseType(StatusCodes.Status204NoContent)]
-        [ProducesResponseType(typeof(ErrorModel), StatusCodes.Status401Unauthorized)]
-        [ProducesResponseType(typeof(ErrorModel), StatusCodes.Status403Forbidden)]
         [ProducesResponseType(typeof(ErrorModel), StatusCodes.Status404NotFound)]
         [HttpDelete]
         [Route("{clientId}")]

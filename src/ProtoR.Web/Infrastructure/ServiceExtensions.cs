@@ -44,6 +44,7 @@ namespace ProtoR.Web.Infrastructure
                 config.SchemaFilter<SwaggerExcludeFilter>();
                 config.OperationFilter<HybridOperationFilter>();
                 config.OperationFilter<IgnoreParameterPrefixFilter>();
+                config.OperationFilter<CommonResponseOperationFilter>();
 
                 var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
                 var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);

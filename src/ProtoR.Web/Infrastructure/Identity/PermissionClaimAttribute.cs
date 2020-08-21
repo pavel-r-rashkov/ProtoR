@@ -6,19 +6,19 @@ namespace ProtoR.Web.Infrastructure.Identity
     [AttributeUsage(AttributeTargets.Method)]
     public class PermissionClaimAttribute : Attribute, IFilterFactory
     {
-        private readonly Permission permission;
-
         public PermissionClaimAttribute(Permission permission)
         {
-            this.permission = permission;
+            this.Permission = permission;
         }
 
         public bool IsReusable => false;
 
+        public Permission Permission { get; }
+
         public IFilterMetadata CreateInstance(IServiceProvider serviceProvider)
         {
             var filter = (PermissionClaimFilter)serviceProvider.GetService(typeof(PermissionClaimFilter));
-            filter.Permission = this.permission;
+            filter.Permission = this.Permission;
 
             return filter;
         }

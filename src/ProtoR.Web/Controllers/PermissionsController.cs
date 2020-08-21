@@ -25,13 +25,7 @@ namespace ProtoR.Web.Controllers
         /// </summary>
         /// <returns>Permissions.</returns>
         /// <response code="200">Permissions list.</response>
-        /// <response code="401">User or client is not authenticated.</response>
-        /// <response code="403">
-        /// "PermissionRead" permission is missing.
-        /// </response>
         [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(ErrorModel), StatusCodes.Status401Unauthorized)]
-        [ProducesResponseType(typeof(ErrorModel), StatusCodes.Status403Forbidden)]
         [HttpGet]
         [PermissionClaim(Permission.PermissionRead)]
         public async Task<ActionResult<ResponseModel<IEnumerable<PermissionReadModel>>>> Get()

@@ -44,7 +44,7 @@
             "env": {
                 "ASPNETCORE_ENVIRONMENT": "Development",
 				"COMPlus_EnableAlternateStackCheck": "1",
-				"PROTOR_Logging__MinLevel": "Warning"
+				"PROTOR_Logging__MinLevel": "Information"
             },
             "sourceFileMap": {
                 "/Views": "${workspaceFolder}/Views"
