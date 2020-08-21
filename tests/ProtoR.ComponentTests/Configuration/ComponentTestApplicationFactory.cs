@@ -128,7 +128,7 @@ namespace ProtoR.ComponentTests.Configuration
                 .ConfigureAppConfiguration(configuration =>
                 {
                     var directory = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
-                    var settingsLocation = Path.Combine(directory, "appsettings.json");
+                    var settingsLocation = Path.Combine(directory, "component-appsettings.json");
                     configuration.AddJsonFile(settingsLocation);
                 })
                 .ConfigureServices((hostBuilder, services) =>

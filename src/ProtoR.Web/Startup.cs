@@ -3,6 +3,7 @@
     using Autofac;
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Hosting;
+    using Microsoft.AspNetCore.Mvc;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Options;
@@ -41,12 +42,11 @@
                 .AddHybridModelBinder()
                 .AddCustomFluentValidation();
 
-            var authOptions = this.Configuration.Get<AuthenticationConfiguration>();
             services
                 .AddConfiguration(this.Configuration)
                 .AddSwagger()
                 .AddCustomIdentity()
-                .AddCustomIdentityServer(authOptions)
+                .AddCustomIdentityServer(this.Configuration)
                 .AddCustomCors()
                 .AddCustomAuthentication()
                 .AddCustomHealthChecks();

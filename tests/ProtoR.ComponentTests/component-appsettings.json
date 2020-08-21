@@ -1,0 +1,47 @@
+{
+	"Logging": {
+		"MinLevel": "Error",
+		"LogFileLocation": null
+	},
+	"TlsConfiguration": {
+		"CertificateLocation": null,
+		"Password": null,
+		"ForceHttps": false
+	},
+	"AuthenticationConfiguration": {
+		"AuthenticationEnabled": true,
+		"SigningCredentialPath": null,
+		"SigningCredentialPassword": null
+	},
+	"Ignite": {
+		"CacheNames": {
+            "SchemaCacheName": "SchemaCacheName_ComponentTest",
+            "SchemaGroupCacheName": "SchemaGroupCacheName_ComponentTest",
+            "ConfigurationCacheName": "ConfigurationCacheName_ComponentTest",
+            "RuleConfigurationCacheName": "RuleConfigurationCacheName_ComponentTest",
+            "UserCacheName": "UserCacheName_ComponentTest",
+            "UserRoleCacheName": "UserRoleCacheName_ComponentTest",
+            "UserCategoryCacheName": "UserCategoryCacheName_ComponentTest",
+            "RoleCacheName": "RoleCacheName_ComponentTest",
+            "RolePermissionCacheName": "RolePermissionCacheName_ComponentTest",
+            "CategoryCacheName": "CategoryCacheName_ComponentTest",
+            "ClientCacheName": "ClientCacheName_ComponentTest",
+            "ClientRoleCacheName": "ClientRoleCacheName_ComponentTest",
+            "ClientCategoryCacheName": "ClientCategoryCacheName_ComponentTest"
+		},
+		"EnablePersistence": false,
+		"DiscoveryPort": "10100",
+		"CommunicationPort": "9100",
+		"NodeEndpoints": "127.0.0.1:10100",
+		"StoragePath": "/tmp/component-tests",
+		"TlsConfiguration": {
+            "KeyStoreLocation": null,
+            "KeyStorePassword": null,
+            "KeyStoreType": null,
+            "TrustStoreLocation": null,
+            "TrustStorePassword": null,
+            "TrustStoreType": null
+		}
+	}
+}
+  

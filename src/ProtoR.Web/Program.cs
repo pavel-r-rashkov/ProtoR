@@ -37,15 +37,6 @@
             return Host
                 .CreateDefaultBuilder(args)
                 .UseServiceProviderFactory(new AutofacServiceProviderFactory())
-                .ConfigureAppConfiguration((hostContext, configuration) =>
-                {
-                    if (hostContext.HostingEnvironment.IsDevelopment())
-                    {
-                        configuration.AddUserSecrets<Startup>(true);
-                    }
-
-                    configuration.AddEnvironmentVariables(prefix: "PROTOR_");
-                })
                 .ConfigureWebHostDefaults(webHostBuilder =>
                 {
                     webHostBuilder

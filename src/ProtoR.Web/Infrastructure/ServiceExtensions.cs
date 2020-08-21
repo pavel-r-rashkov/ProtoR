@@ -54,7 +54,7 @@ namespace ProtoR.Web.Infrastructure
             return services;
         }
 
-        public static IServiceCollection AddCustomIdentityServer(this IServiceCollection services, AuthenticationConfiguration authOptions)
+        public static IServiceCollection AddCustomIdentityServer(this IServiceCollection services, IConfiguration configuration)
         {
             var builder = services
                 .AddIdentityServer(options =>
@@ -75,6 +75,10 @@ namespace ProtoR.Web.Infrastructure
                 .AddClientStore<ClientStore>()
                 .AddAspNetIdentity<User>()
                 .AddProfileService<ProfileService>();
+
+            var authOptions = configuration
+                .GetSection(nameof(AuthenticationConfiguration))
+                .Get<AuthenticationConfiguration>();
 
             if (authOptions.AuthenticationEnabled)
             {
