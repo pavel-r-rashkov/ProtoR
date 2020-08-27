@@ -6,6 +6,7 @@ namespace ProtoR.Application.Client
     using System.Threading.Tasks;
     using MediatR;
     using ProtoR.Domain.ClientAggregate;
+    using ProtoR.Domain.Exceptions;
     using ProtoR.Domain.RoleAggregate;
     using ProtoR.Domain.SchemaGroupAggregate;
     using ProtoR.Domain.SeedWork;
@@ -26,6 +27,15 @@ namespace ProtoR.Application.Client
         public async Task<long> Handle(CreateClientCommand request, CancellationToken cancellationToken)
         {
             _ = request ?? throw new ArgumentNullException(nameof(request));
+
+            var existingClient = await this.clientRepository.GetByClientId(request.ClientId);
+
+            if (existingClient != null)
+            {
+                throw new DuplicateClientException(
+                    $"Cannot create client with ClientId {request.ClientId}.",
+                    request.ClientId);
+            }
 
             var client = new Client(
                 default,
