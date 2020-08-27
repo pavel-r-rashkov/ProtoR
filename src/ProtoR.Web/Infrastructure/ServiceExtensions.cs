@@ -14,10 +14,16 @@ namespace ProtoR.Web.Infrastructure
     using IdentityServer4.Services;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Cors.Infrastructure;
+    using Microsoft.AspNetCore.DataProtection;
+    using Microsoft.AspNetCore.DataProtection.KeyManagement;
+    using Microsoft.AspNetCore.DataProtection.Repositories;
+    using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.Identity;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
+    using Microsoft.Extensions.DependencyInjection.Extensions;
+    using Microsoft.Extensions.Options;
     using Microsoft.OpenApi.Models;
     using ProtoR.Application.Common;
     using ProtoR.Domain.RoleAggregate;
@@ -31,8 +37,12 @@ namespace ProtoR.Web.Infrastructure
 
     public static class ServiceExtensions
     {
-        public static IServiceCollection AddSwagger(this IServiceCollection services)
+        public static IServiceCollection AddSwagger(this IServiceCollection services, IConfiguration configuration)
         {
+            var authOptions = configuration
+                .GetSection(nameof(AuthenticationConfiguration))
+                .Get<AuthenticationConfiguration>();
+
             services.AddSwaggerGen(config =>
             {
                 config.SwaggerDoc("v1", new OpenApiInfo
@@ -50,6 +60,28 @@ namespace ProtoR.Web.Infrastructure
                 var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
                 config.IncludeXmlComments(xmlPath);
                 config.AddFluentValidationRules();
+
+                if (authOptions.AuthenticationEnabled)
+                {
+                    config.AddSecurityDefinition("OIDC", new OpenApiSecurityScheme
+                    {
+                        // OIDC is not supported in Swagger UI.
+                        // https://swagger.io/docs/specification/authentication/openid-connect-discovery/
+                        Type = SecuritySchemeType.OAuth2,
+                        Flows = new OpenApiOAuthFlows
+                        {
+                            ClientCredentials = new OpenApiOAuthFlow
+                            {
+                                AuthorizationUrl = new Uri("https://localhost:5001/connect/authorize"),
+                                TokenUrl = new Uri("https://localhost:5001/connect/token"),
+                                Scopes = new Dictionary<string, string>
+                                {
+                                    { "protor-api", "ProtoR api" },
+                                },
+                            },
+                        },
+                    });
+                }
             });
 
             return services;
@@ -215,6 +247,29 @@ namespace ProtoR.Web.Infrastructure
             return services
                 .AddHealthChecks()
                 .AddCheck<IgniteHealthCheck>(IgniteHealthCheck.Name);
+        }
+
+        public static IServiceCollection AddCustomDataProtection(this IServiceCollection services)
+        {
+            services
+                .AddScoped<IXmlRepository, IgniteKeyStore>()
+                .TryAddEnumerable(ServiceDescriptor.Singleton<IPostConfigureOptions<KeyManagementOptions>, PostConfigureKeyManagementOptions>());
+
+            services
+                .AddDataProtection()
+                .SetApplicationName("ProtoR");
+
+            return services;
+        }
+
+        public static IServiceCollection AddCustomAntiforgery(this IServiceCollection services)
+        {
+            return services.AddAntiforgery(antiforgeryOptions =>
+            {
+                antiforgeryOptions.Cookie.Name = "XSRF-TOKEN";
+                antiforgeryOptions.HeaderName = "X-XSRF-TOKEN";
+                antiforgeryOptions.SuppressXFrameOptionsHeader = true;
+            });
         }
     }
 }

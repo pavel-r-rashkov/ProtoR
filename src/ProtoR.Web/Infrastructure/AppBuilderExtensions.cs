@@ -23,7 +23,6 @@ namespace ProtoR.Web.Infrastructure
         {
             var autofacContainer = app.ApplicationServices.GetAutofacRoot();
             var igniteFactory = autofacContainer.Resolve<IIgniteFactory>();
-            igniteFactory.InitalizeIgnite();
             igniteFactory.SetAutoFacPlugin(autofacContainer);
 
             return app;

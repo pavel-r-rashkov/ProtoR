@@ -1,0 +1,22 @@
+{
+	"Ignite": {
+		"CacheNames": {
+            "SchemaCacheName": "PROTOR_SCHEMA_CACHE_INTEGRATION",
+            "SchemaGroupCacheName": "PROTOR_SCHEMA_GROUP_CACHE_INTEGRATION",
+            "ConfigurationCacheName": "PROTOR_CONFIGURATION_CACHE_INTEGRATION",
+            "RuleConfigurationCacheName": "PROTOR_RULE_CONFIGURATION_CACHE_INTEGRATION",
+            "UserCacheName": "PROTOR_USER_CACHE_INTEGRATION",
+            "UserRoleCacheName": "PROTOR_USER_ROLE_CACHE_INTEGRATION",
+            "RoleCacheName": "PROTOR_ROLE_CACHE_INTEGRATION",
+            "RolePermissionCacheName": "ROLE_PERMISSION_CACHE_INTEGRATION",
+            "ClientCacheName": "CLIENT_CACHE_INTEGRATION",
+            "ClientRoleCacheName": "CLIENT_ROLE_CACHE_INTEGRATION",
+            "KeyCacheName": "KEY_CACHE_INTEGRATION"
+		},
+		"EnablePersistence": true,
+		"DiscoveryPort": "10100",
+		"CommunicationPort": "9100",
+		"NodeEndpoints": "127.0.0.1:10100",
+		"StoragePath": "/tmp/protor-cache-integration"
+	}
+}

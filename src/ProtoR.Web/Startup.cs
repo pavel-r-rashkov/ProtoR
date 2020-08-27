@@ -3,7 +3,6 @@
     using Autofac;
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Hosting;
-    using Microsoft.AspNetCore.Mvc;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Options;
@@ -36,15 +35,21 @@
             {
                 options.AddModelBinders();
             });
+
             services
-                .AddControllers()
+                .AddCustomAntiforgery()
+                .AddControllers(mvcOptions =>
+                {
+                    mvcOptions.Filters.Add(typeof(ConditionalAntiforgeryFilter));
+                })
                 .ConfigureCustomApiBehaviorOptions()
                 .AddHybridModelBinder()
                 .AddCustomFluentValidation();
 
             services
                 .AddConfiguration(this.Configuration)
-                .AddSwagger()
+                .AddCustomDataProtection()
+                .AddSwagger(this.Configuration)
                 .AddCustomIdentity()
                 .AddCustomIdentityServer(this.Configuration)
                 .AddCustomCors()

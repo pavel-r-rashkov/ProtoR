@@ -6,6 +6,7 @@ namespace ProtoR.Web.Infrastructure.Swagger
     using System.Net;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
+    using Microsoft.Extensions.Options;
     using Microsoft.OpenApi.Models;
     using ProtoR.Web.Controllers;
     using ProtoR.Web.Infrastructure.Identity;
@@ -14,10 +15,21 @@ namespace ProtoR.Web.Infrastructure.Swagger
 
     public class CommonResponseOperationFilter : IOperationFilter
     {
+        private readonly AuthenticationConfiguration authenticationConfiguration;
+
+        public CommonResponseOperationFilter(IOptions<AuthenticationConfiguration> authenticationConfiguration)
+        {
+            this.authenticationConfiguration = authenticationConfiguration.Value;
+        }
+
         public void Apply(OpenApiOperation operation, OperationFilterContext context)
         {
-            this.AddUnauthroizedResponse(operation, context);
-            this.AddForbiddenResponse(operation, context);
+            if (this.authenticationConfiguration.AuthenticationEnabled)
+            {
+                this.AddUnauthroizedResponse(operation, context);
+                this.AddForbiddenResponse(operation, context);
+            }
+
             this.AddUnprocessableEntityResponse(operation, context);
         }
 
@@ -40,6 +52,24 @@ namespace ProtoR.Web.Infrastructure.Swagger
                 {
                     Description = "User or client is not authenticated.",
                 });
+
+            operation.Security = new List<OpenApiSecurityRequirement>
+            {
+                new OpenApiSecurityRequirement
+                {
+                    [
+                        new OpenApiSecurityScheme
+                        {
+                            Reference = new OpenApiReference
+                            {
+                                Type = ReferenceType.SecurityScheme,
+                                Id = "OIDC",
+                            },
+                        }
+
+                    ] = new[] { "protor-api" },
+                },
+            };
         }
 
         private void AddForbiddenResponse(OpenApiOperation operation, OperationFilterContext context)

@@ -4,7 +4,6 @@ namespace ProtoR.Web.Controllers
     using System.Linq;
     using System.Threading.Tasks;
     using AutoMapper;
-    using HybridModelBinding;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Mvc;

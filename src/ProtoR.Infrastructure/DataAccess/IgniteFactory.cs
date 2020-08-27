@@ -105,6 +105,7 @@ namespace ProtoR.Infrastructure.DataAccess
             this.ignite.GetOrCreateCache<RolePermissionKey, EmptyCacheItem>(this.externalConfiguration.CacheNames.RolePermissionCacheName);
             this.ignite.GetOrCreateCache<long, ClientCacheItem>(this.externalConfiguration.CacheNames.ClientCacheName);
             this.ignite.GetOrCreateCache<ClientRoleKey, EmptyCacheItem>(this.externalConfiguration.CacheNames.ClientRoleCacheName);
+            this.ignite.GetOrCreateCache<string, KeyCacheItem>(this.externalConfiguration.CacheNames.KeyCacheName);
 
             this.CreateSequence<ConfigurationCacheItem>();
             this.CreateSequence<RuleConfigurationCacheItem>();
@@ -113,6 +114,7 @@ namespace ProtoR.Infrastructure.DataAccess
             this.CreateSequence<UserCacheItem>();
             this.CreateSequence<RoleCacheItem>();
             this.CreateSequence<ClientCacheItem>();
+            this.CreateSequence<KeyCacheItem>();
         }
 
         private void CreateSequence<T>(long initialValue = 0)
@@ -382,6 +384,22 @@ namespace ProtoR.Infrastructure.DataAccess
                             {
                                 new QueryField("ClientId", typeof(long)) { IsKeyField = true },
                                 new QueryField("RoleId", typeof(long)) { IsKeyField = true },
+                            },
+                        })
+                    {
+                        AtomicityMode = CacheAtomicityMode.Transactional,
+                        WriteSynchronizationMode = CacheWriteSynchronizationMode.FullSync,
+                    },
+                    new CacheConfiguration(
+                        externalConfiguration.CacheNames.KeyCacheName,
+                        new QueryEntity
+                        {
+                            KeyType = typeof(long),
+                            ValueType = typeof(KeyCacheItem),
+                            Fields = new[]
+                            {
+                                new QueryField(nameof(KeyCacheItem.XmlElement), typeof(string)) { NotNull = true },
+                                new QueryField(nameof(KeyCacheItem.FriendlyName), typeof(string)),
                             },
                         })
                     {

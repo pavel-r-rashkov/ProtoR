@@ -1,7 +1,10 @@
 namespace ProtoR.DataAccess.IntegrationTests.Fixtures
 {
     using System;
+    using System.IO;
+    using System.Reflection;
     using MediatR;
+    using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.Options;
     using Moq;
     using ProtoR.Infrastructure.DataAccess;
@@ -12,32 +15,17 @@ namespace ProtoR.DataAccess.IntegrationTests.Fixtures
     {
         public IgniteFixture()
         {
-            var externalConfiguration = new IgniteExternalConfiguration
-            {
-                CacheNames = new IgniteCacheNameConfiguration
-                {
-                    SchemaCacheName = "PROTOR_SCHEMA_CACHE_INTEGRATION",
-                    SchemaGroupCacheName = "PROTOR_SCHEMA_GROUP_CACHE_INTEGRATION",
-                    ConfigurationCacheName = "PROTOR_CONFIGURATION_CACHE_INTEGRATION",
-                    RuleConfigurationCacheName = "PROTOR_RULE_CONFIGURATION_CACHE_INTEGRATION",
-                    UserCacheName = "PROTOR_USER_CACHE_INTEGRATION",
-                    RoleCacheName = "PROTOR_ROLE_CACHE_INTEGRATION",
-                    UserRoleCacheName = "PROTOR_USER_ROLE_CACHE_INTEGRATION",
-                    RolePermissionCacheName = "ROLE_PERMISSION_CACHE_INTEGRATION",
-                    CategoryCacheName = "CATEGORY_CACHE_INTEGRATION",
-                    ClientCacheName = "CLIENT_CACHE_INTEGRATION",
-                    ClientRoleCacheName = "CLIENT_ROLE_CACHE_INTEGRATION",
-                    ClientCategoryCacheName = "CLIENT_CATEGORY_CACHE_INTEGRATION",
-                    UserCategoryCacheName = "USER_CATEGORY_CACHE_INTEGRATION",
-                },
-                DiscoveryPort = 10100,
-                CommunicationPort = 9100,
-                NodeEndpoints = "127.0.0.1:10100",
-                StoragePath = @"/tmp/protor-cache-integration",
-                EnablePersistence = true,
-            };
+            var directory = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
+            var settingsLocation = Path.Combine(directory, "integration-appsettings.json");
+            var configuration = new ConfigurationBuilder()
+                .AddJsonFile(settingsLocation)
+                .Build();
+
+            var externalConfiguration = new IgniteExternalConfiguration();
+            configuration.GetSection("Ignite").Bind(externalConfiguration);
             this.Configuration = Options.Create(externalConfiguration);
             var logger = new LoggerConfiguration().CreateLogger();
+
             this.IgniteFactory = new IgniteFactory(
                 this.Configuration,
                 new Mock<IMediator>().Object,

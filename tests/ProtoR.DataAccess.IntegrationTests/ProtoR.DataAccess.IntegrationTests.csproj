@@ -20,4 +20,8 @@
     <ProjectReference Include="..\..\src\ProtoR.Infrastructure\ProtoR.Infrastructure.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+	<None Update="integration-appsettings.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
 </Project>

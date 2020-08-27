@@ -27,7 +27,8 @@
             "CategoryCacheName": "CategoryCacheName_ComponentTest",
             "ClientCacheName": "ClientCacheName_ComponentTest",
             "ClientRoleCacheName": "ClientRoleCacheName_ComponentTest",
-            "ClientCategoryCacheName": "ClientCategoryCacheName_ComponentTest"
+            "ClientCategoryCacheName": "ClientCategoryCacheName_ComponentTest",
+            "KeyCacheName": "KeyCacheName_ComponentTest"
 		},
 		"EnablePersistence": false,
 		"DiscoveryPort": "10100",
@@ -44,4 +45,3 @@
 		}
 	}
 }
-  

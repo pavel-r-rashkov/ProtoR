@@ -27,5 +27,7 @@ namespace ProtoR.Infrastructure.DataAccess
         public string ClientRoleCacheName { get; set; }
 
         public string ClientCategoryCacheName { get; set; }
+
+        public string KeyCacheName { get; set; }
     }
 }
