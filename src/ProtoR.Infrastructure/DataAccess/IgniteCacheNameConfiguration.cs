@@ -16,17 +16,13 @@ namespace ProtoR.Infrastructure.DataAccess
 
         public string UserRoleCacheName { get; set; }
 
-        public string UserCategoryCacheName { get; set; }
-
         public string RolePermissionCacheName { get; set; }
-
-        public string CategoryCacheName { get; set; }
 
         public string ClientCacheName { get; set; }
 
         public string ClientRoleCacheName { get; set; }
 
-        public string ClientCategoryCacheName { get; set; }
+        public string GrantStoreCacheName { get; set; }
 
         public string KeyCacheName { get; set; }
     }

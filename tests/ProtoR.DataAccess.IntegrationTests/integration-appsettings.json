@@ -11,7 +11,8 @@
             "RolePermissionCacheName": "ROLE_PERMISSION_CACHE_INTEGRATION",
             "ClientCacheName": "CLIENT_CACHE_INTEGRATION",
             "ClientRoleCacheName": "CLIENT_ROLE_CACHE_INTEGRATION",
-            "KeyCacheName": "KEY_CACHE_INTEGRATION"
+            "KeyCacheName": "KEY_CACHE_INTEGRATION",
+            "GrantStoreCacheName": "GRANT_STORE_CACHE_INTEGRATION"
 		},
 		"EnablePersistence": true,
 		"DiscoveryPort": "10100",

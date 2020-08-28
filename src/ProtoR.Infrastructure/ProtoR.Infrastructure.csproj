@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
     <ProjectReference Include="..\ProtoR.Application\ProtoR.Application.csproj" />
@@ -8,9 +8,9 @@
   <ItemGroup>
     <PackageReference Include="Apache.Ignite" Version="2.8.0" />
     <PackageReference Include="Apache.Ignite.Linq" Version="2.8.0" />
-	<PackageReference Include="Autofac.Extensions.DependencyInjection" Version="6.0.0" />
-	<PackageReference Include="IdentityServer4.AspNetIdentity" Version="3.0.2" />
-	<PackageReference Include="Serilog" Version="2.9.0" />
+	  <PackageReference Include="Autofac.Extensions.DependencyInjection" Version="6.0.0" />
+	  <PackageReference Include="IdentityServer4.AspNetIdentity" Version="3.0.2" />
+	  <PackageReference Include="Serilog" Version="2.9.0" />
   </ItemGroup>
 
   <PropertyGroup>

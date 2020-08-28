@@ -106,6 +106,7 @@ namespace ProtoR.Infrastructure.DataAccess
             this.ignite.GetOrCreateCache<long, ClientCacheItem>(this.externalConfiguration.CacheNames.ClientCacheName);
             this.ignite.GetOrCreateCache<ClientRoleKey, EmptyCacheItem>(this.externalConfiguration.CacheNames.ClientRoleCacheName);
             this.ignite.GetOrCreateCache<string, KeyCacheItem>(this.externalConfiguration.CacheNames.KeyCacheName);
+            this.ignite.GetOrCreateCache<string, GrantCacheItem>(this.externalConfiguration.CacheNames.GrantStoreCacheName);
 
             this.CreateSequence<ConfigurationCacheItem>();
             this.CreateSequence<RuleConfigurationCacheItem>();
@@ -400,6 +401,28 @@ namespace ProtoR.Infrastructure.DataAccess
                             {
                                 new QueryField(nameof(KeyCacheItem.XmlElement), typeof(string)) { NotNull = true },
                                 new QueryField(nameof(KeyCacheItem.FriendlyName), typeof(string)),
+                            },
+                        })
+                    {
+                        AtomicityMode = CacheAtomicityMode.Transactional,
+                        WriteSynchronizationMode = CacheWriteSynchronizationMode.FullSync,
+                    },
+                    new CacheConfiguration(
+                        externalConfiguration.CacheNames.GrantStoreCacheName,
+                        new QueryEntity
+                        {
+                            KeyType = typeof(string),
+                            ValueType = typeof(GrantCacheItem),
+                            Fields = new[]
+                            {
+                                new QueryField(nameof(GrantCacheItem.ClientId), typeof(string)) { NotNull = true },
+                                new QueryField(nameof(GrantCacheItem.CreationTime), typeof(DateTime)),
+                                new QueryField(nameof(GrantCacheItem.Data), typeof(string)),
+                                new QueryField(nameof(GrantCacheItem.Expiration), typeof(DateTime?)),
+                                new QueryField(nameof(GrantCacheItem.SubjectId), typeof(string)),
+                                new QueryField(nameof(GrantCacheItem.Type), typeof(string)),
+                                new QueryField(nameof(GrantCacheItem.CreatedBy), typeof(string)),
+                                new QueryField(nameof(GrantCacheItem.CreatedOn), typeof(DateTime)),
                             },
                         })
                     {

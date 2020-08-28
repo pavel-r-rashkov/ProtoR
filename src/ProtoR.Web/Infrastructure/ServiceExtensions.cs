@@ -106,6 +106,7 @@ namespace ProtoR.Web.Infrastructure
                     new ApiResource("protor-api", "ProtoR API") { },
                 })
                 .AddClientStore<ClientStore>()
+                .AddPersistedGrantStore<IgniteGrantStore>()
                 .AddAspNetIdentity<User>()
                 .AddProfileService<ProfileService>();
 

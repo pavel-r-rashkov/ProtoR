@@ -49,6 +49,8 @@ namespace ProtoR.DataAccess.IntegrationTests.Fixtures
             this.CleanCache<RolePermissionKey, EmptyCacheItem>(this.Configuration.Value.CacheNames.RolePermissionCacheName);
             this.CleanCache<long, ClientCacheItem>(this.Configuration.Value.CacheNames.ClientCacheName);
             this.CleanCache<ClientRoleKey, EmptyCacheItem>(this.Configuration.Value.CacheNames.ClientRoleCacheName);
+            this.CleanCache<long, KeyCacheItem>(this.Configuration.Value.CacheNames.KeyCacheName);
+            this.CleanCache<string, GrantCacheItem>(this.Configuration.Value.CacheNames.GrantStoreCacheName);
         }
 
         public void Dispose()

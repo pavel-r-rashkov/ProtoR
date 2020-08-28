@@ -21,14 +21,12 @@
             "RuleConfigurationCacheName": "RuleConfigurationCacheName_ComponentTest",
             "UserCacheName": "UserCacheName_ComponentTest",
             "UserRoleCacheName": "UserRoleCacheName_ComponentTest",
-            "UserCategoryCacheName": "UserCategoryCacheName_ComponentTest",
             "RoleCacheName": "RoleCacheName_ComponentTest",
             "RolePermissionCacheName": "RolePermissionCacheName_ComponentTest",
-            "CategoryCacheName": "CategoryCacheName_ComponentTest",
             "ClientCacheName": "ClientCacheName_ComponentTest",
             "ClientRoleCacheName": "ClientRoleCacheName_ComponentTest",
-            "ClientCategoryCacheName": "ClientCategoryCacheName_ComponentTest",
-            "KeyCacheName": "KeyCacheName_ComponentTest"
+            "KeyCacheName": "KeyCacheName_ComponentTest",
+            "GrantStoreCacheName": "GrantStoreCacheName_ComponentTest"
 		},
 		"EnablePersistence": false,
 		"DiscoveryPort": "10100",
